@@ -1,43 +1,21 @@
-"use client";
-
+// app/(dashboard)/dashboard/layout.tsx
 import type { ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { supabase } from "@/lib/supabaseClient";
+import { Card } from "@/components/ui/Card";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-  }
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50">
-      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20 text-sky-400 font-semibold">
-              W
-            </div>
-            <span className="text-sm font-medium text-slate-100">
-              WiseGraph
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-xs text-slate-400 sm:inline">
-              Mr. Wiseman
-            </span>
-            <Button variant="ghost" onClick={handleLogout}>
-              Log out
-            </Button>
-          </div>
-        </div>
+    <main className="min-h-screen bg-slate-950 text-slate-50">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <h1 className="text-lg font-semibold">WiseMetrics</h1>
+        <LogoutButton />
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        {children}
-      </main>
-    </div>
+
+      <section className="px-6 py-4">
+        <Card className="bg-slate-950 border-none shadow-none">
+          {children}
+        </Card>
+      </section>
+    </main>
   );
 }
