@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
@@ -10,8 +11,12 @@ export default function HomePage() {
           Interactive reports for student assessments.
         </p>
         <div className="flex justify-center gap-3">
-          <Button>Log in</Button>
-          <Button variant="secondary">Sign up</Button>
+          <Link href="/login">
+            <Button>Log in</Button>
+          </Link>
+          <Link href="/signup">
+            <Button variant="secondary">Sign up</Button>
+          </Link>
         </div>
       </Card>
     </main>
