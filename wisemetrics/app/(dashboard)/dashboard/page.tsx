@@ -1,3 +1,4 @@
+// app/(dashboard)/dashboard/page.tsx
 import { getClassScoreSummary } from "@/lib/classSummary";
 import { ClassConcentricGraph } from "@/components/charts/ClassConcentricGraph";
 
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
             <h1 className="text-xl font-semibold">{cls.name}</h1>
             <p className="text-sm text-slate-400">
               {cls.subject} • Grade {cls.gradeLevel}
+              {cls.term ? ` • ${cls.term}` : ""}
             </p>
           </div>
         </div>
@@ -37,7 +39,9 @@ export default async function DashboardPage() {
           {cls.students.map((s) => (
             <li key={s.id} className="flex items-center justify-between">
               <span>{s.name}</span>
-              <span className="text-xs text-slate-400">{s.overallScore}</span>
+              <span className="text-xs text-slate-400">
+                {s.overallScore}
+              </span>
             </li>
           ))}
         </ul>

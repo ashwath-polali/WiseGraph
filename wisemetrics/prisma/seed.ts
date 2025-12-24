@@ -1,10 +1,32 @@
 // prisma/seed.ts
-// prisma/seed.ts
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const pool = new Pool({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+  });
+
+  const adapter = new PrismaPg(pool);
+
+  return new PrismaClient({
+    adapter,
+    log: ["error", "warn"],
+  });
+}
+
+const prisma = createPrismaClient();
 
 async function main() {
+  // Example teacher
   const teacher = await prisma.teacher.upsert({
     where: { email: "teacher@example.com" },
     update: {},
@@ -14,6 +36,7 @@ async function main() {
     },
   });
 
+  // Example class
   const cls = await prisma.class.create({
     data: {
       teacherId: teacher.id,
@@ -24,14 +47,25 @@ async function main() {
     },
   });
 
-  const reading = await prisma.category.create({
-    data: { classId: cls.id, name: "Reading", order: 0 },
+  // Example categories (teacher-defined in real use; this is just demo data)
+  await prisma.category.createMany({
+    data: [
+      { classId: cls.id, name: "Reading",       order: 0 },
+      { classId: cls.id, name: "Writing",       order: 1 },
+      { classId: cls.id, name: "Vocabulary",    order: 2 },
+      { classId: cls.id, name: "Comprehension", order: 3 },
+      { classId: cls.id, name: "Fluency",       order: 4 },
+    ],
   });
 
-  const writing = await prisma.category.create({
-    data: { classId: cls.id, name: "Writing", order: 1 },
+  const categories = await prisma.category.findMany({
+    where: { classId: cls.id },
+    orderBy: { order: "asc" },
   });
 
+  const [reading, writing, vocab, comp, fluency] = categories;
+
+  // Example student
   const student = await prisma.student.create({
     data: {
       classId: cls.id,
@@ -42,6 +76,7 @@ async function main() {
     },
   });
 
+  // Example scores across all categories
   await prisma.score.createMany({
     data: [
       {
@@ -53,6 +88,21 @@ async function main() {
         studentId: student.id,
         categoryId: writing.id,
         standardScore: 98,
+      },
+      {
+        studentId: student.id,
+        categoryId: vocab.id,
+        standardScore: 105,
+      },
+      {
+        studentId: student.id,
+        categoryId: comp.id,
+        standardScore: 115,
+      },
+      {
+        studentId: student.id,
+        categoryId: fluency.id,
+        standardScore: 102,
       },
     ],
   });
