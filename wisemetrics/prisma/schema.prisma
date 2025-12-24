@@ -1,14 +1,75 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ------------------ MODELS ------------------
+
+model Teacher {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  classes   Class[]
+  createdAt DateTime @default(now())
+}
+
+model Class {
+  id         String    @id @default(uuid())
+  teacherId  String
+  teacher    Teacher   @relation(fields: [teacherId], references: [id])
+  name       String
+  gradeLevel String
+  subject    String
+  term       String?
+  students   Student[]
+  categories Category[]
+  createdAt  DateTime  @default(now())
+}
+
+model Student {
+  id           String   @id @default(uuid())
+  classId      String
+  class        Class    @relation(fields: [classId], references: [id])
+  name         String
+  studentCode  String?
+  gradeLevel   String
+  overallScore Int
+  scores       Score[]
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  classId      String
+  class        Class         @relation(fields: [classId], references: [id])
+  name         String
+  order        Int           @default(0)
+  subcategories Subcategory[]
+  scores       Score[]       // <-- add this line
+}
+
+model Subcategory {
+  id         String      @id @default(uuid())
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id])
+  name       String
+  order      Int         @default(0)
+  scores     Score[]
+}
+
+model Score {
+  id            String       @id @default(uuid())
+  studentId     String
+  student       Student      @relation(fields: [studentId], references: [id])
+  categoryId    String?
+  category      Category?    @relation(fields: [categoryId], references: [id])
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+  standardScore Int
+  createdAt     DateTime     @default(now())
 }
