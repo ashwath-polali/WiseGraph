@@ -4,16 +4,35 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    // Temporary fake signup; will be replaced by Supabase
-    router.push("/dashboard");
+    setError(null);
+    setLoading(true);
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    // Depending on settings, Supabase might require email confirmation.
+    // For now, just send user to login.
+    router.push("/login");
   }
 
   return (
@@ -41,8 +60,13 @@ export default function SignupPage() {
             required
           />
         </div>
-        <Button type="submit" className="w-full">
-          Sign up
+        {error && (
+          <p className="text-xs text-red-400">
+            {error}
+          </p>
+        )}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Creating account…" : "Sign up"}
         </Button>
       </form>
     </div>

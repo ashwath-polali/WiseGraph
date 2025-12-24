@@ -1,7 +1,18 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
@@ -18,7 +29,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <span className="hidden text-xs text-slate-400 sm:inline">
               Mr. Wiseman
             </span>
-            <Button variant="ghost">
+            <Button variant="ghost" onClick={handleLogout}>
               Log out
             </Button>
           </div>
