@@ -1,7 +1,11 @@
+// app/(dashboard)/dashboard/students/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClassScoreSummary } from "@/lib/classSummary";
+import type { ClassScoreSummary, StudentScoreSummary } from "@/types/scores";
 import { Card } from "@/components/ui/Card";
+import { StudentHeroChartsClient } from "@/components/StudentHeroChartsClient";
+import { CategoryDrillDownClient } from "@/components/CategoryDrillDownClient";
 
 type RouteParams = {
   id: string;
@@ -12,7 +16,7 @@ type Props = {
 };
 
 export default async function StudentDetailPage({ params }: Props) {
-  const { id } = await params; // ⬅ unwrap the Promise
+  const { id } = await params;
 
   const summary = await getClassScoreSummary();
   if (!summary) notFound();
@@ -26,6 +30,7 @@ export default async function StudentDetailPage({ params }: Props) {
     <main className="p-6 space-y-4">
       <header className="flex items-center justify-between">
         <div>
+          <p className="text-xs text-slate-400">Student detail</p>
           <h1 className="text-xl font-semibold text-slate-50">
             {student.name}
           </h1>
@@ -41,32 +46,53 @@ export default async function StudentDetailPage({ params }: Props) {
         </Link>
       </header>
 
-      <Card className="p-4 bg-slate-900/80 border border-slate-800">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-slate-200">
-            Performance vs class
-          </h2>
-          <div className="inline-flex rounded-md border border-slate-700 bg-slate-900 text-xs text-slate-300">
-            <span className="px-2 py-1 bg-slate-800 text-slate-50">
-              Polar
-            </span>
-            <span className="px-2 py-1">Bell</span>
-            <span className="px-2 py-1">Concentric</span>
-          </div>
-        </div>
-        <div className="h-64 flex items-center justify-center text-slate-500 text-xs">
-          Polar chart placeholder (wire up real chart next)
-        </div>
-      </Card>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,0.9fr)]">
+        {/* Main charts + drill-down */}
+        <section className="space-y-4">
+          <Card className="p-4 bg-slate-900/80 border border-slate-800">
+            <StudentHeroChartsClient
+              student={student as StudentScoreSummary}
+              cls={summary as ClassScoreSummary}
+            />
+          </Card>
 
-      <Card className="p-4 bg-slate-900/80 border border-slate-800">
-        <h2 className="mb-3 text-sm font-medium text-slate-200">
-          Subcategory details
-        </h2>
-        <div className="h-56 flex items-center justify-center text-slate-500 text-xs">
-          Subcategory diamond chart placeholder
-        </div>
-      </Card>
+          <Card className="p-4 bg-slate-900/80 border border-slate-800">
+            <CategoryDrillDownClient student={student as StudentScoreSummary} />
+          </Card>
+        </section>
+
+        {/* Side summary */}
+        <aside className="space-y-3">
+          <Card className="p-4 bg-slate-900/80 border border-slate-800">
+            <h2 className="text-sm font-medium text-slate-200">
+              Snapshot
+            </h2>
+            <p className="mt-2 text-3xl font-semibold text-slate-50">
+              {student.overallScore}
+            </p>
+            <p className="text-xs text-slate-400">
+              Overall standard score
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-slate-900/80 border border-slate-800">
+            <h2 className="text-sm font-medium text-slate-200">
+              Categories
+            </h2>
+            <ul className="mt-2 space-y-1 text-xs text-slate-300">
+              {student.categories.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between"
+                >
+                  <span>{c.name}</span>
+                  <span className="text-slate-400">{c.score}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </aside>
+      </div>
     </main>
   );
 }
