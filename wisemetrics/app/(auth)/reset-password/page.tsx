@@ -1,0 +1,134 @@
+"use client";
+
+import { useEffect, useState, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+
+export default function ResetPasswordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [isReady, setIsReady] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const tokenHash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (!tokenHash || type !== "recovery") {
+      setError("Invalid or expired reset link.");
+      return;
+    }
+
+    (async () => {
+      const { data, error } = await supabase.auth.verifyOtp({
+        type: "recovery",
+        token_hash: tokenHash,
+      });
+
+      if (error || !data.session) {
+        setError(error?.message ?? "Could not validate reset link.");
+        return;
+      }
+
+      setIsReady(true);
+    })();
+  }, [searchParams]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const supabase = createSupabaseBrowserClient();
+
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      setError(error.message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    router.push("/auth/login");
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <Card className="w-full max-w-md space-y-4 p-6">
+        <h1 className="text-xl font-semibold text-slate-50">
+          Reset your password
+        </h1>
+
+        {!isReady && !error && (
+          <p className="text-sm text-slate-400">
+            Checking your reset link…
+          </p>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-400">
+            {error}
+          </p>
+        )}
+
+        {isReady && !error && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-200">
+                New password
+              </label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-200">
+                Confirm password
+              </label>
+              <Input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+              />
+            </div>
+
+            {isSubmitting && (
+              <p className="text-sm text-slate-400">
+                Updating your password…
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? "Saving…" : "Save new password"}
+            </Button>
+          </form>
+        )}
+      </Card>
+    </div>
+  );
+}
