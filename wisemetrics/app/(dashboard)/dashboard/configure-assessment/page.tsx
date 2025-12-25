@@ -1,7 +1,7 @@
 // app/(dashboard)/dashboard/configure-assessment/page.tsx
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import {
-  getClassScoreSummary,
   getTeacherClassesWithSummary,
   getDefaultClassIdForTeacher,
 } from "@/lib/classSummary";
@@ -39,9 +39,36 @@ export default async function ConfigureAssessmentPage({
       (await getDefaultClassIdForTeacher()) ?? classes[0].id;
   }
 
-  const cls = currentClassId
-    ? await getClassScoreSummary(currentClassId)
-    : null;
+  if (!currentClassId) {
+    return (
+      <main className="space-y-6">
+        <Card className="p-6">
+          <h1 className="text-xl font-semibold">Configure assessment</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            No class selected.
+          </p>
+          <Link href="/dashboard" className="text-xs text-sky-400">
+            Back to dashboard
+          </Link>
+        </Card>
+      </main>
+    );
+  }
+
+  // Load categories + subcategories directly for this class
+  const cls = await prisma.class.findUnique({
+    where: { id: currentClassId },
+    include: {
+      categories: {
+        orderBy: { order: "asc" },
+        include: {
+          subcategories: {
+            orderBy: { order: "asc" },
+          },
+        },
+      },
+    },
+  });
 
   if (!cls) {
     return (
@@ -78,7 +105,16 @@ export default async function ConfigureAssessmentPage({
 
         <ConfigureAssessmentClient
           classId={cls.id}
-          initialCategories={cls.categories}
+          initialCategories={cls.categories.map((cat) => ({
+            id: cat.id,
+            name: cat.name,
+            score: 100 as const,
+            subcategories: cat.subcategories.map((sub) => ({
+              id: sub.id,
+              name: sub.name,
+              score: 100 as const,
+            })),
+          }))}
         />
       </Card>
     </main>
