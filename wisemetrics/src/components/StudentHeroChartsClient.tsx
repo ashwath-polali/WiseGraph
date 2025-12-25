@@ -86,6 +86,7 @@ export function StudentHeroChartsClient({ student, cls }: Props) {
 
   const radarOptions: ChartOptions<"radar"> = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       r: {
         min: 60,
@@ -162,27 +163,28 @@ export function StudentHeroChartsClient({ student, cls }: Props) {
         </div>
       </header>
 
-      {view === "bell" ? (
-  <div className="student-hero-chart h-80">
-    <StudentBellCurveChart student={student} cls={cls} />
-  </div>
-) : (
-  <div className="student-hero-chart h-80 flex items-center justify-center">
-    <div className="w-full h-full max-w-md">
-      {view === "polar" && (
-        <Radar data={radarData} options={radarOptions} />
-      )}
+      {/* Fixed, large height so charts are big and stable */}
+      <div className="h-[420px]">
+        {view === "bell" ? (
+          <div className="h-full">
+            <StudentBellCurveChart student={student} cls={cls} />
+          </div>
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-full w-full max-w-xl">
+              {view === "polar" && (
+                <Radar data={radarData} options={radarOptions} />
+              )}
 
-      {view === "concentric" && (
-        <StudentConcentricPieChart student={student} cls={cls} />
-      )}
-    </div>
-  </div>
-)}
+              {view === "concentric" && (
+                <StudentConcentricPieChart student={student} cls={cls} />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
-<ExportButtons studentName={student.name} view={view} />
-
-
+      <ExportButtons studentName={student.name} view={view} />
     </div>
   );
 }

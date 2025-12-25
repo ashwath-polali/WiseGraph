@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import type { CategoryScore } from "@/types/scores";
+import type { CategoryScore, SubcategoryScore } from "@/types/scores";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -16,10 +15,8 @@ export function ConfigureAssessmentClient({
   classId,
   initialCategories,
 }: Props) {
-  const router = useRouter();
-  const [categories, setCategories] = useState<CategoryScore[]>(
-    initialCategories
-  );
+  // Single source of truth for this UI: categories state
+  const [categories, setCategories] = useState<CategoryScore[]>(initialCategories);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newSubNameByCategory, setNewSubNameByCategory] = useState<
     Record<string, string>
@@ -39,11 +36,12 @@ export function ConfigureAssessmentClient({
     });
 
     if (!res.ok) {
-      console.error("Failed to add category");
+      console.error("Failed to add category", await res.text());
       return;
     }
 
     const created = await res.json();
+
     setCategories((prev) => [
       ...prev,
       {
@@ -53,11 +51,15 @@ export function ConfigureAssessmentClient({
         subcategories: [],
       },
     ]);
+
     setNewCategoryName("");
-    router.refresh();
+    // no router.refresh() → avoid resetting to initialCategories
   }
 
-  async function handleAddSubcategory(categoryId: string, e: FormEvent) {
+  async function handleAddSubcategory(
+    categoryId: string,
+    e: FormEvent<HTMLFormElement>
+  ) {
     e.preventDefault();
     const name = newSubNameByCategory[categoryId]?.trim();
     if (!name) return;
@@ -72,26 +74,33 @@ export function ConfigureAssessmentClient({
     });
 
     if (!res.ok) {
-      console.error("Failed to add subcategory");
+      console.error("Failed to add subcategory", await res.text());
       return;
     }
 
-    const created = await res.json();
+    const created: { id: string; name: string } = await res.json();
+
     setCategories((prev) =>
-      prev.map((c) =>
-        c.id === categoryId
+      prev.map((cat) =>
+        cat.id === categoryId
           ? {
-              ...c,
+              ...cat,
               subcategories: [
-                ...(c.subcategories ?? []),
-                { id: created.id, name: created.name, score: 100 },
+                ...(cat.subcategories ?? []),
+                {
+                  id: created.id,
+                  name: created.name,
+                  // score is irrelevant here; just use 100
+                  score: 100 as SubcategoryScore["score"],
+                },
               ],
             }
-          : c
+          : cat
       )
     );
+
     setNewSubNameByCategory((prev) => ({ ...prev, [categoryId]: "" }));
-    router.refresh();
+    // no router.refresh()
   }
 
   return (
@@ -99,10 +108,10 @@ export function ConfigureAssessmentClient({
       {/* Add category */}
       <form
         onSubmit={handleAddCategory}
-        className="flex flex-col sm:flex-row gap-3 items-start sm:items-end"
+        className="flex flex-col items-start gap-3 sm:flex-row sm:items-end"
       >
         <div className="flex-1">
-          <label className="block text-xs font-medium text-slate-400 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-400">
             New category
           </label>
           <Input
@@ -121,7 +130,7 @@ export function ConfigureAssessmentClient({
         {categories.map((cat, index) => (
           <div
             key={cat.id}
-            className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 space-y-3"
+            className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -132,12 +141,11 @@ export function ConfigureAssessmentClient({
                   Subskills: {cat.subcategories?.length ?? 0}
                 </p>
               </div>
-              {/* Renaming/reordering can be added later */}
             </div>
 
             <div className="space-y-2">
               {(cat.subcategories ?? []).length > 0 && (
-                <ul className="text-xs text-slate-300 space-y-1">
+                <ul className="space-y-1 text-xs text-slate-300">
                   {cat.subcategories!.map((sub) => (
                     <li key={sub.id} className="flex items-center gap-2">
                       <span className="h-1 w-1 rounded-full bg-slate-500" />
@@ -149,10 +157,10 @@ export function ConfigureAssessmentClient({
 
               <form
                 onSubmit={(e) => handleAddSubcategory(cat.id, e)}
-                className="flex gap-2 items-end"
+                className="flex items-end gap-2"
               >
                 <div className="flex-1">
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                  <label className="mb-1 block text-[11px] font-medium text-slate-400">
                     Add subskill
                   </label>
                   <Input

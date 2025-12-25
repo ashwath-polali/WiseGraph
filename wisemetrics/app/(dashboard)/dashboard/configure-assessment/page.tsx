@@ -19,7 +19,7 @@ export default async function ConfigureAssessmentPage({
   if (!classes.length) {
     return (
       <main className="space-y-6">
-        <Card className="p-6 space-y-4">
+        <Card className="space-y-4 p-6">
           <h1 className="text-xl font-semibold">Configure assessment</h1>
           <p className="text-sm text-slate-400">
             Before you can configure categories and subskills, create a class.
@@ -61,7 +61,7 @@ export default async function ConfigureAssessmentPage({
 
   return (
     <main className="space-y-6">
-      <Card className="p-6 space-y-4">
+      <Card className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold">
