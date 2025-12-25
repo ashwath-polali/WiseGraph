@@ -1,11 +1,18 @@
 // src/lib/classSummary.ts
 import { prisma } from "@/lib/prisma";
-import type { ClassScoreSummary, CategoryScore, StudentScoreSummary } from "@/types/scores";
+import type {
+  ClassScoreSummary,
+  CategoryScore,
+  StudentScoreSummary,
+  SubcategoryScore,
+} from "@/types/scores";
 
 export async function getClassScoreSummary(): Promise<ClassScoreSummary | null> {
   const cls = await prisma.class.findFirst({
     include: {
-      categories: true,
+      categories: {
+        include: { subcategories: true },
+      },
       students: {
         include: { scores: true },
       },
@@ -40,14 +47,33 @@ export async function getClassScoreSummary(): Promise<ClassScoreSummary | null> 
       };
     });
 
-  // Per-student category scores
+  // Per-student category + subcategory scores
   const students: StudentScoreSummary[] = cls.students.map((s) => {
     const categoryScores: CategoryScore[] = cls.categories.map((cat) => {
-      const score = s.scores.find((sc) => sc.categoryId === cat.id);
+      const catScore = s.scores.find((sc) => sc.categoryId === cat.id);
+
+      const subcategories: SubcategoryScore[] = cat.subcategories.map(
+        (sub) => {
+          const subScore = s.scores.find(
+            (sc) => sc.subcategoryId === sub.id
+          );
+
+          return {
+            id: sub.id,
+            name: sub.name,
+            score:
+              subScore?.standardScore ??
+              catScore?.standardScore ??
+              s.overallScore,
+          };
+        }
+      );
+
       return {
         id: cat.id,
         name: cat.name,
-        score: score?.standardScore ?? s.overallScore,
+        score: catScore?.standardScore ?? s.overallScore,
+        subcategories,
       };
     });
 

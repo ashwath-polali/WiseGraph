@@ -1,10 +1,17 @@
 // src/types/scores.ts
 export type StandardScore = number; // 60–150
 
+export interface SubcategoryScore {
+  id: string;
+  name: string;
+  score: StandardScore;
+}
+
 export interface CategoryScore {
   id: string;
   name: string;
   score: StandardScore;
+  subcategories?: SubcategoryScore[];
 }
 
 export interface StudentScoreSummary {
@@ -21,6 +28,6 @@ export interface ClassScoreSummary {
   gradeLevel: string;
   subject: string;
   term?: string | null;
-  categories: CategoryScore[];          // class averages per category
-  students: StudentScoreSummary[];      // students with per-category scores
+  categories: CategoryScore[];         // class averages per category
+  students: StudentScoreSummary[];     // students with per-category scores
 }

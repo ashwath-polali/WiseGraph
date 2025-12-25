@@ -12,16 +12,12 @@ interface Props {
   initialCategories: CategoryScore[];
 }
 
-type CategoryWithSubs = CategoryScore & {
-  subcategories?: { id: string; name: string }[];
-};
-
 export function ConfigureAssessmentClient({
   classId,
   initialCategories,
 }: Props) {
   const router = useRouter();
-  const [categories, setCategories] = useState<CategoryWithSubs[]>(
+  const [categories, setCategories] = useState<CategoryScore[]>(
     initialCategories
   );
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -50,7 +46,12 @@ export function ConfigureAssessmentClient({
     const created = await res.json();
     setCategories((prev) => [
       ...prev,
-      { id: created.id, name: created.name, score: created.score ?? 100 },
+      {
+        id: created.id,
+        name: created.name,
+        score: created.score ?? 100,
+        subcategories: [],
+      },
     ]);
     setNewCategoryName("");
     router.refresh();
@@ -83,7 +84,7 @@ export function ConfigureAssessmentClient({
               ...c,
               subcategories: [
                 ...(c.subcategories ?? []),
-                { id: created.id, name: created.name },
+                { id: created.id, name: created.name, score: 100 },
               ],
             }
           : c
@@ -165,9 +166,7 @@ export function ConfigureAssessmentClient({
                     }
                   />
                 </div>
-                <Button type="submit">
-                  Add
-                </Button>
+                <Button type="submit">Add</Button>
               </form>
             </div>
           </div>

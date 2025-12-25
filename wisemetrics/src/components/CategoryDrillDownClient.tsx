@@ -2,7 +2,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { StudentScoreSummary } from "@/types/scores";
+import type {
+  StudentScoreSummary,
+  SubcategoryScore,
+} from "@/types/scores";
+import { SubcategoryDiamondChart } from "@/components/charts/SubcategoryDiamondChart";
 
 interface Props {
   student: StudentScoreSummary;
@@ -13,10 +17,13 @@ export function CategoryDrillDownClient({ student }: Props) {
     student.categories[0]?.id ?? null
   );
 
-  const selected = useMemo(
+  const selectedCategory = useMemo(
     () => student.categories.find((c) => c.id === selectedId) ?? null,
     [student.categories, selectedId]
   );
+
+  const subskills: SubcategoryScore[] =
+    selectedCategory?.subcategories ?? [];
 
   return (
     <div className="space-y-3">
@@ -37,19 +44,26 @@ export function CategoryDrillDownClient({ student }: Props) {
         </select>
       </header>
 
-      {!selected ? (
+      {!selectedCategory || subskills.length === 0 ? (
         <p className="text-xs text-slate-500">
-          No categories available for this student.
+          No subskills recorded for this category yet.
         </p>
       ) : (
-        <div className="space-y-2">
-          <p className="text-xs text-slate-400">
-            Subskill detail for {selected.name} will use your diamond chart
-            component once subscores are wired.
-          </p>
-          <div className="h-56 flex items-center justify-center text-xs text-slate-500">
-            Subcategory diamond chart placeholder.
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          <div className="h-56">
+            <SubcategoryDiamondChart subskills={subskills} />
           </div>
+          <ul className="space-y-2 text-xs text-slate-300">
+            {subskills.map((sub) => (
+              <li
+                key={sub.id}
+                className="flex items-center justify-between border-b border-slate-800 pb-1 last:border-b-0 last:pb-0"
+              >
+                <span>{sub.name}</span>
+                <span className="text-slate-400">{sub.score}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
