@@ -24,6 +24,8 @@ export function ClassSelectorClient({
   const [isPending, startTransition] = useTransition();
 
   function handleSelect(id: string) {
+    if (id === currentClassId) return;
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("classId", id);
 
@@ -32,20 +34,26 @@ export function ClassSelectorClient({
     });
   }
 
+  if (!classes.length) return null;
+
   return (
     <div className="flex flex-wrap gap-2">
       {classes.map((cls) => {
-        const active = cls.id === currentClassId;
+        const isActive = cls.id === currentClassId;
+        const label = `${cls.name} – ${cls.subject}${
+          cls.term ? ` (${cls.term})` : ""
+        }`;
+
         return (
           <Button
             key={cls.id}
-            variant={active ? "primary" : "ghost"}
+            type="button"
+            variant={isActive ? "primary" : "ghost"}
             onClick={() => handleSelect(cls.id)}
-            disabled={isPending}
-            className="text-xs"
+            disabled={isPending && !isActive}
+            className="rounded-full px-3 py-1 text-[11px]"
           >
-            {cls.name} · {cls.subject}
-            {cls.term ? ` · ${cls.term}` : ""}
+            {label}
           </Button>
         );
       })}

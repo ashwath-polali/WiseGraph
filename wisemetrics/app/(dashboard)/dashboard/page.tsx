@@ -38,6 +38,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
+  // Determine current class from query or default
   let currentClassId = searchParams.classId;
   if (!currentClassId) {
     currentClassId = (await getDefaultClassIdForTeacher()) ?? classes[0].id;
@@ -85,11 +86,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     Configure assessment
                   </Button>
                 </Link>
+                {/* Optionally mount <DeleteClassButton classId={cls.id} /> here */}
               </div>
             </header>
 
             {/* Class selector pills */}
-            <div className="mt-1">
+            <div className="mt-1 flex items-center justify-between gap-2">
               <ClassSelectorClient
                 classes={classes.map((c) => ({
                   id: c.id,
@@ -99,6 +101,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 }))}
                 currentClassId={cls.id}
               />
+              {/* Small inline create button for additional classes */}
+              <CreateFirstClassButton />
             </div>
 
             {/* Big class chart */}

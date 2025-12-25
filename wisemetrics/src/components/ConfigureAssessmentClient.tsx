@@ -1,4 +1,3 @@
-// src/components/ConfigureAssessmentClient.tsx
 "use client";
 
 import { useState, FormEvent } from "react";
@@ -15,7 +14,6 @@ export function ConfigureAssessmentClient({
   classId,
   initialCategories,
 }: Props) {
-  // Single source of truth for this UI: categories state
   const [categories, setCategories] = useState<CategoryScore[]>(initialCategories);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newSubNameByCategory, setNewSubNameByCategory] = useState<
@@ -53,7 +51,6 @@ export function ConfigureAssessmentClient({
     ]);
 
     setNewCategoryName("");
-    // no router.refresh() → avoid resetting to initialCategories
   }
 
   async function handleAddSubcategory(
@@ -90,7 +87,6 @@ export function ConfigureAssessmentClient({
                 {
                   id: created.id,
                   name: created.name,
-                  // score is irrelevant here; just use 100
                   score: 100 as SubcategoryScore["score"],
                 },
               ],
@@ -100,7 +96,24 @@ export function ConfigureAssessmentClient({
     );
 
     setNewSubNameByCategory((prev) => ({ ...prev, [categoryId]: "" }));
-    // no router.refresh()
+  }
+
+  async function handleDeleteCategory(id: string, name: string) {
+    const ok = window.confirm(
+      `Are you sure you want to delete the category "${name}"? This will also remove all of its subskills and scores.`
+    );
+    if (!ok) return;
+
+    const res = await fetch(`/api/categories?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      console.error("Failed to delete category", await res.text());
+      return;
+    }
+
+    setCategories((prev) => prev.filter((c) => c.id !== id));
   }
 
   return (
@@ -141,6 +154,13 @@ export function ConfigureAssessmentClient({
                   Subskills: {cat.subcategories?.length ?? 0}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                className="text-[11px] text-red-400 hover:text-red-300"
+              >
+                Delete
+              </button>
             </div>
 
             <div className="space-y-2">

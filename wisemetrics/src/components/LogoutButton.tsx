@@ -7,24 +7,23 @@ import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 
 export function LogoutButton() {
   const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
 
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Logout error", error);
-      // You could show a toast here later.
-    }
-    router.push("/login");
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+
+    // Send user back to WiseGraph home
+    router.push("/");
   }
 
   return (
     <Button
+      type="button"
       variant="ghost"
+      className="text-xs text-slate-400 hover:text-slate-100"
       onClick={handleLogout}
-      className="text-xs text-slate-300 hover:text-sky-300"
     >
-      Logout
+      Log out
     </Button>
   );
 }
