@@ -1,3 +1,4 @@
+// app/(auth)/reset-password/page.tsx
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
@@ -16,6 +17,7 @@ export default function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Verify recovery token from URL (?token_hash=...&type=recovery)
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     const tokenHash = searchParams.get("token_hash");
@@ -65,7 +67,9 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    router.push("/auth/login");
+    // Force end of recovery session, then send user to login
+    await supabase.auth.signOut();
+    router.push("/login");
   }
 
   return (
