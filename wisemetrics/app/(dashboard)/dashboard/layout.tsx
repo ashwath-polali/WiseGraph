@@ -1,21 +1,30 @@
 // app/(dashboard)/dashboard/layout.tsx
 import type { ReactNode } from "react";
-import { Card } from "@/components/ui/Card";
+import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
+import { getCurrentTeacherId } from "@/lib/currentTeacher";
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const teacherId = await getCurrentTeacherId();
+  if (!teacherId) {
+    redirect("/login");
+  }
+
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-        <h1 className="text-lg font-semibold">WiseMetrics</h1>
+    <div className="min-h-screen bg-slate-950 text-slate-50">
+      <header className="flex items-center justify-between border-b border-slate-800 px-6 py-3">
+        <div className="text-sm font-medium text-slate-200">
+          WiseMetrics
+        </div>
         <LogoutButton />
       </header>
 
-      <section className="px-6 py-4">
-        <Card className="bg-slate-950 border-none shadow-none">
-          {children}
-        </Card>
-      </section>
-    </main>
+      {/* full-width content with just side padding */}
+      <main className="px-6 py-6">{children}</main>
+    </div>
   );
 }

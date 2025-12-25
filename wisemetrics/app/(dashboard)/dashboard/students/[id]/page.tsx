@@ -1,6 +1,8 @@
 // app/(dashboard)/dashboard/students/[id]/page.tsx
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { getClassScoreSummary } from "@/lib/classSummary";
 import type {
   ClassScoreSummary,
@@ -19,92 +21,124 @@ type Props = {
   params: Promise<RouteParams>;
 };
 
-export default async function StudentDetailPage({ params }: Props) {
-  const { id } = await params;
+export default async function StudentDetailPage(props: Props) {
+  const { id } = await props.params;
 
-  const summary = await getClassScoreSummary();
-  if (!summary) notFound();
+  // 1) Find which class this student belongs to.
+  const studentRow = await prisma.student.findUnique({
+    where: { id },
+    select: { classId: true },
+  });
 
-  const student = summary.students.find((s) => s.id === id);
-  if (!student) notFound();
+  if (!studentRow) {
+    return notFound();
+  }
 
-  const { name: className, subject } = summary;
+  // 2) Load class summary for that class.
+  const cls = await getClassScoreSummary(studentRow.classId);
+  if (!cls) {
+    return notFound();
+  }
+
+  // 3) Find the student summary inside this class.
+  const student = cls.students.find((s) => s.id === id);
+  if (!student) {
+    return notFound();
+  }
 
   return (
-    <main className="p-6 space-y-4">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-slate-400">Student detail</p>
-          <h1 className="text-xl font-semibold text-slate-50">
-            {student.name}
-          </h1>
-          <p className="text-sm text-slate-400">
-            {className} · {subject}
+    <main className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
+      {/* Left: charts + drill-down */}
+      <div className="space-y-6">
+        <Card className="p-6 space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs text-slate-400">
+                {cls.name} · Grade {cls.gradeLevel} · {cls.subject}
+              </p>
+              <h1 className="mt-1 text-xl font-semibold text-slate-50">
+                {student.name}
+              </h1>
+              <p className="mt-1 text-xs text-slate-400">
+                Overall standard score:{" "}
+                <span className="font-semibold text-slate-100">
+                  {student.overallScore}
+                </span>
+              </p>
+            </div>
+            <Link href="/dashboard" className="text-xs text-sky-400">
+              Back to dashboard
+            </Link>
+          </div>
+
+          <StudentHeroChartsClient student={student} cls={cls} />
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-sm font-medium text-slate-100">
+            Category drill-down
+          </h2>
+          <p className="text-xs text-slate-400">
+            Explore subskills for each category to see decoding, fluency, and
+            comprehension patterns.
           </p>
-        </div>
-        <Link
-          href="/dashboard"
-          className="text-xs text-sky-400 hover:underline"
-        >
-          ← Back to class
-        </Link>
-      </header>
+          <CategoryDrillDownClient student={student} />
+        </Card>
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,0.9fr)]">
-        {/* Left: charts + drill-down */}
-        <section className="space-y-4">
-          <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <StudentHeroChartsClient
-              student={student as StudentScoreSummary}
-              cls={summary as ClassScoreSummary}
-            />
-          </Card>
+      {/* Right: snapshot + categories + edit panel */}
+      <div className="space-y-4">
+        <Card className="p-4 space-y-2">
+          <h2 className="text-sm font-medium text-slate-100">
+            Snapshot
+          </h2>
+          <p className="text-xs text-slate-400">
+            Quick view of {student.name}&apos;s overall performance relative
+            to class expectations.
+          </p>
+          <div className="mt-2 space-y-1 text-xs text-slate-300">
+            <div className="flex justify-between">
+              <span>Overall score</span>
+              <span className="font-semibold">
+                {student.overallScore}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Categories tracked</span>
+              <span>{student.categories.length}</span>
+            </div>
+          </div>
+        </Card>
 
-          <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <CategoryDrillDownClient
-              student={student as StudentScoreSummary}
-            />
-          </Card>
-        </section>
+        <Card className="p-4 space-y-3">
+          <h2 className="text-sm font-medium text-slate-100">
+            Categories
+          </h2>
+          <ul className="space-y-1 text-xs text-slate-300">
+            {student.categories.map((cat) => (
+              <li
+                key={cat.id}
+                className="flex items-center justify-between rounded-md bg-slate-900/60 px-2 py-1"
+              >
+                <span>{cat.name}</span>
+                <span className="font-mono text-[11px]">
+                  {cat.score}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
 
-        {/* Right: snapshot + categories + edit panel */}
-        <aside className="space-y-3">
-          <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <h2 className="text-sm font-medium text-slate-200">
-              Snapshot
-            </h2>
-            <p className="mt-2 text-3xl font-semibold text-slate-50">
-              {student.overallScore}
-            </p>
-            <p className="text-xs text-slate-400">
-              Overall standard score
-            </p>
-          </Card>
-
-          <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <h2 className="text-sm font-medium text-slate-200">
-              Categories
-            </h2>
-            <ul className="mt-2 space-y-1 text-xs text-slate-300">
-              {student.categories.map((c) => (
-                <li
-                  key={c.id}
-                  className="flex items-center justify-between"
-                >
-                  <span>{c.name}</span>
-                  <span className="text-slate-400">{c.score}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-
-          <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <h2 className="text-sm font-medium text-slate-200 mb-2">
-              Edit scores
-            </h2>
-            <EditScoresClient student={student as StudentScoreSummary} />
-          </Card>
-        </aside>
+        <Card className="p-4 space-y-3">
+          <h2 className="text-sm font-medium text-slate-100">
+            Edit scores
+          </h2>
+          <p className="text-xs text-slate-400">
+            Update overall, category, and subskill scores. Charts will refresh
+            automatically after saving.
+          </p>
+          <EditScoresClient student={student} />
+        </Card>
       </div>
     </main>
   );

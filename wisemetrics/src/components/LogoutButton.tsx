@@ -3,18 +3,27 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 
 export function LogoutButton() {
   const router = useRouter();
+  const supabase = createSupabaseBrowserClient();
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout error", error);
+      // You could show a toast here later.
+    }
     router.push("/login");
   }
 
   return (
-    <Button variant="ghost" onClick={handleLogout}>
+    <Button
+      variant="ghost"
+      onClick={handleLogout}
+      className="text-xs text-slate-300 hover:text-sky-300"
+    >
       Logout
     </Button>
   );
