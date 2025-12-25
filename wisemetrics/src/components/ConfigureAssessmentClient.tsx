@@ -14,7 +14,8 @@ export function ConfigureAssessmentClient({
   classId,
   initialCategories,
 }: Props) {
-  const [categories, setCategories] = useState<CategoryScore[]>(initialCategories);
+  const [categories, setCategories] =
+    useState<CategoryScore[]>(initialCategories);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newSubNameByCategory, setNewSubNameByCategory] = useState<
     Record<string, string>
@@ -116,6 +117,32 @@ export function ConfigureAssessmentClient({
     setCategories((prev) => prev.filter((c) => c.id !== id));
   }
 
+  async function handleDeleteSubcategory(id: string, name: string) {
+    const ok = window.confirm(
+      `Delete subskill "${name}"? This will remove its scores for all students.`
+    );
+    if (!ok) return;
+
+    const res = await fetch(
+      `/api/subcategories?id=${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to delete subcategory", await res.text());
+      return;
+    }
+
+    setCategories((prev) =>
+      prev.map((cat) => ({
+        ...cat,
+        subcategories: cat.subcategories?.filter((s) => s.id !== id) ?? [],
+      }))
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Add category */}
@@ -157,9 +184,44 @@ export function ConfigureAssessmentClient({
               <button
                 type="button"
                 onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                className="text-[11px] text-red-400 hover:text-red-300"
+                className="rounded p-1 text-slate-500 hover:text-red-400"
+                aria-label={`Delete category ${cat.name}`}
               >
-                Delete
+                {/* simple trashcan icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                >
+                  <path
+                    d="M3 4h10l-.7 9.1A1.5 1.5 0 0 1 10.8 14H5.2a1.5 1.5 0 0 1-1.5-1.3L3 4Z"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M6 4V2.8A1.3 1.3 0 0 1 7.3 1.5h1.4A1.3 1.3 0 0 1 10 2.8V4"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M2 4h12"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M7 6v5"
+                    stroke="currentColor"
+                    strokeWidth="1.1"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M9 6v5"
+                    stroke="currentColor"
+                    strokeWidth="1.1"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
             </div>
 
@@ -167,9 +229,40 @@ export function ConfigureAssessmentClient({
               {(cat.subcategories ?? []).length > 0 && (
                 <ul className="space-y-1 text-xs text-slate-300">
                   {cat.subcategories!.map((sub) => (
-                    <li key={sub.id} className="flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-slate-500" />
-                      <span>{sub.name}</span>
+                    <li
+                      key={sub.id}
+                      className="flex items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="h-1 w-1 rounded-full bg-slate-500" />
+                        <span>{sub.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteSubcategory(sub.id, sub.name)
+                        }
+                        className="rounded p-1 text-slate-500 hover:text-red-400"
+                        aria-label={`Delete subskill ${sub.name}`}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                        >
+                          <path
+                            d="M3 4h10l-.7 9.1A1.5 1.5 0 0 1 10.8 14H5.2a1.5 1.5 0 0 1-1.5-1.3L3 4Z"
+                            stroke="currentColor"
+                            strokeWidth="1.1"
+                          />
+                          <path
+                            d="M2 4h12"
+                            stroke="currentColor"
+                            strokeWidth="1.1"
+                          />
+                        </svg>
+                      </button>
                     </li>
                   ))}
                 </ul>

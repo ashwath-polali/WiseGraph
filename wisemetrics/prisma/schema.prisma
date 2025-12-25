@@ -16,6 +16,12 @@ model Teacher {
   name      String?
   classes   Class[]
   createdAt DateTime @default(now())
+
+  // Settings fields
+  school             String?
+  defaultClassId     String?
+  defaultClass       Class?   @relation("DefaultClass", fields: [defaultClassId], references: [id])
+  defaultStudentView String?  // "polar" | "bell" | "concentric"
 }
 
 model Class {
@@ -29,6 +35,8 @@ model Class {
   students   Student[]
   categories Category[]
   createdAt  DateTime  @default(now())
+
+  defaultForTeachers Teacher[] @relation("DefaultClass")
 }
 
 model Student {
