@@ -33,10 +33,15 @@ type ViewMode = "polar" | "bell" | "concentric";
 interface Props {
   student: StudentScoreSummary;
   cls: ClassScoreSummary;
+  defaultView?: ViewMode; // <-- added
 }
 
-export function StudentHeroChartsClient({ student, cls }: Props) {
-  const [view, setView] = useState<ViewMode>("polar");
+export function StudentHeroChartsClient({
+  student,
+  cls,
+  defaultView = "polar",
+}: Props) {
+  const [view, setView] = useState<ViewMode>(defaultView);
 
   const labels = useMemo(
     () => cls.categories.map((c) => c.name),

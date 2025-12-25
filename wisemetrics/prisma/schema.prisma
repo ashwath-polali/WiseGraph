@@ -14,29 +14,31 @@ model Teacher {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
-  classes   Class[]
   createdAt DateTime @default(now())
 
-  // Settings fields
+  // Settings
   school             String?
-  defaultClassId     String?
-  defaultClass       Class?   @relation("DefaultClass", fields: [defaultClassId], references: [id])
+  defaultClassId     String?  // just stores a Class.id as text
   defaultStudentView String?  // "polar" | "bell" | "concentric"
+
+  classes Class[]
 }
 
 model Class {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   teacherId  String
-  teacher    Teacher   @relation(fields: [teacherId], references: [id])
   name       String
   gradeLevel String
   subject    String
   term       String?
+  createdAt  DateTime @default(now())
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  // REMOVE this line if you added it:
+  // defaultForTeachers Teacher[] @relation("DefaultClass")
+
   students   Student[]
   categories Category[]
-  createdAt  DateTime  @default(now())
-
-  defaultForTeachers Teacher[] @relation("DefaultClass")
 }
 
 model Student {

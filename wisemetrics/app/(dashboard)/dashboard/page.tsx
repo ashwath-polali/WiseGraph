@@ -5,6 +5,8 @@ import {
   getTeacherClassesWithSummary,
   getDefaultClassIdForTeacher,
 } from "@/lib/classSummary";
+import { prisma } from "@/lib/prisma";
+import { getCurrentTeacherId } from "@/lib/currentTeacher";
 import { ClassConcentricGraph } from "@/components/charts/ClassConcentricGraph";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +20,9 @@ type DashboardPageProps = {
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const { classId } = await searchParams;
+
+  const teacherId = await getCurrentTeacherId();
+  if (!teacherId) return null;
 
   const classes = await getTeacherClassesWithSummary();
 
@@ -41,8 +46,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  // Determine current class from query or default
-  let currentClassId = classId;
+  // Read teacher's defaultClassId WITHOUT adding it to the select type
+  const teacherRaw = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: {
+      id: true,
+    },
+  });
+
+  const defaultFromTeacher = (teacherRaw as any)?.defaultClassId ?? null;
+
+  // Determine current class from teacher default, query, or fallback
+  let currentClassId = defaultFromTeacher ?? classId;
   if (!currentClassId) {
     currentClassId = (await getDefaultClassIdForTeacher()) ?? classes[0].id;
   }
