@@ -65,10 +65,7 @@ export function ConfigureAssessmentClient({
     const res = await fetch("/api/subcategories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        categoryId,
-        name,
-      }),
+      body: JSON.stringify({ categoryId, name }),
     });
 
     if (!res.ok) {
@@ -79,21 +76,28 @@ export function ConfigureAssessmentClient({
     const created: { id: string; name: string } = await res.json();
 
     setCategories((prev) =>
-      prev.map((cat) =>
-        cat.id === categoryId
-          ? {
-              ...cat,
-              subcategories: [
-                ...(cat.subcategories ?? []),
-                {
-                  id: created.id,
-                  name: created.name,
-                  score: 100 as SubcategoryScore["score"],
-                },
-              ],
-            }
-          : cat
-      )
+      prev.map((cat) => {
+        if (cat.id !== categoryId) return cat;
+
+        const existing = cat.subcategories ?? [];
+
+        // Avoid duplicate ids; otherwise append so UI updates immediately
+        if (!created.id || existing.some((s) => s.id === created.id)) {
+          return cat;
+        }
+
+        return {
+          ...cat,
+          subcategories: [
+            ...existing,
+            {
+              id: created.id,
+              name: created.name,
+              score: 100 as SubcategoryScore["score"],
+            },
+          ],
+        };
+      })
     );
 
     setNewSubNameByCategory((prev) => ({ ...prev, [categoryId]: "" }));
@@ -228,43 +232,45 @@ export function ConfigureAssessmentClient({
             <div className="space-y-2">
               {(cat.subcategories ?? []).length > 0 && (
                 <ul className="space-y-1 text-xs text-slate-300">
-                  {cat.subcategories!.map((sub) => (
-                    <li
-                      key={sub.id}
-                      className="flex items-center justify-between gap-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="h-1 w-1 rounded-full bg-slate-500" />
-                        <span>{sub.name}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDeleteSubcategory(sub.id, sub.name)
-                        }
-                        className="rounded p-1 text-slate-500 hover:text-red-400"
-                        aria-label={`Delete subskill ${sub.name}`}
+                  {(cat.subcategories ?? [])
+                    .filter((sub) => sub && sub.id)
+                    .map((sub, idx) => (
+                      <li
+                        key={`${sub.id}-${idx}`}
+                        className="flex items-center justify-between gap-2"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          viewBox="0 0 16 16"
-                          fill="none"
+                        <div className="flex items-center gap-2">
+                          <span className="h-1 w-1 rounded-full bg-slate-500" />
+                          <span>{sub.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteSubcategory(sub.id, sub.name)
+                          }
+                          className="rounded p-1 text-slate-500 hover:text-red-400"
+                          aria-label={`Delete subskill ${sub.name}`}
                         >
-                          <path
-                            d="M3 4h10l-.7 9.1A1.5 1.5 0 0 1 10.8 14H5.2a1.5 1.5 0 0 1-1.5-1.3L3 4Z"
-                            stroke="currentColor"
-                            strokeWidth="1.1"
-                          />
-                          <path
-                            d="M2 4h12"
-                            stroke="currentColor"
-                            strokeWidth="1.1"
-                          />
-                        </svg>
-                      </button>
-                    </li>
-                  ))}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-3 w-3"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                          >
+                            <path
+                              d="M3 4h10l-.7 9.1A1.5 1.5 0 0 1 10.8 14H5.2a1.5 1.5 0 0 1-1.5-1.3L3 4Z"
+                              stroke="currentColor"
+                              strokeWidth="1.1"
+                            />
+                            <path
+                              d="M2 4h12"
+                              stroke="currentColor"
+                              strokeWidth="1.1"
+                            />
+                          </svg>
+                        </button>
+                      </li>
+                    ))}
                 </ul>
               )}
 
