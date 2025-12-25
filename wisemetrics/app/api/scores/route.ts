@@ -14,13 +14,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // 1) Find existing score for this tuple (student + category + subcategory/null)
+    const existing = await prisma.score.findFirst({
+      where: {
+        studentId,
+        categoryId: categoryId ?? null,
+        subcategoryId: subcategoryId ?? null,
+      },
+    });
+
+    // 2) Use id-based upsert
     const score = await prisma.score.upsert({
       where: {
-        student_category_sub_unique: {
-          studentId,
-          categoryId: categoryId ?? null,
-          subcategoryId: subcategoryId ?? null,
-        },
+        id: existing?.id ?? "___dummy___", // will not match if no existing row
       },
       update: {
         standardScore,

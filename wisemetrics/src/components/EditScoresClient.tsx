@@ -44,9 +44,7 @@ export function EditScoresClient({ student }: Props) {
     const parsed = parseInt(value, 10);
     if (Number.isNaN(parsed)) return;
     setCategories((prev) =>
-      prev.map((c) =>
-        c.id === categoryId ? { ...c, score: parsed } : c
-      )
+      prev.map((c) => (c.id === categoryId ? { ...c, score: parsed } : c))
     );
   }
 
@@ -75,6 +73,7 @@ export function EditScoresClient({ student }: Props) {
     e.preventDefault();
     setSaving(true);
     try {
+      // 1) Overall score
       const overallParsed = parseInt(overallInput, 10);
       if (!Number.isNaN(overallParsed)) {
         await fetch("/api/studentOverall", {
@@ -87,21 +86,26 @@ export function EditScoresClient({ student }: Props) {
         });
       }
 
-      // Save category scores
+      // 2) Category + subskill scores
       for (const cat of categories) {
-        await fetch("/api/scores", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId: student.id,
-            categoryId: cat.id,
-            subcategoryId: null,
-            standardScore: cat.score,
-          }),
-        });
+        const catScore = Number(cat.score);
+        if (!Number.isNaN(catScore)) {
+          await fetch("/api/scores", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              studentId: student.id,
+              categoryId: cat.id,
+              // omit subcategoryId here (handled as null in the API)
+              standardScore: catScore,
+            }),
+          });
+        }
 
-        // Save subskills
         for (const sub of cat.subcategories ?? []) {
+          const subScore = Number(sub.score);
+          if (Number.isNaN(subScore)) continue;
+
           await fetch("/api/scores", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -109,7 +113,7 @@ export function EditScoresClient({ student }: Props) {
               studentId: student.id,
               categoryId: cat.id,
               subcategoryId: sub.id,
-              standardScore: sub.score,
+              standardScore: subScore,
             }),
           });
         }
