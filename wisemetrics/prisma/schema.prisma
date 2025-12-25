@@ -72,4 +72,6 @@ model Score {
   subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
   standardScore Int
   createdAt     DateTime     @default(now())
+
+  @@unique([studentId, categoryId, subcategoryId], name: "student_category_sub_unique")
 }

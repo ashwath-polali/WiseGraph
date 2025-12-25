@@ -2,10 +2,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClassScoreSummary } from "@/lib/classSummary";
-import type { ClassScoreSummary, StudentScoreSummary } from "@/types/scores";
+import type {
+  ClassScoreSummary,
+  StudentScoreSummary,
+} from "@/types/scores";
 import { Card } from "@/components/ui/Card";
 import { StudentHeroChartsClient } from "@/components/StudentHeroChartsClient";
 import { CategoryDrillDownClient } from "@/components/CategoryDrillDownClient";
+import { EditScoresClient } from "@/components/EditScoresClient";
 
 type RouteParams = {
   id: string;
@@ -47,7 +51,7 @@ export default async function StudentDetailPage({ params }: Props) {
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,0.9fr)]">
-        {/* Main charts + drill-down */}
+        {/* Left: charts + drill-down */}
         <section className="space-y-4">
           <Card className="p-4 bg-slate-900/80 border border-slate-800">
             <StudentHeroChartsClient
@@ -57,11 +61,13 @@ export default async function StudentDetailPage({ params }: Props) {
           </Card>
 
           <Card className="p-4 bg-slate-900/80 border border-slate-800">
-            <CategoryDrillDownClient student={student as StudentScoreSummary} />
+            <CategoryDrillDownClient
+              student={student as StudentScoreSummary}
+            />
           </Card>
         </section>
 
-        {/* Side summary */}
+        {/* Right: snapshot + categories + edit panel */}
         <aside className="space-y-3">
           <Card className="p-4 bg-slate-900/80 border border-slate-800">
             <h2 className="text-sm font-medium text-slate-200">
@@ -90,6 +96,13 @@ export default async function StudentDetailPage({ params }: Props) {
                 </li>
               ))}
             </ul>
+          </Card>
+
+          <Card className="p-4 bg-slate-900/80 border border-slate-800">
+            <h2 className="text-sm font-medium text-slate-200 mb-2">
+              Edit scores
+            </h2>
+            <EditScoresClient student={student as StudentScoreSummary} />
           </Card>
         </aside>
       </div>

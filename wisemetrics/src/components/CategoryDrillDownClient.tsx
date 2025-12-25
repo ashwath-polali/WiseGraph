@@ -49,8 +49,8 @@ export function CategoryDrillDownClient({ student }: Props) {
           No subskills recorded for this category yet.
         </p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <div className="h-56">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="h-80 md:h-96">
             <SubcategoryDiamondChart subskills={subskills} />
           </div>
           <ul className="space-y-2 text-xs text-slate-300">

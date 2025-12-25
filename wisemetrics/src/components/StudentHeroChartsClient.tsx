@@ -17,6 +17,7 @@ import {
 } from "chart.js";
 import { StudentBellCurveChart } from "@/components/charts/StudentBellCurveChart";
 import { StudentConcentricPieChart } from "@/components/charts/StudentConcentricPieChart";
+import { ExportButtons } from "@/components/ExportButtons";
 
 ChartJS.register(
   RadialLinearScale,
@@ -162,13 +163,11 @@ export function StudentHeroChartsClient({ student, cls }: Props) {
       </header>
 
       {view === "bell" ? (
-  // Bell: span the full panel
-  <div className="h-80">
+  <div className="student-hero-chart h-80">
     <StudentBellCurveChart student={student} cls={cls} />
   </div>
 ) : (
-  // Polar + concentric: centered
-  <div className="h-80 flex items-center justify-center">
+  <div className="student-hero-chart h-80 flex items-center justify-center">
     <div className="w-full h-full max-w-md">
       {view === "polar" && (
         <Radar data={radarData} options={radarOptions} />
@@ -180,6 +179,9 @@ export function StudentHeroChartsClient({ student, cls }: Props) {
     </div>
   </div>
 )}
+
+<ExportButtons studentName={student.name} view={view} />
+
 
     </div>
   );
