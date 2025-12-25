@@ -24,17 +24,20 @@ export function DeleteClassButton({ classId }: DeleteClassButtonProps) {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/classes", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: classId }),
-      });
+      const res = await fetch(
+        `/api/classes?id=${encodeURIComponent(classId)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!res.ok) {
-        console.error("Failed to delete class");
+        const text = await res.text();
+        console.error("Failed to delete class", res.status, text);
         return;
       }
 
+      // After delete, let the dashboard pick the next/default class
       router.push("/dashboard");
       router.refresh();
     } finally {

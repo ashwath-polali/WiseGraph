@@ -10,12 +10,15 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ClassSelectorClient } from "@/components/ClassSelectorClient";
 import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
+import { DeleteClassButton } from "@/components/DeleteClassButton";
 
 type DashboardPageProps = {
-  searchParams: { classId?: string };
+  searchParams: Promise<{ classId?: string }>;
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const { classId } = await searchParams;
+
   const classes = await getTeacherClassesWithSummary();
 
   // No classes yet → show create UI
@@ -28,8 +31,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               Welcome to WiseMetrics
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Create your first class to start tracking student performance by
-              category and subskills.
+              Create your first high school class to start tracking performance
+              by category and subskills.
             </p>
           </div>
           <CreateFirstClassButton />
@@ -39,7 +42,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   // Determine current class from query or default
-  let currentClassId = searchParams.classId;
+  let currentClassId = classId;
   if (!currentClassId) {
     currentClassId = (await getDefaultClassIdForTeacher()) ?? classes[0].id;
   }
@@ -65,53 +68,52 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <main className="min-h-[calc(100vh-4rem)]">
-      <section className="flex flex-col gap-6 py-2">
+      <section className="flex flex-col gap-4 py-2">
+        {/* Page header: class title + classes strip */}
+        <div className="flex flex-col gap-3 px-2">
+          {/* Current class info + configure */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-slate-50">
+                {cls.name}
+              </h1>
+              <p className="mt-1 text-xs text-slate-400">
+                Grade {cls.gradeLevel} · {cls.subject}
+                {cls.term ? ` · ${cls.term}` : ""}
+              </p>
+            </div>
+            <Link href="/dashboard/configure-assessment">
+              <Button variant="secondary" className="text-xs">
+                Configure assessment
+              </Button>
+            </Link>
+          </div>
+
+          {/* All classes strip + new class button */}
+          <div className="flex items-center justify-between gap-2">
+            <ClassSelectorClient
+              classes={classes.map((c) => ({
+                id: c.id,
+                name: c.name,
+                subject: c.subject,
+                term: c.term,
+              }))}
+              currentClassId={cls.id}
+            />
+            <CreateFirstClassButton />
+          </div>
+        </div>
+
         {/* Top row: class overview + students sidebar */}
         <div className="grid grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)] gap-6">
-          {/* Left: big class card */}
-          <Card className="space-y-5 p-6">
-            <header className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-semibold text-slate-50">
-                  {cls.name}
-                </h1>
-                <p className="mt-1 text-xs text-slate-400">
-                  Grade {cls.gradeLevel} · {cls.subject}
-                  {cls.term ? ` · ${cls.term}` : ""}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link href="/dashboard/configure-assessment">
-                  <Button variant="secondary" className="text-xs">
-                    Configure assessment
-                  </Button>
-                </Link>
-                {/* Optionally mount <DeleteClassButton classId={cls.id} /> here */}
-              </div>
-            </header>
-
-            {/* Class selector pills */}
-            <div className="mt-1 flex items-center justify-between gap-2">
-              <ClassSelectorClient
-                classes={classes.map((c) => ({
-                  id: c.id,
-                  name: c.name,
-                  subject: c.subject,
-                  term: c.term,
-                }))}
-                currentClassId={cls.id}
-              />
-              {/* Small inline create button for additional classes */}
-              <CreateFirstClassButton />
-            </div>
-
-            {/* Big class chart */}
-            <div className="mt-4 h-[420px]">
+          {/* Left: big class card with just the chart */}
+          <Card className="p-6">
+            <div className="h-[420px]">
               <ClassConcentricGraph cls={cls} />
             </div>
           </Card>
 
-          {/* Right: students list */}
+          {/* Right: students list WITH Manage button in panel */}
           <Card className="flex h-full flex-col p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
@@ -160,6 +162,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               )}
             </div>
           </Card>
+        </div>
+
+        {/* Bottom row: destructive action for this class */}
+        <div className="flex justify-end px-2">
+          <DeleteClassButton classId={cls.id} />
         </div>
       </section>
     </main>

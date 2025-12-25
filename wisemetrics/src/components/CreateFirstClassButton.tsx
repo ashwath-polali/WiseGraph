@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/Input";
 export function CreateFirstClassButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [gradeLevel, setGradeLevel] = useState("");
-  const [subject, setSubject] = useState("");
-  const [term, setTerm] = useState("");
+  const [name, setName] = useState("");        // e.g., "Period 1 – Algebra II"
+  const [gradeLevel, setGradeLevel] = useState(""); // e.g., "10"
+  const [subject, setSubject] = useState("");  // e.g., "Algebra II"
+  const [term, setTerm] = useState("");        // e.g., "Fall 2025"
   const [loading, setLoading] = useState(false);
 
   async function handleCreate() {
@@ -57,57 +57,57 @@ export function CreateFirstClassButton() {
       <Button
         type="button"
         variant="primary"
-        className="text-sm"
+        className="text-xs"
         onClick={() => setOpen(true)}
       >
-        Create class
+        New class
       </Button>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          placeholder="Class name (e.g., Period 1 – Reading)"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          placeholder="Grade level (e.g., 6)"
-          value={gradeLevel}
-          onChange={(e) => setGradeLevel(e.target.value)}
-        />
-        <Input
-          placeholder="Subject (e.g., Reading)"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-        <Input
-          placeholder="Term (optional)"
-          value={term}
-          onChange={(e) => setTerm(e.target.value)}
-        />
-      </div>
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="primary"
-          disabled={loading}
-          onClick={handleCreate}
-          className="text-sm"
-        >
-          {loading ? "Creating…" : "Save class"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          className="text-sm"
-          onClick={() => setOpen(false)}
-        >
-          Cancel
-        </Button>
-      </div>
+    <div className="flex flex-wrap items-end gap-2">
+      <Input
+        placeholder="Class name (e.g., Period 1 – Algebra II)"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="min-w-[220px]"
+      />
+      <Input
+        placeholder="Grade (9–12)"
+        value={gradeLevel}
+        onChange={(e) => setGradeLevel(e.target.value)}
+        className="w-24"
+      />
+      <Input
+        placeholder="Subject (e.g., Algebra II)"
+        value={subject}
+        onChange={(e) => setSubject(e.target.value)}
+        className="min-w-[160px]"
+      />
+      <Input
+        placeholder="Term (e.g., Fall 2025)"
+        value={term}
+        onChange={(e) => setTerm(e.target.value)}
+        className="min-w-[140px]"
+      />
+      <Button
+        type="button"
+        variant="primary"
+        onClick={handleCreate}
+        disabled={loading}
+        className="text-xs"
+      >
+        {loading ? "Creating…" : "Save"}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setOpen(false)}
+        className="text-xs"
+      >
+        Cancel
+      </Button>
     </div>
   );
 }

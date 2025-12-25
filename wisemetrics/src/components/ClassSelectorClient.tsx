@@ -23,6 +23,8 @@ export function ClassSelectorClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  if (!classes.length) return null;
+
   function handleSelect(id: string) {
     if (id === currentClassId) return;
 
@@ -34,14 +36,12 @@ export function ClassSelectorClient({
     });
   }
 
-  if (!classes.length) return null;
-
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-slate-800 bg-slate-950/70 px-2 py-1">
       {classes.map((cls) => {
         const isActive = cls.id === currentClassId;
-        const label = `${cls.name} – ${cls.subject}${
-          cls.term ? ` (${cls.term})` : ""
+        const label = `${cls.name} • ${cls.subject}${
+          cls.term ? ` • ${cls.term}` : ""
         }`;
 
         return (
@@ -51,7 +51,7 @@ export function ClassSelectorClient({
             variant={isActive ? "primary" : "ghost"}
             onClick={() => handleSelect(cls.id)}
             disabled={isPending && !isActive}
-            className="rounded-full px-3 py-1 text-[11px]"
+            className="whitespace-nowrap rounded-full px-3 py-1 text-[11px]"
           >
             {label}
           </Button>
