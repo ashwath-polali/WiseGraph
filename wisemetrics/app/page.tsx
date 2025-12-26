@@ -75,7 +75,7 @@ export default function HomePage() {
             </p>
             <p className="mt-2 text-xs text-slate-400">
               Instantly spot outliers and trends instead of paging through
-              static reports.
+              many reports.
             </p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
