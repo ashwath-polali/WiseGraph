@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/manage-students/page.tsx
 import Link from "next/link";
 import {
   getClassScoreSummary,
@@ -43,14 +42,12 @@ export default async function ManageStudentsPage({
     );
   }
 
-  // 1) URL classId if valid
   const idFromQuery =
     classId &&
     classes.some((c: TeacherClass) => c.id === classId)
       ? classId
       : null;
 
-  // 2) Default if valid
   const defaultClassId = await getDefaultClassIdForTeacher();
   const idFromDefault =
     defaultClassId &&
@@ -58,7 +55,6 @@ export default async function ManageStudentsPage({
       ? defaultClassId
       : null;
 
-  // 3) First class
   const currentClassId = idFromQuery ?? idFromDefault ?? classes[0].id;
 
   const cls = await getClassScoreSummary(currentClassId);

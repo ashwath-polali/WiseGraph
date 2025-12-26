@@ -1,8 +1,6 @@
-// app/api/subcategories/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Create subcategory
 export async function POST(req: Request) {
   const body = await req.json();
   const { categoryId, name } = body ?? {};
@@ -30,7 +28,6 @@ export async function POST(req: Request) {
   return NextResponse.json({ subcategory });
 }
 
-// Delete subcategory (and its scores)
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
@@ -39,12 +36,10 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  // Delete scores tied to this subcategory
   await prisma.score.deleteMany({
     where: { subcategoryId: id },
   });
 
-  // Delete the subcategory itself
   await prisma.subcategory.delete({
     where: { id },
   });

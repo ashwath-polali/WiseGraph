@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client";
 
 import Link from "next/link";
@@ -37,7 +36,7 @@ export default function HomePage() {
             </span>
           </div>
           <nav className="flex items-center gap-4 text-xs text-slate-400">
-            {/* Routes live at app/(auth)/login and app/(auth)/signup → /login, /signup */}
+            {/* Routes live at app/(auth)/login and app/(auth)/signup then /login, /signup */}
             <Link href="/login" className="hover:text-slate-100">
               Log in
             </Link>
@@ -62,7 +61,7 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* Hero visualization band */}
+        {/* hero visualization band */}
         <section className="mt-14 w-full">
           <InteractiveGraphBand />
         </section>
@@ -103,7 +102,7 @@ export default function HomePage() {
 }
 
 /**
- * Interactive graph band where only the region near the cursor expands.
+ *graph band where only the region near the cursor expands.
  */
 function InteractiveGraphBand() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -118,7 +117,7 @@ function InteractiveGraphBand() {
   const pathCRef = useRef<SVGPathElement | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // Continuous redraw using current cursor state
+  // continuous redraw using current cursor state
   useEffect(() => {
     const updatePaths = () => {
       const { x, y, inside } = cursorRef.current;
@@ -154,15 +153,15 @@ function InteractiveGraphBand() {
     };
   }, []);
 
-  // Mouse tracking within the band
+  // mouse tracking!!
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const handleMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width; // 0..1
-      const y = (e.clientY - rect.top) / rect.height; // 0..1
+      const x = (e.clientX - rect.left) / rect.width; 
+      const y = (e.clientY - rect.top) / rect.height; 
       cursorRef.current = {
         x: Math.min(1, Math.max(0, x)),
         y: Math.min(1, Math.max(0, y)),
@@ -218,7 +217,7 @@ function InteractiveGraphBand() {
             />
           ))}
 
-          {/* main “class trend” curve */}
+          {/* main class trend curve */}
           <path
             ref={pathMainRef}
             d={generateWiseGraphPath(0)}
@@ -282,10 +281,10 @@ function InteractiveGraphBand() {
 }
 
 /**
- * Generate a complex “graph-like” curve across 600×300 space.
- * offsetFactor: shifts phase/amplitude for each series.
+ * Generate a complex graph like curve across 600 by300 space.
+ * offsetFactor shifts amp for each series.
  * baseScale: base vertical scale of this series.
- * hover: {x,y} in 0..1; only region near hover expands.
+ * hover: x,y in 0 1 only region near hover expands.
  */
 function generateWiseGraphPath(
   offsetFactor: number = 0,
@@ -307,7 +306,7 @@ function generateWiseGraphPath(
   const samples = 260;
 
   for (let i = 0; i <= samples; i++) {
-    const t = i / samples; // 0..1 along x
+    const t = i / samples; 
     const x = t * width;
 
     const trend = Math.sin(t * Math.PI * 2 * 0.8 + offsetFactor);
@@ -319,11 +318,11 @@ function generateWiseGraphPath(
     // local expansion if close to hover.x
     let localScale = 1;
     if (hover) {
-      const dx = Math.abs(t - hover.x); // 0 at cursor
-      const radius = 0.18; // influence width
+      const dx = Math.abs(t - hover.x); 
+      const radius = 0.18; 
       if (dx < radius) {
-        const falloff = 1 - dx / radius; // 0..1
-        localScale = 1 + falloff * 0.7; // up to +70% locally
+        const falloff = 1 - dx / radius; 
+        localScale = 1 + falloff * 0.7; 
       }
     }
 

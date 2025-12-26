@@ -1,4 +1,3 @@
-// prisma/seed.ts
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
@@ -26,7 +25,7 @@ function createPrismaClient() {
 const prisma = createPrismaClient();
 
 async function main() {
-  // Example teacher
+
   const teacher = await prisma.teacher.upsert({
     where: { email: "teacher@example.com" },
     update: {},
@@ -36,7 +35,6 @@ async function main() {
     },
   });
 
-  // Example class
   const cls = await prisma.class.create({
     data: {
       teacherId: teacher.id,
@@ -47,7 +45,6 @@ async function main() {
     },
   });
 
-  // Example categories (teacher-defined in real use; this is just demo data)
   await prisma.category.createMany({
     data: [
       { classId: cls.id, name: "Reading",       order: 0 },
@@ -65,7 +62,6 @@ async function main() {
 
   const [reading, writing, vocab, comp, fluency] = categories;
 
-  // Example student
   const student = await prisma.student.create({
     data: {
       classId: cls.id,
@@ -76,7 +72,7 @@ async function main() {
     },
   });
 
-  // Example scores across all categories
+
   await prisma.score.createMany({
     data: [
       {

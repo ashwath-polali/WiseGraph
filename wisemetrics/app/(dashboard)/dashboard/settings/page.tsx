@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/settings/page.tsx
 import { prisma } from "@/lib/prisma";
 import { getCurrentTeacherId } from "@/lib/currentTeacher";
 import { Card } from "@/components/ui/Card";

@@ -1,4 +1,3 @@
-// app/auth/signup/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -26,8 +25,6 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      // If you later add email confirmation, you can restore:
-      // options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
 
     setSubmitting(false);

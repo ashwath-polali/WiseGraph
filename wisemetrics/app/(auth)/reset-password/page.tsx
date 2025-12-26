@@ -1,4 +1,3 @@
-// app/(auth)/reset-password/page.tsx
 "use client";
 
 import { useEffect, useState, FormEvent, Suspense } from "react";
@@ -17,7 +16,7 @@ function ResetPasswordInner() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Verify recovery token from URL (?token_hash=...&type=recovery)
+  // Verify recovery token from URL 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     const tokenHash = searchParams.get("token_hash");

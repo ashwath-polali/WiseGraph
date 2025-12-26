@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/page.tsx
 import Link from "next/link";
 import {
   getClassScoreSummary,
@@ -40,7 +39,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const classes = (await getTeacherClassesWithSummary()) as TeacherClass[];
 
-  // No classes yet → show create UI
   if (!classes.length) {
     return (
       <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
@@ -60,7 +58,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     );
   }
 
-  // Read teacher's defaultClassId WITHOUT adding it to the select type
   const teacherRaw = await prisma.teacher.findUnique({
     where: { id: teacherId },
     select: { id: true, defaultClassId: true },
@@ -68,21 +65,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const defaultFromTeacher = (teacherRaw as TeacherWithDefault | null)?.defaultClassId ?? null;
 
-  // 1) URL classId if it belongs to this teacher
   const idFromQuery =
     classId &&
     classes.some((c: TeacherClass) => c.id === classId)
       ? classId
       : null;
 
-  // 2) Teacher default if valid
   const idFromTeacher =
     defaultFromTeacher &&
     classes.some((c: TeacherClass) => c.id === defaultFromTeacher)
       ? defaultFromTeacher
       : null;
 
-  // 3) First class
   const fallbackId = classes[0].id;
 
   const currentClassId = idFromQuery ?? idFromTeacher ?? fallbackId;

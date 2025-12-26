@@ -1,4 +1,3 @@
-// app/api/scores/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -14,7 +13,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Find existing score for this tuple (student + category + subcategory/null)
     const existing = await prisma.score.findFirst({
       where: {
         studentId,
@@ -23,7 +21,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // 2) Use id-based upsert
     const score = await prisma.score.upsert({
       where: {
         id: existing?.id ?? "___dummy___", // will not match if no existing row

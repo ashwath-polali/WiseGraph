@@ -1,8 +1,6 @@
-// app/api/students/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Create student
 export async function POST(req: Request) {
   const body = await req.json();
   const { classId, name, gradeLevel, overallScore } = body ?? {};
@@ -26,7 +24,6 @@ export async function POST(req: Request) {
       name: true,
       gradeLevel: true,
       overallScore: true,
-      // fields for StudentScoreSummary
       scores: false,
     },
   });
@@ -34,7 +31,6 @@ export async function POST(req: Request) {
   return NextResponse.json({ student });
 }
 
-// Update student (name, grade, overallScore)
 export async function PATCH(req: Request) {
   const body = await req.json();
   const { id, name, gradeLevel, overallScore } = body ?? {};
@@ -61,7 +57,6 @@ export async function PATCH(req: Request) {
   return NextResponse.json({ student });
 }
 
-// Delete student and their scores
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { id } = body ?? {};
@@ -75,7 +70,6 @@ export async function DELETE(req: Request) {
     where: { studentId: id },
   });
 
-  // Then delete student
   await prisma.student.delete({
     where: { id },
   });

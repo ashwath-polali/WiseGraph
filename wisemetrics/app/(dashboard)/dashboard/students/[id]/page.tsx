@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/students/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -27,7 +26,7 @@ export default async function StudentDetailPage(props: Props) {
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
-  // 1) Find which class this student belongs to.
+  // finding which class this student belongs to.
   const studentRow = await prisma.student.findUnique({
     where: { id },
     select: { classId: true },
@@ -37,7 +36,6 @@ export default async function StudentDetailPage(props: Props) {
     return notFound();
   }
 
-  // 2) Load class summary for that class.
   const cls = (await getClassScoreSummary(
     studentRow.classId
   )) as ClassScoreSummary | null;
@@ -45,7 +43,6 @@ export default async function StudentDetailPage(props: Props) {
     return notFound();
   }
 
-  // 3) Find the student summary inside this class.
   const student = cls.students.find((s) => s.id === id) as
     | StudentScoreSummary
     | undefined;
@@ -53,7 +50,6 @@ export default async function StudentDetailPage(props: Props) {
     return notFound();
   }
 
-  // 4) Read teacher's defaultStudentView without touching select types
   const teacherRaw = await prisma.teacher.findUnique({
     where: { id: teacherId },
     select: {

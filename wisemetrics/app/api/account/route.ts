@@ -1,4 +1,3 @@
-// app/api/account/route.ts
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import { prisma } from "@/lib/prisma";
@@ -14,7 +13,7 @@ export async function PATCH(req: Request) {
   const body = await req.json();
   const { name, email } = body ?? {};
 
-  // 1) Update email in Supabase auth if provided
+  // Update email in Supabase auth
   if (email) {
     const { error: authError } = await supabase.auth.updateUser({ email });
     if (authError) {
@@ -25,7 +24,6 @@ export async function PATCH(req: Request) {
     }
   }
 
-  // 2) Update Teacher profile (name, and maybe keep email in sync)
   const teacher = await prisma.teacher.update({
     where: { id: teacherId },
     data: {

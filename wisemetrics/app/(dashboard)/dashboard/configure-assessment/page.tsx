@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/configure-assessment/page.tsx
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
@@ -54,14 +53,12 @@ export default async function ConfigureAssessmentPage({
     );
   }
 
-  // 1) URL classId if valid
   const idFromQuery =
     classId &&
     classes.some((c: TeacherClass) => c.id === classId)
       ? classId
       : null;
 
-  // 2) Default if valid
   const defaultClassId = await getDefaultClassIdForTeacher();
   const idFromDefault =
     defaultClassId &&
@@ -69,10 +66,8 @@ export default async function ConfigureAssessmentPage({
       ? defaultClassId
       : null;
 
-  // 3) First class
   const currentClassId = idFromQuery ?? idFromDefault ?? classes[0].id;
 
-  // Load categories + subcategories directly for this class
   const cls = await prisma.class.findUnique({
     where: { id: currentClassId },
     include: {

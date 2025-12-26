@@ -1,8 +1,6 @@
-// app/api/categories/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// Create category
 export async function POST(req: Request) {
   const body = await req.json();
   const { classId, name } = body ?? {};
@@ -30,7 +28,6 @@ export async function POST(req: Request) {
     },
   });
 
-  // score is not stored on Category; caller treats it as 100 by default
   return NextResponse.json({
     id: category.id,
     name: category.name,
@@ -38,7 +35,6 @@ export async function POST(req: Request) {
   });
 }
 
-// Delete category (plus subcategories and scores)
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
@@ -47,7 +43,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  // Delete scores tied to this category or its subcategories
   await prisma.score.deleteMany({
     where: {
       OR: [
@@ -61,12 +56,10 @@ export async function DELETE(req: Request) {
     },
   });
 
-  // Delete subcategories
   await prisma.subcategory.deleteMany({
     where: { categoryId: id },
   });
 
-  // Delete category
   await prisma.category.delete({
     where: { id },
   });

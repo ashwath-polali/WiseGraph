@@ -1,9 +1,7 @@
-// app/api/teacher/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTeacherId } from "@/lib/currentTeacher";
 
-// Get current teacher basic settings
 export async function GET() {
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) {
@@ -17,14 +15,12 @@ export async function GET() {
       email: true,
       name: true,
       createdAt: true,
-      // keep select minimal; we don't rely on this GET for settings UI
     },
   });
 
   return NextResponse.json(teacher);
 }
 
-// Update teacher settings (name + app defaults)
 export async function PATCH(req: Request) {
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) {
