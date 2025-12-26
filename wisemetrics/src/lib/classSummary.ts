@@ -220,25 +220,35 @@ export async function getClassScoreSummary(
  * List of all classes owned by the current teacher.
  */
 export async function getTeacherClassesWithSummary() {
-  const teacherId = await getCurrentTeacherId();
-  if (!teacherId) return [];
-
-  const classes = await prisma.class.findMany({
-    where: { teacherId },
-    orderBy: { createdAt: "asc" },
-    include: {
-      categories: true,
-      students: true,
-    },
-  });
-
-  return classes.map((cls) => ({
-    id: cls.id,
-    name: cls.name,
-    subject: cls.subject,
-    term: cls.term,
-    gradeLevel: cls.gradeLevel,
-    studentCount: cls.students.length,
-    categoryCount: cls.categories.length,
-  }));
-}
+    const teacherId = await getCurrentTeacherId();
+    if (!teacherId) return [];
+  
+    const classes = await prisma.class.findMany({
+      where: { teacherId },
+      orderBy: { createdAt: "asc" },
+      include: {
+        categories: true,
+        students: true,
+      },
+    });
+  
+    // Explicitly type `cls` so it isn't inferred as `any`
+    return classes.map((cls: {
+      id: string;
+      name: string;
+      subject: string;
+      term: string | null;
+      gradeLevel: string;
+      students: { id: string }[];
+      categories: { id: string }[];
+    }) => ({
+      id: cls.id,
+      name: cls.name,
+      subject: cls.subject,
+      term: cls.term,
+      gradeLevel: cls.gradeLevel,
+      studentCount: cls.students.length,
+      categoryCount: cls.categories.length,
+    }));
+  }
+  
