@@ -9,6 +9,14 @@ import { Card } from "@/components/ui/Card";
 import { ConfigureAssessmentClient } from "@/components/ConfigureAssessmentClient";
 import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
 
+type TeacherClass = {
+  id: string;
+  name: string;
+  gradeLevel: string;
+  subject: string;
+  term: string | null;
+};
+
 export default async function ConfigureAssessmentPage({
   searchParams,
 }: {
@@ -16,7 +24,7 @@ export default async function ConfigureAssessmentPage({
 }) {
   const { classId } = await searchParams;
 
-  const classes = await getTeacherClassesWithSummary();
+  const classes = (await getTeacherClassesWithSummary()) as TeacherClass[];
 
   if (!classes.length) {
     return (
@@ -37,12 +45,16 @@ export default async function ConfigureAssessmentPage({
 
   // 1) URL classId if valid
   const idFromQuery =
-    classId && classes.some((c) => c.id === classId) ? classId : null;
+    classId &&
+    classes.some((c: TeacherClass) => c.id === classId)
+      ? classId
+      : null;
 
   // 2) Default if valid
   const defaultClassId = await getDefaultClassIdForTeacher();
   const idFromDefault =
-    defaultClassId && classes.some((c) => c.id === defaultClassId)
+    defaultClassId &&
+    classes.some((c: TeacherClass) => c.id === defaultClassId)
       ? defaultClassId
       : null;
 
