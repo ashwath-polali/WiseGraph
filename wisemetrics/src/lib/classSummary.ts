@@ -9,6 +9,36 @@ import type {
 } from "@/types/scores";
 import { clampScore, SCOREMIN } from "./chartScaling";
 
+type RawScore = {
+  categoryId: string | null;
+  subcategoryId: string | null;
+  standardScore: number;
+};
+
+type RawStudent = {
+  id: string;
+  name: string;
+  gradeLevel: string;
+  overallScore: number;
+  scores: RawScore[];
+};
+
+type RawCategory = {
+  id: string;
+  name: string;
+  subcategories: { id: string; name: string }[];
+};
+
+type RawClass = {
+  id: string;
+  name: string;
+  gradeLevel: string;
+  subject: string;
+  term: string | null;
+  categories: RawCategory[];
+  students: RawStudent[];
+};
+
 /**
  * Returns the first classId for the current teacher, or null if none.
  */
@@ -35,7 +65,7 @@ export async function getClassScoreSummary(
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
-  const cls = await prisma.class.findFirst({
+  const cls = (await prisma.class.findFirst({
     where: {
       id: classId,
       teacherId,
@@ -56,110 +86,112 @@ export async function getClassScoreSummary(
         },
       },
     },
-  });
+  })) as RawClass | null;
 
   if (!cls) return null;
 
   // --- Per-category class averages + subskill (subcategory) averages ---
 
-  const categoryAverages: CategoryScore[] = cls.categories.map((cat: {
-    id: string;
-    name: string;
-    subcategories: { id: string; name: string }[];
-  }) => {
-    const scoresForCategory = cls.students.flatMap((student) =>
-      student.scores.filter(
-        (s) => s.categoryId === cat.id && s.subcategoryId == null,
-      ),
-    );
+  const categoryAverages: CategoryScore[] = cls.categories.map(
+    (cat: RawCategory) => {
+      const scoresForCategory = cls.students.flatMap(
+        (student: RawStudent) =>
+          student.scores.filter(
+            (s: RawScore) =>
+              s.categoryId === cat.id && s.subcategoryId == null,
+          ),
+      );
 
-    const avgCategoryScore =
-      scoresForCategory.length > 0
-        ? clampScore(
-            Math.round(
-              scoresForCategory.reduce(
-                (sum, s) => sum + s.standardScore,
-                0,
-              ) / scoresForCategory.length,
-            ),
-          )
-        : (SCOREMIN as number);
+      const avgCategoryScore =
+        scoresForCategory.length > 0
+          ? clampScore(
+              Math.round(
+                scoresForCategory.reduce(
+                  (sum: number, s: RawScore) => sum + s.standardScore,
+                  0,
+                ) / scoresForCategory.length,
+              ),
+            )
+          : (SCOREMIN as number);
 
-    // Per-subcategory averages for this category
-    const subcategories: SubcategoryScore[] = cat.subcategories.map(
-      (sub: { id: string; name: string }) => {
-        const scoresForSub = cls.students.flatMap((student) =>
-          student.scores.filter((s) => s.subcategoryId === sub.id),
-        );
+      // Per-subcategory averages for this category
+      const subcategories: SubcategoryScore[] = cat.subcategories.map(
+        (sub: { id: string; name: string }) => {
+          const scoresForSub = cls.students.flatMap(
+            (student: RawStudent) =>
+              student.scores.filter(
+                (s: RawScore) => s.subcategoryId === sub.id,
+              ),
+          );
 
-        const avgSubScore =
-          scoresForSub.length > 0
-            ? clampScore(
-                Math.round(
-                  scoresForSub.reduce(
-                    (sum, s) => sum + s.standardScore,
-                    0,
-                  ) / scoresForSub.length,
-                ),
-              )
-            : (SCOREMIN as number);
+          const avgSubScore =
+            scoresForSub.length > 0
+              ? clampScore(
+                  Math.round(
+                    scoresForSub.reduce(
+                      (sum: number, s: RawScore) => sum + s.standardScore,
+                      0,
+                    ) / scoresForSub.length,
+                  ),
+                )
+              : (SCOREMIN as number);
 
-        return {
-          id: sub.id,
-          name: sub.name,
-          score: avgSubScore,
-        };
-      },
-    );
+          return {
+            id: sub.id,
+            name: sub.name,
+            score: avgSubScore,
+          };
+        },
+      );
 
-    return {
-      id: cat.id,
-      name: cat.name,
-      score: avgCategoryScore,
-      subcategories,
-    };
-  });
+      return {
+        id: cat.id,
+        name: cat.name,
+        score: avgCategoryScore,
+        subcategories,
+      };
+    },
+  );
 
   // --- Per-student category + subcategory scores ---
 
   const students: StudentScoreSummary[] = cls.students.map(
-    (student): StudentScoreSummary => {
-      const categories: CategoryScore[] = cls.categories.map((cat: {
-        id: string;
-        name: string;
-        subcategories: { id: string; name: string }[];
-      }) => {
-        const catScore = student.scores.find(
-          (s) => s.categoryId === cat.id && s.subcategoryId == null,
-        );
-        const catStandard = catScore
-          ? clampScore(catScore.standardScore)
-          : (SCOREMIN as number);
+    (student: RawStudent): StudentScoreSummary => {
+      const categories: CategoryScore[] = cls.categories.map(
+        (cat: RawCategory) => {
+          const catScore = student.scores.find(
+            (s: RawScore) =>
+              s.categoryId === cat.id && s.subcategoryId == null,
+          );
+          const catStandard = catScore
+            ? clampScore(catScore.standardScore)
+            : (SCOREMIN as number);
 
-        const subcategories: SubcategoryScore[] = cat.subcategories.map(
-          (sub: { id: string; name: string }) => {
-            const subScore = student.scores.find(
-              (s) => s.subcategoryId === sub.id,
-            );
-            const subStandard = subScore
-              ? clampScore(subScore.standardScore)
-              : (SCOREMIN as number);
+          const subcategories: SubcategoryScore[] = cat.subcategories.map(
+            (sub: { id: string; name: string }) => {
+              const subScore = student.scores.find(
+                (s: RawScore) => s.subcategoryId === sub.id,
+              );
+              const subStandard = subScore
+                ? clampScore(subScore.standardScore)
+                : (SCOREMIN as number);
 
-            return {
-              id: sub.id,
-              name: sub.name,
-              score: subStandard,
-            };
-          },
-        );
+              return {
+                id: sub.id,
+                name: sub.name,
+                score: subStandard,
+              };
+            },
+          );
 
-        return {
-          id: cat.id,
-          name: cat.name,
-          score: catStandard,
-          subcategories,
-        };
-      });
+          return {
+            id: cat.id,
+            name: cat.name,
+            score: catStandard,
+            subcategories,
+          };
+        },
+      );
 
       return {
         id: student.id,
