@@ -14,6 +14,10 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [resetSending, setResetSending] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -33,6 +37,40 @@ export default function LoginPage() {
     }
 
     router.push("/dashboard");
+  }
+
+  async function handleForgotPassword() {
+    // no email entered, bail early
+    if (!email) {
+      setResetError("Enter your email above, then click reset.");
+      setResetMessage(null);
+      return;
+    }
+
+    setResetSending(true);
+    setResetMessage(null);
+    setResetError(null);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        (typeof window !== "undefined" ? window.location.origin : "");
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/reset-password`,
+      });
+
+      if (error) {
+        setResetError(error.message);
+        return;
+      }
+
+      setResetMessage("Reset link sent. Check your email.");
+    } finally {
+      setResetSending(false);
+    }
   }
 
   return (
@@ -76,6 +114,28 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <div className="mt-1 flex items-center justify-between text-[11px]">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={resetSending}
+                className="text-sky-400 hover:text-sky-300 disabled:opacity-60"
+              >
+                {resetSending ? "Sending reset link…" : "Forgot password?"}
+              </button>
+              <div>
+                {resetError && (
+                  <span className="text-red-400">
+                    {resetError}
+                  </span>
+                )}
+                {resetMessage && (
+                  <span className="text-emerald-400">
+                    {resetMessage}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
           <Button
