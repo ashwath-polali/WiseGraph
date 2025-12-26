@@ -7,13 +7,13 @@ import {
 } from "@/lib/classSummary";
 import { prisma } from "@/lib/prisma";
 import { getCurrentTeacherId } from "@/lib/currentTeacher";
-import { ClassConcentricGraph } from "@/components/charts/ClassConcentricGraph";
+import type { ClassScoreSummary } from "@/types/scores";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ClassSelectorClient } from "@/components/ClassSelectorClient";
 import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
 import { DeleteClassButton } from "@/components/DeleteClassButton";
-import { ClassExplodingRadialChart } from "@/components/charts/ClassExplodingRadialChart";
+import { ClassOverviewClient } from "@/components/ClassOverviewClient";
 
 type DashboardPageProps = {
   searchParams: Promise<{ classId?: string }>;
@@ -122,12 +122,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         {/* Top row: class overview + students sidebar */}
         <div className="grid grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)] gap-6">
-          {/* Left: big class card with just the chart */}
-          <Card className="p-6">
-  <div className="h-[620px]">
-    <ClassExplodingRadialChart cls={cls} />
-  </div>
-</Card>
+          {/* Left: big class card with chart + radial/bell toggle */}
+          <ClassOverviewClient cls={cls as ClassScoreSummary} />
 
           {/* Right: students list WITH Manage button in panel */}
           <Card className="flex h-full flex-col p-5">
