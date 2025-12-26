@@ -39,7 +39,7 @@ export default function SignupPage() {
 
     setMessage("Successfully created account. Redirecting to login...");
     setTimeout(() => {
-      router.push("/auth/login");
+      router.push("/login");
     }, 1500);
   }
 
