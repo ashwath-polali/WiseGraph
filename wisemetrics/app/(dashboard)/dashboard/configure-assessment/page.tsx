@@ -92,8 +92,10 @@ export default async function ConfigureAssessmentPage({
               Grade {cls.gradeLevel} · {cls.subject}
             </p>
           </div>
-          <Link href="/dashboard" className="text-xs text-sky-400">
-            Back to dashboard
+          <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
+            <span className="text-xs text-sky-400">
+              Back to dashboard
+            </span>
           </Link>
         </div>
 

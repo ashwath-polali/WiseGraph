@@ -20,7 +20,7 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const { classId } = await searchParams; // <-- unwrap Promise
+  const { classId } = await searchParams;
 
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
@@ -169,7 +169,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   {cls.students.map((student) => (
                     <li key={student.id}>
                       <Link
-                        href={`/dashboard/students/${student.id}`}
+                        href={`/dashboard/students/${student.id}?classId=${encodeURIComponent(
+                          cls.id,
+                        )}`}
                         className="flex items-center justify-between px-3 py-2 hover:bg-slate-800/60"
                       >
                         <div>

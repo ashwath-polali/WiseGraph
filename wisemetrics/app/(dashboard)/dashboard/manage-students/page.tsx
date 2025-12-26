@@ -20,7 +20,7 @@ export default async function ManageStudentsPage({
     return (
       <main className="space-y-6">
         <Card className="p-6">
-          <h1 className="text-xl font-semibold">Manage students</h1>
+          <h1 className="text-xl font-offsetof-semibold">Manage students</h1>
           <p className="mt-2 text-sm text-slate-400">
             No classes yet. Create a class first.
           </p>
@@ -69,7 +69,7 @@ export default async function ManageStudentsPage({
           <h1 className="text-xl font-semibold">
             Students · {cls.name}
           </h1>
-          <Link href="/dashboard">
+          <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
             <span className="text-xs text-sky-400 hover:text-sky-300">
               Back to dashboard
             </span>

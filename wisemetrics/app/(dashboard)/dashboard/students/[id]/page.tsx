@@ -88,7 +88,11 @@ export default async function StudentDetailPage(props: Props) {
                 </span>
               </p>
             </div>
-            <Link href="/dashboard" className="text-xs text-sky-400">
+            {/* Preserve the student's class when going back */}
+            <Link
+              href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
+              className="text-xs text-sky-400"
+            >
               Back to dashboard
             </Link>
           </div>

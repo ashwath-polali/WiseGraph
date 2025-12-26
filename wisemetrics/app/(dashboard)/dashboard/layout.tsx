@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
 import { getCurrentTeacherId } from "@/lib/currentTeacher";
+import { BackToDashboardLink } from "@/components/BackToDashboardLink";
 
 export default async function DashboardLayout({
   children,
@@ -11,71 +12,49 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) {
-    redirect("/login");
-  }
+  if (!teacherId) redirect("/login");
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       {/* Top nav */}
-      <header className="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-4 py-2">
-        {/* Brand → click to go back to dashboard */}
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 text-sm font-semibold text-slate-100"
-        >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-sky-500/10 text-xs font-semibold text-sky-400">
-            W
-          </span>
-          <span>WiseMetrics</span>
+      <header className="flex items-center justify-between border-b border-slate-800 px-4 py-2">
+        {/* Brand → click to go back to dashboard (generic) */}
+        <Link href="/dashboard" className="flex items-center gap-2 text-sm">
+          <span className="font-semibold">WiseMetrics</span>
         </Link>
 
-        <div className="flex items-center gap-2">
-          {/* Explicit return-to-dashboard button */}
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center rounded border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-[11px] text-slate-200 hover:bg-slate-800"
-          >
-            Back to dashboard
-          </Link>
+        <div className="flex items-center gap-3 text-xs">
+          {/* Explicit return-to-dashboard button that preserves classId */}
+          <BackToDashboardLink />
 
           {/* Settings button with a clean gear icon */}
           <Link
             href="/dashboard/settings"
-            className="inline-flex h-9 w-9 items-center justify-center rounded border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-slate-50"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900 hover:bg-slate-800"
             aria-label="Settings"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
               viewBox="0 0 24 24"
-              fill="none"
+              className="h-3.5 w-3.5 text-slate-200"
+              aria-hidden="true"
             >
               {/* outer gear teeth */}
               <path
-                d="M12 3.75l1.05 1.82 2.1.36 1.48-1.48 1.82 1.82-1.48 1.48.36 2.1 1.82 1.05-1.05 1.82-2.1-.36-1.48 1.48.36 2.1-1.82 1.05-1.05-1.05-2.1-.36-1.48 1.48-1.82-1.82 1.48-1.48-.36-2.1-1.82-1.05 1.05-1.82 2.1.36 1.48-1.48-.36-2.1L10.5 5.57 12 3.75Z"
-                stroke="currentColor"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                d="M12 1.5 13.2 3.9 15.8 4.2 16.5 6.7 18.8 7.9 18.1 10.4 19.5 12 18.1 13.6 18.8 16.1 16.5 17.3 15.8 19.8 13.2 20.1 12 22.5 10.8 20.1 8.2 19.8 7.5 17.3 5.2 16.1 5.9 13.6 4.5 12 5.9 10.4 5.2 7.9 7.5 6.7 8.2 4.2 10.8 3.9 12 1.5Z"
+                className="fill-slate-400"
               />
               {/* inner circle */}
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
+              <circle cx="12" cy="12" r="4" className="fill-slate-950" />
             </svg>
           </Link>
 
+          {/* Log out */}
           <LogoutButton />
         </div>
       </header>
 
       {/* full-width content with just side padding */}
-      <main className="px-4 pb-6 pt-3">{children}</main>
+      <main className="px-4 py-4">{children}</main>
     </div>
   );
 }
