@@ -21,6 +21,7 @@ type CategoryView = {
 
 type Props = {
   cls: ClassScoreSummary;
+  svgRef?: React.Ref<SVGSVGElement>;
 };
 
 type DotKind = "category" | "subskill";
@@ -32,7 +33,7 @@ type ActiveDot = {
   subskillId?: string;
 };
 
-export function ClassExplodingRadialChart({ cls }: Props) {
+export function ClassExplodingRadialChart({ cls, svgRef }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("average");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
@@ -172,6 +173,7 @@ export function ClassExplodingRadialChart({ cls }: Props) {
             setActiveSubskillId={setActiveSubskillId}
             activeDot={activeDot}
             setActiveDot={setActiveDot}
+            svgRef={svgRef}
           />
         </div>
 
@@ -300,6 +302,7 @@ type RadialProps = {
   setActiveSubskillId: (id: string | null) => void;
   activeDot: ActiveDot | null;
   setActiveDot: (dot: ActiveDot | null) => void;
+  svgRef?: React.Ref<SVGSVGElement>; 
 };
 
 function RadialBars({
@@ -316,6 +319,7 @@ function RadialBars({
   setActiveSubskillId,
   activeDot,
   setActiveDot,
+  svgRef,
 }: RadialProps) {
   const size = 520;
   const cx = size / 2;
@@ -480,6 +484,7 @@ function RadialBars({
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${size} ${size}`}
       className="h-full w-full"
       onMouseLeave={() => !isDrill && setHoveredId(null)}

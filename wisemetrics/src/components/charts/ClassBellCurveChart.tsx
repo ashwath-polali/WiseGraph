@@ -13,6 +13,7 @@ type ViewMode = "average" | "students" | "compare";
 
 type Props = {
   cls: ClassScoreSummary;
+  svgRef?: React.Ref<SVGSVGElement>;
 };
 
 type ActiveDotKind = "overall" | "category" | "subskill";
@@ -81,7 +82,7 @@ function buildLeadingLetterAbbrevs(names: string[]): string[] {
   return abbrevs;
 }
 
-export function ClassBellCurveChart({ cls }: Props) {
+export function ClassBellCurveChart({ cls, svgRef }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>("average");
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null,
@@ -159,6 +160,7 @@ export function ClassBellCurveChart({ cls }: Props) {
             setHoveredCategoryId={setHoveredCategoryId}
             activeDot={activeDot}
             setActiveDot={setActiveDot}
+            svgRef={svgRef}
           />
         </div>
 
@@ -282,6 +284,7 @@ type BellProps = {
   setHoveredCategoryId: (id: string | null) => void;
   activeDot: ActiveDot | null;
   setActiveDot: (dot: ActiveDot | null) => void;
+  svgRef?: React.Ref<SVGSVGElement>;
 };
 
 function BellCurveCanvas({
@@ -293,6 +296,7 @@ function BellCurveCanvas({
   setHoveredCategoryId,
   activeDot,
   setActiveDot,
+  svgRef,
 }: BellProps) {
   const width = 520;
   const height = 270;
@@ -341,38 +345,12 @@ function BellCurveCanvas({
         cls.students.length
       : MEAN;
 
-  // Helper: thin polyline through a student's category scores
-  function studentCategoryPolylinePoints(student: StudentScoreSummary): string {
-    const pts: string[] = [];
-    student.categories.forEach((cat) => {
-      const x = xScale(cat.score);
-      const pdf = normalPdf(cat.score, MEAN, SD);
-      const baseY = yScaleFromPdf(pdf);
-      const y = baseY + jitterForKey(`cmp-cat-${student.id}-${cat.id}`, 3);
-      pts.push(`${x},${y}`);
-    });
-    return pts.join(" ");
-  }
-
-  // Helper: thin polyline through a student's subskill scores
-  function studentSubskillPolylinePoints(
-    student: StudentScoreSummary,
-  ): string {
-    const pts: string[] = [];
-    student.categories.forEach((cat) => {
-      (cat.subcategories ?? []).forEach((sub) => {
-        const x = xScale(sub.score);
-        const pdf = normalPdf(sub.score, MEAN, SD);
-        const baseY = yScaleFromPdf(pdf);
-        const y = baseY + jitterForKey(`cmp-sub-${student.id}-${sub.id}`, 3);
-        pts.push(`${x},${y}`);
-      });
-    });
-    return pts.join(" ");
-  }
-
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full">
+    <svg
+      ref={svgRef}
+      viewBox={`0 0 ${width} ${height}`}
+      className="h-full w-full"
+    >
       {/* gradients */}
       <defs>
         <linearGradient id="bell-bg" x1="0" y1="0" x2="0" y2="1">
@@ -665,36 +643,10 @@ function BellCurveCanvas({
         </>
       )}
 
-      {/* compare mode: selected student overall spike + cat/sub polylines */}
+      {/* compare mode: selected student vs class using dots */}
       {viewMode === "compare" && selectedStudent && (
         <>
-          {/* faint category polyline */}
-          {selectedStudent.categories.length > 0 && (
-            <polyline
-              points={studentCategoryPolylinePoints(selectedStudent)}
-              fill="none"
-              stroke="rgba(34,197,94,0.6)"
-              strokeWidth={1.4}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          )}
-
-          {/* faint subskill polyline */}
-          {selectedStudent.categories.some(
-            (c) => (c.subcategories ?? []).length > 0,
-          ) && (
-            <polyline
-              points={studentSubskillPolylinePoints(selectedStudent)}
-              fill="none"
-              stroke="rgba(168,85,247,0.5)"
-              strokeWidth={1.1}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          )}
-
-          {/* bold overall vertical line */}
+          {/* bold overall vertical line for selected student */}
           <line
             x1={xScale(selectedStudent.overallScore)}
             y1={marginTop}
@@ -703,14 +655,79 @@ function BellCurveCanvas({
             className="stroke-orange-400"
             strokeWidth={2}
           />
-          <text
-            x={xScale(selectedStudent.overallScore)}
-            y={marginTop + 10}
-            className="fill-orange-300 text-[10px]"
-            textAnchor="middle"
-          >
-            {selectedStudent.name}
-          </text>
+          {/* connector and label moved outside chart */}
+          {(() => {
+            const x = xScale(selectedStudent.overallScore);
+            const anchorY = marginTop - 4;
+            const labelX = x + 8;
+            const labelY = marginTop - 14;
+            return (
+              <>
+                <line
+                  x1={x}
+                  y1={anchorY}
+                  x2={labelX}
+                  y2={labelY + 2}
+                  stroke="rgba(249,115,22,0.8)"
+                  strokeWidth={1}
+                />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  className="fill-orange-300 text-[10px]"
+                  textAnchor="start"
+                >
+                  {selectedStudent.name}
+                </text>
+              </>
+            );
+          })()}
+
+          {/* medium dots for this student's category scores */}
+          {selectedStudent.categories.map((cat) => {
+            const x = xScale(cat.score);
+            const pdf = normalPdf(cat.score, MEAN, SD);
+            const baseY = yScaleFromPdf(pdf);
+            const y = baseY + jitterForKey(
+              `cmp-cat-${selectedStudent.id}-${cat.id}`,
+              3,
+            );
+
+            return (
+              <circle
+                key={`cmp-cat-${cat.id}`}
+                cx={x}
+                cy={y}
+                r={2.6}
+                fill="#22c55e"
+                opacity={0.85}
+              />
+            );
+          })}
+
+          {/* faint dots for this student's subskill scores */}
+          {selectedStudent.categories.flatMap((cat) =>
+            (cat.subcategories ?? []).map((sub) => {
+              const x = xScale(sub.score);
+              const pdf = normalPdf(sub.score, MEAN, SD);
+              const baseY = yScaleFromPdf(pdf);
+              const y = baseY + jitterForKey(
+                `cmp-sub-${selectedStudent.id}-${sub.id}`,
+                2.5,
+              );
+
+              return (
+                <circle
+                  key={`cmp-sub-${sub.id}`}
+                  cx={x}
+                  cy={y}
+                  r={2}
+                  fill="#a855f7"
+                  opacity={0.6}
+                />
+              );
+            }),
+          )}
         </>
       )}
     </svg>
@@ -743,6 +760,52 @@ function AverageDetailPanel({
         cls.students.length
       : MEAN;
 
+  // For compare mode, compute student vs class deltas for category + subskills
+  let studentCategoryScore: number | null = null;
+  let deltaCategory: number | null = null;
+  let studentSubskills: { name: string; student: number; delta: number }[] = [];
+
+  if (viewMode === "compare" && selectedStudent && category) {
+    const studentCat = selectedStudent.categories.find(
+      (c) => c.id === category.id,
+    );
+    if (studentCat) {
+      studentCategoryScore = clampScore(studentCat.score);
+      deltaCategory = studentCategoryScore - category.avgScore;
+      const classSubById = new Map(
+        category.subskills.map((s) => [s.id, s]),
+      );
+      (studentCat.subcategories ?? []).forEach((sub) => {
+        const classSub = classSubById.get(sub.id);
+        if (!classSub) return;
+        const stud = clampScore(sub.score);
+        const delta = stud - classSub.score;
+        studentSubskills.push({
+          name: sub.name,
+          student: stud,
+          delta,
+        });
+      });
+    }
+  }
+
+  function formatDelta(d: number | null): string {
+    if (d == null || Number.isNaN(d)) return "–";
+    const rounded = Math.round(d);
+    if (rounded === 0) return "0";
+    if (rounded > 0) return `+${rounded}`;
+    return `${rounded}`;
+  }
+
+  function deltaColor(delta: number | null): string {
+    if (delta == null || Number.isNaN(delta)) return "text-slate-400";
+    if (delta >= 8) return "text-emerald-300";
+    if (delta >= 3) return "text-emerald-200";
+    if (delta <= -8) return "text-red-400";
+    if (delta <= -3) return "text-red-300";
+    return "text-slate-300";
+  }
+
   return (
     <div className="flex h-full flex-col rounded-xl border border-slate-800/80 bg-gradient-to-b from-slate-950/90 to-slate-950/60 p-3">
       <div className="mb-2 flex items-start justify-between gap-2 border-b border-slate-800/70 pb-2">
@@ -764,7 +827,13 @@ function AverageDetailPanel({
               {selectedStudent.name}
             </div>
             <div className="text-[10px] text-orange-300">
-              Overall {Math.round(selectedStudent.overallScore)}
+              Overall {Math.round(selectedStudent.overallScore)}{" "}
+              <span className="text-slate-400">
+                ({formatDelta(
+                  selectedStudent.overallScore - classOverallMean,
+                )}
+                )
+              </span>
             </div>
           </div>
         )}
@@ -785,41 +854,96 @@ function AverageDetailPanel({
               {category.name}
             </div>
           </div>
+
+          {/* Class vs student category row */}
           <div className="flex items-center justify-between rounded-lg border border-slate-800/80 bg-slate-950/70 px-2 py-1">
             <div className="text-[10px] text-slate-400">
               Class average score
             </div>
-            <span className="rounded-full bg-slate-900/90 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
-              {Math.round(category.avgScore)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-slate-900/90 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
+                {Math.round(category.avgScore)}
+              </span>
+              {viewMode === "compare" && studentCategoryScore != null && (
+                <>
+                  <span className="text-[9px] text-slate-500">vs student</span>
+                  <span className="rounded-full bg-slate-900/90 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">
+                    {Math.round(studentCategoryScore)}
+                  </span>
+                  <span
+                    className={
+                      "font-mono text-[10px] " +
+                      deltaColor(deltaCategory)
+                    }
+                  >
+                    {formatDelta(deltaCategory)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
+          {/* Subskills section */}
           {category.subskills.length > 0 && (
             <div className="mt-1 space-y-1.5">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                Subskill averages
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  Subskill averages
+                </div>
+                {viewMode === "compare" && selectedStudent && (
+                  <div className="text-[9px] text-slate-500">
+                    Student vs class (Δ)
+                  </div>
+                )}
               </div>
               <div className="space-y-0.5">
-                {category.subskills.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="flex items-center justify-between rounded-md border border-slate-900/80 bg-slate-950/60 px-1.5 py-0.5"
-                  >
-                    <span className="truncate text-[10px] text-slate-300">
-                      {sub.name}
-                    </span>
-                    <span className="font-mono text-[10px] text-violet-300">
-                      {Math.round(sub.score)}
-                    </span>
-                  </div>
-                ))}
+                {category.subskills.map((sub) => {
+                  const studentRow =
+                    viewMode === "compare" && selectedStudent
+                      ? studentSubskills.find((s) => s.name === sub.name)
+                      : null;
+                  return (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between rounded-md border border-slate-900/80 bg-slate-950/60 px-1.5 py-0.5"
+                    >
+                      <span className="truncate text-[10px] text-slate-300">
+                        {sub.name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] text-violet-300">
+                          {Math.round(sub.score)}
+                        </span>
+                        {studentRow && (
+                          <>
+                            <span className="text-[9px] text-slate-500">
+                              /
+                            </span>
+                            <span className="font-mono text-[10px] text-emerald-300">
+                              {Math.round(studentRow.student)}
+                            </span>
+                            <span
+                              className={
+                                "font-mono text-[10px] " +
+                                deltaColor(studentRow.delta)
+                              }
+                            >
+                              {formatDelta(studentRow.delta)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
           <p className="mt-2 text-[10px] text-slate-500">
-            Category and subskill averages are placed on the same 60–150
-            standard score curve for quick pattern scanning.
+            Category and subskill scores are placed on the same 60–150
+            standard score curve so you can compare a single student to the
+            class at each level.
           </p>
         </div>
       )}
