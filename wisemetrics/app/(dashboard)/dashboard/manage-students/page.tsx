@@ -8,6 +8,14 @@ import {
 import { Card } from "@/components/ui/Card";
 import { ManageStudentsClient } from "@/components/ManageStudentsClient";
 
+type TeacherClass = {
+  id: string;
+  name: string;
+  gradeLevel: string;
+  subject: string;
+  term: string | null;
+};
+
 export default async function ManageStudentsPage({
   searchParams,
 }: {
@@ -15,12 +23,13 @@ export default async function ManageStudentsPage({
 }) {
   const { classId } = await searchParams;
 
-  const classes = await getTeacherClassesWithSummary();
+  const classes = (await getTeacherClassesWithSummary()) as TeacherClass[];
+
   if (!classes.length) {
     return (
       <main className="space-y-6">
         <Card className="p-6">
-          <h1 className="text-xl font-offsetof-semibold">Manage students</h1>
+          <h1 className="text-xl font-semibold">Manage students</h1>
           <p className="mt-2 text-sm text-slate-400">
             No classes yet. Create a class first.
           </p>
@@ -36,12 +45,16 @@ export default async function ManageStudentsPage({
 
   // 1) URL classId if valid
   const idFromQuery =
-    classId && classes.some((c) => c.id === classId) ? classId : null;
+    classId &&
+    classes.some((c: TeacherClass) => c.id === classId)
+      ? classId
+      : null;
 
   // 2) Default if valid
   const defaultClassId = await getDefaultClassIdForTeacher();
   const idFromDefault =
-    defaultClassId && classes.some((c) => c.id === defaultClassId)
+    defaultClassId &&
+    classes.some((c: TeacherClass) => c.id === defaultClassId)
       ? defaultClassId
       : null;
 
