@@ -16,13 +16,13 @@ export async function getDefaultClassIdForTeacher(): Promise<string | null> {
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
-  const cls = await prisma.class.findFirst({
+  const firstClass = await prisma.class.findFirst({
     where: { teacherId },
-    orderBy: { createdAt: "asc" },
     select: { id: true },
+    orderBy: { createdAt: "asc" },
   });
 
-  return cls?.id ?? null;
+  return firstClass?.id ?? null;
 }
 
 /**
@@ -30,13 +30,16 @@ export async function getDefaultClassIdForTeacher(): Promise<string | null> {
  * NOTE: validates that the class belongs to the current teacher.
  */
 export async function getClassScoreSummary(
-  classId: string
+  classId: string,
 ): Promise<ClassScoreSummary | null> {
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
   const cls = await prisma.class.findFirst({
-    where: { id: classId, teacherId },
+    where: {
+      id: classId,
+      teacherId,
+    },
     include: {
       categories: {
         orderBy: { order: "asc" },
@@ -44,11 +47,10 @@ export async function getClassScoreSummary(
           subcategories: {
             orderBy: { order: "asc" },
           },
-          scores: true,
         },
       },
       students: {
-        orderBy: { name: "asc" },
+        orderBy: { createdAt: "asc" },
         include: {
           scores: true,
         },
@@ -58,86 +60,106 @@ export async function getClassScoreSummary(
 
   if (!cls) return null;
 
-  // --- Per-category class averages ---
-  const categorySummaries: CategoryScore[] = cls.categories.map((cat) => {
-    const categoryScores = cls.students
-      .map((student) =>
-        student.scores.find(
-          (s) => s.categoryId === cat.id && s.subcategoryId === null
-        )
-      )
-      .filter((s) => !!s)
-      .map((s) => clampScore(s!.standardScore));
+  // --- Per-category class averages + subskill (subcategory) averages ---
 
-    const avg =
-      categoryScores.length === 0
-        ? SCOREMIN
-        : Math.round(
-            categoryScores.reduce((sum, v) => sum + v, 0) /
-              categoryScores.length
-          );
+  const categoryAverages: CategoryScore[] = cls.categories.map((cat) => {
+    const scoresForCategory = cls.students.flatMap((student) =>
+      student.scores.filter((s) => s.categoryId === cat.id && s.subcategoryId == null),
+    );
+
+    const avgCategoryScore =
+      scoresForCategory.length > 0
+        ? clampScore(
+            Math.round(
+              scoresForCategory.reduce((sum, s) => sum + s.standardScore, 0) /
+                scoresForCategory.length,
+            ),
+          )
+        : (SCOREMIN as number);
+
+    // Per-subcategory averages for this category
+    const subcategories: SubcategoryScore[] = cat.subcategories.map((sub) => {
+      const scoresForSub = cls.students.flatMap((student) =>
+        student.scores.filter((s) => s.subcategoryId === sub.id),
+      );
+
+      const avgSubScore =
+        scoresForSub.length > 0
+          ? clampScore(
+              Math.round(
+                scoresForSub.reduce((sum, s) => sum + s.standardScore, 0) /
+                  scoresForSub.length,
+              ),
+            )
+          : (SCOREMIN as number);
+
+      return {
+        id: sub.id,
+        name: sub.name,
+        score: avgSubScore,
+      };
+    });
 
     return {
       id: cat.id,
       name: cat.name,
-      score: avg,
+      score: avgCategoryScore,
+      subcategories,
     };
   });
 
   // --- Per-student category + subcategory scores ---
-  const studentSummaries: StudentScoreSummary[] = cls.students.map(
-    (student) => {
-      const categories: CategoryScore[] = cls.categories.map((cat) => {
-        const catScoreRow = student.scores.find(
-          (s) => s.categoryId === cat.id && s.subcategoryId === null
-        );
-        const catScore = clampScore(
-          catScoreRow?.standardScore ?? SCOREMIN
-        );
 
-        const subskills: SubcategoryScore[] = cat.subcategories.map(
-          (sub) => {
-            const subRow = student.scores.find(
-              (s) => s.subcategoryId === sub.id
-            );
-            const subScore = clampScore(
-              subRow?.standardScore ?? SCOREMIN
-            );
-            return {
-              id: sub.id,
-              name: sub.name,
-              score: subScore,
-            };
-          }
-        );
+  const students: StudentScoreSummary[] = cls.students.map((student) => {
+    const categories: CategoryScore[] = cls.categories.map((cat) => {
+      const catScore = student.scores.find(
+        (s) => s.categoryId === cat.id && s.subcategoryId == null,
+      );
+      const catStandard = catScore
+        ? clampScore(catScore.standardScore)
+        : (SCOREMIN as number);
+
+      const subcategories: SubcategoryScore[] = cat.subcategories.map((sub) => {
+        const subScore = student.scores.find((s) => s.subcategoryId === sub.id);
+        const subStandard = subScore
+          ? clampScore(subScore.standardScore)
+          : (SCOREMIN as number);
 
         return {
-          id: cat.id,
-          name: cat.name,
-          score: catScore,
-          subcategories: subskills,
+          id: sub.id,
+          name: sub.name,
+          score: subStandard,
         };
       });
 
       return {
-        id: student.id,
-        name: student.name,
-        gradeLevel: student.gradeLevel,
-        overallScore: clampScore(student.overallScore),
-        categories,
+        id: cat.id,
+        name: cat.name,
+        score: catStandard,
+        subcategories,
       };
-    }
-  );
+    });
 
-  return {
+    return {
+      id: student.id,
+      name: student.name,
+      gradeLevel: student.gradeLevel,
+      overallScore: clampScore(student.overallScore),
+      categories,
+    };
+  });
+
+  const summary: ClassScoreSummary = {
     id: cls.id,
     name: cls.name,
     gradeLevel: cls.gradeLevel,
     subject: cls.subject,
     term: cls.term,
-    categories: categorySummaries,
-    students: studentSummaries,
+    categories: categoryAverages,
+    students,
   };
+
+  return summary;
 }
 
 /**
@@ -151,6 +173,7 @@ export async function getTeacherClassesWithSummary() {
     where: { teacherId },
     orderBy: { createdAt: "asc" },
     include: {
+      categories: true,
       students: true,
     },
   });
@@ -158,9 +181,10 @@ export async function getTeacherClassesWithSummary() {
   return classes.map((cls) => ({
     id: cls.id,
     name: cls.name,
-    gradeLevel: cls.gradeLevel,
     subject: cls.subject,
     term: cls.term,
+    gradeLevel: cls.gradeLevel,
     studentCount: cls.students.length,
+    categoryCount: cls.categories.length,
   }));
 }
