@@ -19,13 +19,26 @@ type DashboardPageProps = {
   searchParams: Promise<{ classId?: string }>;
 };
 
+type TeacherClass = {
+  id: string;
+  name: string;
+  gradeLevel: string;
+  subject: string;
+  term: string | null;
+};
+
+type TeacherWithDefault = {
+  id: string;
+  defaultClassId: string | null;
+};
+
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const { classId } = await searchParams;
 
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
-  const classes = await getTeacherClassesWithSummary();
+  const classes = (await getTeacherClassesWithSummary()) as TeacherClass[];
 
   // No classes yet → show create UI
   if (!classes.length) {
@@ -50,19 +63,22 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   // Read teacher's defaultClassId WITHOUT adding it to the select type
   const teacherRaw = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: { id: true },
+    select: { id: true, defaultClassId: true },
   });
 
-  const defaultFromTeacher = (teacherRaw as any)?.defaultClassId ?? null;
+  const defaultFromTeacher = (teacherRaw as TeacherWithDefault | null)?.defaultClassId ?? null;
 
   // 1) URL classId if it belongs to this teacher
   const idFromQuery =
-    classId && classes.some((c) => c.id === classId) ? classId : null;
+    classId &&
+    classes.some((c: TeacherClass) => c.id === classId)
+      ? classId
+      : null;
 
   // 2) Teacher default if valid
   const idFromTeacher =
     defaultFromTeacher &&
-    classes.some((c) => c.id === defaultFromTeacher)
+    classes.some((c: TeacherClass) => c.id === defaultFromTeacher)
       ? defaultFromTeacher
       : null;
 
@@ -71,7 +87,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const currentClassId = idFromQuery ?? idFromTeacher ?? fallbackId;
 
-  const cls = await getClassScoreSummary(currentClassId);
+  const cls = (await getClassScoreSummary(currentClassId)) as ClassScoreSummary | null;
 
   if (!cls) {
     return (
@@ -120,7 +136,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           {/* All classes strip + new class button */}
           <div className="flex items-center justify-between gap-2">
             <ClassSelectorClient
-              classes={classes.map((c) => ({
+              classes={classes.map((c: TeacherClass) => ({
                 id: c.id,
                 name: c.name,
                 subject: c.subject,
