@@ -378,8 +378,8 @@ function RadialBars({
     const baseAngles = forcedAngles ?? categoryAngles(idx);
     const { angleStart, angleEnd } = baseAngles;
 
+    // We still define a "band" for baselines, but score mapping uses scoreToRadius
     const innerR = maxRadius * 0.4;
-    const outerR = maxRadius * 0.9;
 
     const halfSpan = (angleEnd - angleStart) * 0.8 * 0.5;
     const mid = (angleStart + angleEnd) / 2;
@@ -405,10 +405,7 @@ function RadialBars({
 
       const classSub = classSubs[i];
       if (classSub) {
-        const t =
-          (clampScore(classSub.score) - SCORE_MIN) /
-          (SCORE_MAX - SCORE_MIN);
-        const r = innerR + t * (outerR - innerR);
+        const r = scoreToRadius(classSub.score, maxRadius);
         const p = polarPoint(r, a);
         const px = p.x + dx;
         const py = p.y + dy;
@@ -418,12 +415,10 @@ function RadialBars({
 
       const studentSub = studentSubs[i];
       if (studentSub) {
+        // baseline stays near inner band for visual structure
         studentBaselinePts.push(`${baseX},${baseY}`);
 
-        const t =
-          (clampScore(studentSub.score) - SCORE_MIN) /
-          (SCORE_MAX - SCORE_MIN);
-        const r = innerR + t * (outerR - innerR);
+        const r = scoreToRadius(studentSub.score, maxRadius);
         const p = polarPoint(r, a);
         const px = p.x + dx;
         const py = p.y + dy;
