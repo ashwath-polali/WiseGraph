@@ -17,6 +17,17 @@ type TeacherClass = {
   term: string | null;
 };
 
+type CategoryWithSubs = {
+  id: string;
+  name: string;
+  subcategories: { id: string; name: string }[];
+};
+
+type SubcategoryLite = {
+  id: string;
+  name: string;
+};
+
 export default async function ConfigureAssessmentPage({
   searchParams,
 }: {
@@ -105,24 +116,26 @@ export default async function ConfigureAssessmentPage({
             </p>
           </div>
           <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
-            <span className="text-xs text-sky-400">
-              Back to dashboard
-            </span>
+            <span className="text-xs text-sky-400">Back to dashboard</span>
           </Link>
         </div>
 
         <ConfigureAssessmentClient
           classId={cls.id}
-          initialCategories={cls.categories.map((cat) => ({
-            id: cat.id,
-            name: cat.name,
-            score: 100 as const,
-            subcategories: cat.subcategories.map((sub) => ({
-              id: sub.id,
-              name: sub.name,
+          initialCategories={cls.categories.map(
+            (cat: CategoryWithSubs) => ({
+              id: cat.id,
+              name: cat.name,
               score: 100 as const,
-            })),
-          }))}
+              subcategories: cat.subcategories.map(
+                (sub: SubcategoryLite) => ({
+                  id: sub.id,
+                  name: sub.name,
+                  score: 100 as const,
+                }),
+              ),
+            }),
+          )}
         />
       </Card>
     </main>
