@@ -383,6 +383,11 @@ function RadialBars({
     return pts.join(" ");
   }
 
+  /**
+   * Subskill “band” generator: returns polylines and clickable points
+   * for class and student subskills within a trimmed angular region
+   * inside the wedge.
+   */
   function subskillPolylineForCategory(
     clsCategory: CategoryScore | null,
     studentCategory: CategoryScore | null,
@@ -414,6 +419,7 @@ function RadialBars({
     const baseAngles = forcedAngles ?? categoryAngles(idx);
     const { angleStart, angleEnd } = baseAngles;
 
+    // Focus the band in the outer half of the wedge and trim to 80% of its angle
     const innerR = maxRadius * 0.4;
     const halfSpan = ((angleEnd - angleStart) * 0.8) / 2;
     const mid = (angleStart + angleEnd) / 2;
@@ -431,6 +437,8 @@ function RadialBars({
     for (let i = 0; i < count; i++) {
       const tAngle = count === 1 ? 0.5 : i / (count - 1);
       const a = startAngle + tAngle * (endAngle - startAngle);
+
+      // baseline closer to center, peaks further out using true score radii
       const baseR = innerR + 6;
       const base = polarPoint(baseR, a);
       const baseX = base.x + dx;
@@ -642,7 +650,7 @@ function RadialBars({
                 </text>
               </g>
 
-              {/* class subskill polyline */}
+              {/* class subskill band */}
               {classLine && (
                 <polyline
                   points={classLine}
@@ -676,8 +684,7 @@ function RadialBars({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       style={{
-                        filter:
-                          "drop-shadow(0 0 6px rgba(34,197,94,0.9))",
+                        filter: "drop-shadow(0 0 6px rgba(34,197,94,0.9))",
                       }}
                     />
                   )}
@@ -877,7 +884,7 @@ function RadialBars({
                   </text>
                 </g>
 
-                {/* subskill lines & points */}
+                {/* subskill band when hovered */}
                 {isHovered && classLine && (
                   <g>
                     <polyline
@@ -1213,6 +1220,11 @@ function DetailPanel({
     ]),
   );
 
+  const categoryDelta =
+    viewMode === "compare" && studentCat
+      ? Math.round(studentCat.score - category.avgScore)
+      : null;
+
   return (
     <div className="flex h-full flex-col rounded-xl border border-slate-800/80 bg-gradient-to-b from-slate-950/90 to-slate-950/60 p-3">
       <div className="mb-2 flex items-start justify-between gap-2 border-b border-slate-800/70 pb-2">
@@ -1220,7 +1232,7 @@ function DetailPanel({
           <h3 className="text-xs font-semibold text-slate-100">
             {category.name}
           </h3>
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
             <span>
               Class average{" "}
               <span className="font-mono text-slate-100">
@@ -1228,12 +1240,28 @@ function DetailPanel({
               </span>
             </span>
             {viewMode === "compare" && studentCat && (
-              <span>
-                · Student category{" "}
-                <span className="rounded-full bg-sky-500/15 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
-                  {Math.round(studentCat.score)}
+              <>
+                <span>
+                  · Student{" "}
+                  <span className="rounded-full bg-sky-500/15 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
+                    {Math.round(studentCat.score)}
+                  </span>
                 </span>
-              </span>
+                {categoryDelta !== null && (
+                  <span
+                    className={
+                      categoryDelta > 0
+                        ? "text-[10px] text-emerald-300"
+                        : categoryDelta < 0
+                        ? "text-[10px] text-amber-300"
+                        : "text-[10px] text-slate-400"
+                    }
+                  >
+                    ({categoryDelta > 0 ? "+" : ""}
+                    {categoryDelta} vs class)
+                  </span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -1262,6 +1290,11 @@ function DetailPanel({
             const name =
               classSub?.name ?? studentSub?.name ?? "Subskill";
             const isActive = activeSubskillId === id;
+
+            const delta =
+              viewMode === "compare" && classSub && studentSub
+                ? Math.round(studentSub.score - classSub.score)
+                : null;
 
             return (
               <div
@@ -1294,6 +1327,20 @@ function DetailPanel({
                   {viewMode === "compare" && studentSub && (
                     <span className="rounded-full bg-sky-500/15 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
                       {Math.round(studentSub.score)}
+                    </span>
+                  )}
+                  {delta !== null && (
+                    <span
+                      className={
+                        delta > 0
+                          ? "text-[10px] text-emerald-300"
+                          : delta < 0
+                          ? "text-[10px] text-amber-300"
+                          : "text-[10px] text-slate-400"
+                      }
+                    >
+                      {delta > 0 ? "+" : ""}
+                      {delta}
                     </span>
                   )}
                 </div>
@@ -1357,7 +1404,7 @@ function DotsDetailPanel({
             Category dot
           </h3>
           <p className="mt-0.5 text-[10px] text-slate-500">
-            Each green dot is one student&apos;s overall score in a
+            Each green dot is one student's overall score in a
             category.
           </p>
         </div>
@@ -1395,7 +1442,7 @@ function DotsDetailPanel({
 
           <div className="mt-3 rounded-lg bg-slate-900/60 p-2 text-[10px] text-slate-400">
             This dot is placed at the distance that corresponds to this
-            student&apos;s scaled score in the category, on a 60–150
+            student's scaled score in the category, on a 60–150
             standard score scale.
           </div>
         </div>
@@ -1416,7 +1463,7 @@ function DotsDetailPanel({
           Subskill dot
         </h3>
         <p className="mt-0.5 text-[10px] text-slate-500">
-          Each purple dot is one student&apos;s score on a specific
+          Each purple dot is one student's score on a specific
           subskill inside a category.
         </p>
       </div>
@@ -1468,7 +1515,7 @@ function DotsDetailPanel({
         )}
 
         <div className="mt-3 rounded-lg bg-slate-900/60 p-2 text-[10px] text-slate-400">
-          This dot sits at the radial distance for this subskill&apos;s
+          This dot sits at the radial distance for this subskill's
           score in the 60–150 scale, within its category wedge.
         </div>
       </div>
