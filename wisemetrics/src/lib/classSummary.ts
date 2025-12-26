@@ -62,43 +62,55 @@ export async function getClassScoreSummary(
 
   // --- Per-category class averages + subskill (subcategory) averages ---
 
-  const categoryAverages: CategoryScore[] = cls.categories.map((cat) => {
+  const categoryAverages: CategoryScore[] = cls.categories.map((cat: {
+    id: string;
+    name: string;
+    subcategories: { id: string; name: string }[];
+  }) => {
     const scoresForCategory = cls.students.flatMap((student) =>
-      student.scores.filter((s) => s.categoryId === cat.id && s.subcategoryId == null),
+      student.scores.filter(
+        (s) => s.categoryId === cat.id && s.subcategoryId == null,
+      ),
     );
 
     const avgCategoryScore =
       scoresForCategory.length > 0
         ? clampScore(
             Math.round(
-              scoresForCategory.reduce((sum, s) => sum + s.standardScore, 0) /
-                scoresForCategory.length,
+              scoresForCategory.reduce(
+                (sum, s) => sum + s.standardScore,
+                0,
+              ) / scoresForCategory.length,
             ),
           )
         : (SCOREMIN as number);
 
     // Per-subcategory averages for this category
-    const subcategories: SubcategoryScore[] = cat.subcategories.map((sub) => {
-      const scoresForSub = cls.students.flatMap((student) =>
-        student.scores.filter((s) => s.subcategoryId === sub.id),
-      );
+    const subcategories: SubcategoryScore[] = cat.subcategories.map(
+      (sub: { id: string; name: string }) => {
+        const scoresForSub = cls.students.flatMap((student) =>
+          student.scores.filter((s) => s.subcategoryId === sub.id),
+        );
 
-      const avgSubScore =
-        scoresForSub.length > 0
-          ? clampScore(
-              Math.round(
-                scoresForSub.reduce((sum, s) => sum + s.standardScore, 0) /
-                  scoresForSub.length,
-              ),
-            )
-          : (SCOREMIN as number);
+        const avgSubScore =
+          scoresForSub.length > 0
+            ? clampScore(
+                Math.round(
+                  scoresForSub.reduce(
+                    (sum, s) => sum + s.standardScore,
+                    0,
+                  ) / scoresForSub.length,
+                ),
+              )
+            : (SCOREMIN as number);
 
-      return {
-        id: sub.id,
-        name: sub.name,
-        score: avgSubScore,
-      };
-    });
+        return {
+          id: sub.id,
+          name: sub.name,
+          score: avgSubScore,
+        };
+      },
+    );
 
     return {
       id: cat.id,
@@ -110,44 +122,54 @@ export async function getClassScoreSummary(
 
   // --- Per-student category + subcategory scores ---
 
-  const students: StudentScoreSummary[] = cls.students.map((student) => {
-    const categories: CategoryScore[] = cls.categories.map((cat) => {
-      const catScore = student.scores.find(
-        (s) => s.categoryId === cat.id && s.subcategoryId == null,
-      );
-      const catStandard = catScore
-        ? clampScore(catScore.standardScore)
-        : (SCOREMIN as number);
-
-      const subcategories: SubcategoryScore[] = cat.subcategories.map((sub) => {
-        const subScore = student.scores.find((s) => s.subcategoryId === sub.id);
-        const subStandard = subScore
-          ? clampScore(subScore.standardScore)
+  const students: StudentScoreSummary[] = cls.students.map(
+    (student): StudentScoreSummary => {
+      const categories: CategoryScore[] = cls.categories.map((cat: {
+        id: string;
+        name: string;
+        subcategories: { id: string; name: string }[];
+      }) => {
+        const catScore = student.scores.find(
+          (s) => s.categoryId === cat.id && s.subcategoryId == null,
+        );
+        const catStandard = catScore
+          ? clampScore(catScore.standardScore)
           : (SCOREMIN as number);
 
+        const subcategories: SubcategoryScore[] = cat.subcategories.map(
+          (sub: { id: string; name: string }) => {
+            const subScore = student.scores.find(
+              (s) => s.subcategoryId === sub.id,
+            );
+            const subStandard = subScore
+              ? clampScore(subScore.standardScore)
+              : (SCOREMIN as number);
+
+            return {
+              id: sub.id,
+              name: sub.name,
+              score: subStandard,
+            };
+          },
+        );
+
         return {
-          id: sub.id,
-          name: sub.name,
-          score: subStandard,
+          id: cat.id,
+          name: cat.name,
+          score: catStandard,
+          subcategories,
         };
       });
 
       return {
-        id: cat.id,
-        name: cat.name,
-        score: catStandard,
-        subcategories,
+        id: student.id,
+        name: student.name,
+        gradeLevel: student.gradeLevel,
+        overallScore: clampScore(student.overallScore),
+        categories,
       };
-    });
-
-    return {
-      id: student.id,
-      name: student.name,
-      gradeLevel: student.gradeLevel,
-      overallScore: clampScore(student.overallScore),
-      categories,
-    };
-  });
+    },
+  );
 
   const summary: ClassScoreSummary = {
     id: cls.id,
