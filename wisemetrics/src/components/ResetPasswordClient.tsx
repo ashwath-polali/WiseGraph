@@ -16,16 +16,24 @@ export function ResetPasswordClient({ initialEmail }: { initialEmail: string }) 
     setSending(true);
     setMessage(null);
     setError(null);
+
     try {
       const supabase = createSupabaseBrowserClient();
+
+      // Use Vercel URL in production, fall back to window.location in dev
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        (typeof window !== "undefined" ? window.location.origin : "");
+
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });         
+        redirectTo: `${origin}/reset-password`,
+      });
 
       if (err) {
         setError(err.message);
         return;
       }
+
       setMessage("Reset link sent. Check your email.");
     } finally {
       setSending(false);
