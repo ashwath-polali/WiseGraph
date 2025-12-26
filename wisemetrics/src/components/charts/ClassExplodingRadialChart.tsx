@@ -23,6 +23,15 @@ type Props = {
   cls: ClassScoreSummary;
 };
 
+type DotKind = "category" | "subskill";
+
+type ActiveDot = {
+  kind: DotKind;
+  studentId: string;
+  categoryId: string;
+  subskillId?: string;
+};
+
 export function ClassExplodingRadialChart({ cls }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("average");
@@ -31,6 +40,7 @@ export function ClassExplodingRadialChart({ cls }: Props) {
   );
   const [drillCategoryId, setDrillCategoryId] = useState<string | null>(null);
   const [activeSubskillId, setActiveSubskillId] = useState<string | null>(null);
+  const [activeDot, setActiveDot] = useState<ActiveDot | null>(null);
 
   function buildAbbreviations(names: string[]): string[] {
     const result: string[] = [];
@@ -87,15 +97,24 @@ export function ClassExplodingRadialChart({ cls }: Props) {
       ? categories.find((c) => c.id === drillCategoryId) ?? null
       : null;
 
-  // Reset active subskill when switching drilled category
+  // Reset subskill + dot selection when switching drilled category
   function handleDrillToggle(id: string) {
     setDrillCategoryId((prev) => {
       const next = prev === id ? null : id;
       if (next !== prev) {
         setActiveSubskillId(null);
+        setActiveDot(null);
       }
       return next;
     });
+  }
+
+  // Reset dot when switching view
+  function handleSetViewMode(m: ViewMode) {
+    setViewMode(m);
+    if (m !== "students") {
+      setActiveDot(null);
+    }
   }
 
   return (
@@ -133,7 +152,7 @@ export function ClassExplodingRadialChart({ cls }: Props) {
               setSelectedStudentId={setSelectedStudentId}
             />
           )}
-          <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} />
+          <ViewModeToggle viewMode={viewMode} setViewMode={handleSetViewMode} />
         </div>
       </div>
 
@@ -152,17 +171,27 @@ export function ClassExplodingRadialChart({ cls }: Props) {
             onDrillToggle={handleDrillToggle}
             activeSubskillId={activeSubskillId}
             setActiveSubskillId={setActiveSubskillId}
+            activeDot={activeDot}
+            setActiveDot={setActiveDot}
           />
         </div>
 
         <div className="flex-[1.5] shrink-0">
-          <DetailPanel
-            category={drillCategory ?? hovered}
-            viewMode={viewMode}
-            cls={cls}
-            selectedStudent={selectedStudent}
-            activeSubskillId={activeSubskillId}
-          />
+          {viewMode === "students" ? (
+            <DotsDetailPanel
+              cls={cls}
+              categories={categories}
+              activeDot={activeDot}
+            />
+          ) : (
+            <DetailPanel
+              category={drillCategory ?? hovered}
+              viewMode={viewMode}
+              cls={cls}
+              selectedStudent={selectedStudent}
+              activeSubskillId={activeSubskillId}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -185,7 +214,7 @@ function ViewModeToggle({
     {
       id: "students",
       label: "Dots",
-      hint: "All students per category",
+      hint: "All students per category & subskill",
     },
     {
       id: "compare",
@@ -270,6 +299,8 @@ type RadialProps = {
   onDrillToggle: (id: string) => void;
   activeSubskillId: string | null;
   setActiveSubskillId: (id: string | null) => void;
+  activeDot: ActiveDot | null;
+  setActiveDot: (dot: ActiveDot | null) => void;
 };
 
 function RadialBars({
@@ -284,6 +315,8 @@ function RadialBars({
   onDrillToggle,
   activeSubskillId,
   setActiveSubskillId,
+  activeDot,
+  setActiveDot,
 }: RadialProps) {
   const size = 520;
   const cx = size / 2;
@@ -378,7 +411,6 @@ function RadialBars({
     const baseAngles = forcedAngles ?? categoryAngles(idx);
     const { angleStart, angleEnd } = baseAngles;
 
-    // We still define a "band" for baselines, but score mapping uses scoreToRadius
     const innerR = maxRadius * 0.4;
 
     const halfSpan = (angleEnd - angleStart) * 0.8 * 0.5;
@@ -900,7 +932,7 @@ function RadialBars({
                       </>
                     )}
 
-                    {/* points are clickable here too */}
+                    {/* points are clickable here too (average/compare) */}
                     {classPoints.map((pt) => (
                       <circle
                         key={`class-${cat.id}-${pt.id}`}
@@ -951,7 +983,8 @@ function RadialBars({
 
           {/* student dots */}
           {viewMode === "students" && (
-            <g opacity={0.95}>
+            <g opacity={0.98}>
+              {/* Category-level dots: bigger bright green; click selects category dot */}
               {students.flatMap((s) =>
                 categories.map((cat, idx) => {
                   const catScore = s.categories.find((c) => c.id === cat.id);
@@ -962,15 +995,117 @@ function RadialBars({
                     catScore.score,
                     explodeOffset,
                   );
+                  const isActive =
+                    activeDot &&
+                    activeDot.kind === "category" &&
+                    activeDot.studentId === s.id &&
+                    activeDot.categoryId === cat.id;
+
                   return (
                     <circle
-                      key={`${s.id}-${cat.id}`}
+                      key={`cat-${s.id}-${cat.id}`}
                       cx={px}
                       cy={py}
-                      r={1.6}
-                      fill="rgba(129,140,248,0.95)"
+                      r={isActive ? 3 : 2.4}
+                      fill={isActive ? "#bbf7d0" : "#22c55e"}
+                      style={{
+                        cursor: "pointer",
+                        filter: isActive
+                          ? "drop-shadow(0 0 7px rgba(34,197,94,0.95))"
+                          : "drop-shadow(0 0 5px rgba(34,197,94,0.85))",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDot({
+                          kind: "category",
+                          studentId: s.id,
+                          categoryId: cat.id,
+                        });
+                        setActiveSubskillId(null);
+                      }}
                     />
                   );
+                }),
+              )}
+
+              {/* Subskill dots: smaller purple; click selects this subskill */}
+              {students.flatMap((s) =>
+                categories.map((cat, idx) => {
+                  const clsCategory =
+                    cls.categories.find((c) => c.id === cat.id) ?? null;
+                  const stuCategory =
+                    s.categories.find((c) => c.id === cat.id) ?? null;
+
+                  const classSubs: SubcategoryScore[] =
+                    clsCategory?.subcategories ?? [];
+                  const studentSubs: SubcategoryScore[] =
+                    stuCategory?.subcategories ?? [];
+
+                  if (!classSubs.length && !studentSubs.length) {
+                    return null;
+                  }
+
+                  const { angleStart, angleEnd } = categoryAngles(idx);
+                  const halfSpan = (angleEnd - angleStart) * 0.8 * 0.5;
+                  const mid = (angleStart + angleEnd) / 2;
+                  const startAngle = mid - halfSpan;
+                  const endAngle = mid + halfSpan;
+
+                  const count = Math.max(
+                    classSubs.length,
+                    studentSubs.length,
+                    1,
+                  );
+
+                  const dots: React.ReactNode[] = [];
+
+                  for (let i = 0; i < count; i++) {
+                    const stuSub = studentSubs[i];
+                    if (!stuSub) continue;
+
+                    const tAngle = count === 1 ? 0.5 : i / (count - 1);
+                    const a =
+                      startAngle + tAngle * (endAngle - startAngle);
+
+                    const r = scoreToRadius(stuSub.score, fixedOuter);
+                    const p = polarPoint(r, a);
+
+                    const isActive =
+                      activeDot &&
+                      activeDot.kind === "subskill" &&
+                      activeDot.studentId === s.id &&
+                      activeDot.categoryId === cat.id &&
+                      activeDot.subskillId === stuSub.id;
+
+                    dots.push(
+                      <circle
+                        key={`sub-${s.id}-${cat.id}-${stuSub.id}`}
+                        cx={p.x}
+                        cy={p.y}
+                        r={isActive ? 1.9 : 1.4}
+                        fill={isActive ? "#c4b5fd" : "#a855f7"}
+                        opacity={0.95}
+                        style={{
+                          cursor: "pointer",
+                          filter: isActive
+                            ? "drop-shadow(0 0 6px rgba(196,181,253,0.95))"
+                            : "drop-shadow(0 0 4px rgba(168,85,247,0.85))",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveDot({
+                            kind: "subskill",
+                            studentId: s.id,
+                            categoryId: cat.id,
+                            subskillId: stuSub.id,
+                          });
+                          setActiveSubskillId(stuSub.id);
+                        }}
+                      />,
+                    );
+                  }
+
+                  return <g key={`sub-group-${s.id}-${cat.id}`}>{dots}</g>;
                 }),
               )}
             </g>
@@ -1171,6 +1306,176 @@ function DetailPanel({
             );
           })
         )}
+      </div>
+    </div>
+  );
+}
+
+type DotsDetailPanelProps = {
+  cls: ClassScoreSummary;
+  categories: CategoryView[];
+  activeDot: ActiveDot | null;
+};
+
+function DotsDetailPanel({
+  cls,
+  categories,
+  activeDot,
+}: DotsDetailPanelProps) {
+  if (!activeDot) {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-slate-800/80 bg-slate-950/40 p-3 text-[11px] text-slate-500">
+        <div className="mb-2 border-b border-dashed border-slate-800/80 pb-2">
+          <h3 className="text-xs font-semibold text-slate-100">
+            Dots view
+          </h3>
+          <p className="mt-1 text-[11px] text-slate-400">
+            Click any dot to see which student, category, and score it
+            represents.
+          </p>
+        </div>
+        <p className="mt-4 text-center text-[11px] text-slate-500">
+          No dot selected yet.
+        </p>
+      </div>
+    );
+  }
+
+  const student = cls.students.find((s) => s.id === activeDot.studentId);
+  const categoryMeta = categories.find((c) => c.id === activeDot.categoryId);
+  const category =
+    student?.categories.find((c) => c.id === activeDot.categoryId) ?? null;
+
+  if (!student || !categoryMeta || !category) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-xl border border-slate-800/80 bg-slate-950/40 text-[11px] text-slate-500">
+        This dot refers to data that could not be found.
+      </div>
+    );
+  }
+
+  if (activeDot.kind === "category") {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-slate-800/80 bg-gradient-to-b from-slate-950/90 to-slate-950/60 p-3">
+        <div className="mb-2 border-b border-slate-800/70 pb-2">
+          <h3 className="text-xs font-semibold text-emerald-300">
+            Category dot
+          </h3>
+          <p className="mt-0.5 text-[10px] text-slate-500">
+            Each green dot is one student&apos;s overall score in a
+            category.
+          </p>
+        </div>
+
+        <div className="space-y-2 text-[11px]">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Student
+            </div>
+            <div className="font-medium text-slate-100">
+              {student.name}
+            </div>
+            <div className="text-[10px] text-slate-500">
+              Grade {student.gradeLevel} · Overall{" "}
+              <span className="font-mono text-slate-100">
+                {Math.round(student.overallScore)}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Category
+            </div>
+            <div className="font-medium text-slate-100">
+              {categoryMeta.name}
+            </div>
+            <div className="text-[10px] text-slate-400">
+              Student score in this category:
+              <span className="ml-1 rounded-full bg-slate-900/90 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">
+                {Math.round(category.score)}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg bg-slate-900/60 p-2 text-[10px] text-slate-400">
+            This dot is placed at the distance that corresponds to this
+            student&apos;s scaled score in the category, on a 60–150
+            standard score scale.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const subskill =
+    activeDot.subskillId != null
+      ? category.subcategories?.find((s) => s.id === activeDot.subskillId) ??
+        null
+      : null;
+
+  return (
+    <div className="flex h-full flex-col rounded-xl border border-slate-800/80 bg-gradient-to-b from-slate-950/90 to-slate-950/60 p-3">
+      <div className="mb-2 border-b border-slate-800/70 pb-2">
+        <h3 className="text-xs font-semibold text-violet-300">
+          Subskill dot
+        </h3>
+        <p className="mt-0.5 text-[10px] text-slate-500">
+          Each purple dot is one student&apos;s score on a specific
+          subskill inside a category.
+        </p>
+      </div>
+
+      <div className="space-y-2 text-[11px]">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            Student
+          </div>
+          <div className="font-medium text-slate-100">
+            {student.name}
+          </div>
+          <div className="text-[10px] text-slate-500">
+            Grade {student.gradeLevel} · Overall{" "}
+            <span className="font-mono text-slate-100">
+              {Math.round(student.overallScore)}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">
+            Category
+          </div>
+          <div className="font-medium text-slate-100">
+            {categoryMeta.name}
+          </div>
+        </div>
+
+        {subskill ? (
+          <div>
+            <div className="mt-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">
+              Subskill
+            </div>
+            <div className="font-medium text-slate-100">
+              {subskill.name}
+            </div>
+            <div className="mt-1 text-[10px] text-slate-400">
+              Student score:
+              <span className="ml-1 rounded-full bg-slate-900/90 px-1.5 py-0.5 font-mono text-[10px] text-violet-300">
+                {Math.round(subskill.score)}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-2 text-[10px] text-slate-500">
+            This subskill dot does not have a configured label yet.
+          </div>
+        )}
+
+        <div className="mt-3 rounded-lg bg-slate-900/60 p-2 text-[10px] text-slate-400">
+          This dot sits at the radial distance for this subskill&apos;s
+          score in the 60–150 scale, within its category wedge.
+        </div>
       </div>
     </div>
   );
