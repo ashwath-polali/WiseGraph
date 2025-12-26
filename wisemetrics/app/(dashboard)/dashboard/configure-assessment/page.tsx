@@ -12,8 +12,10 @@ import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
 export default async function ConfigureAssessmentPage({
   searchParams,
 }: {
-  searchParams: { classId?: string };
+  searchParams: Promise<{ classId?: string }>;
 }) {
+  const { classId } = await searchParams;
+
   const classes = await getTeacherClassesWithSummary();
 
   if (!classes.length) {
@@ -33,27 +35,19 @@ export default async function ConfigureAssessmentPage({
     );
   }
 
-  let currentClassId = searchParams.classId;
-  if (!currentClassId) {
-    currentClassId =
-      (await getDefaultClassIdForTeacher()) ?? classes[0].id;
-  }
+  // 1) URL classId if valid
+  const idFromQuery =
+    classId && classes.some((c) => c.id === classId) ? classId : null;
 
-  if (!currentClassId) {
-    return (
-      <main className="space-y-6">
-        <Card className="p-6">
-          <h1 className="text-xl font-semibold">Configure assessment</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            No class selected.
-          </p>
-          <Link href="/dashboard" className="text-xs text-sky-400">
-            Back to dashboard
-          </Link>
-        </Card>
-      </main>
-    );
-  }
+  // 2) Default if valid
+  const defaultClassId = await getDefaultClassIdForTeacher();
+  const idFromDefault =
+    defaultClassId && classes.some((c) => c.id === defaultClassId)
+      ? defaultClassId
+      : null;
+
+  // 3) First class
+  const currentClassId = idFromQuery ?? idFromDefault ?? classes[0].id;
 
   // Load categories + subcategories directly for this class
   const cls = await prisma.class.findUnique({

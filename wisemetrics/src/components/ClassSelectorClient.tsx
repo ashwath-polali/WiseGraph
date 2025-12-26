@@ -23,37 +23,27 @@ export function ClassSelectorClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  if (!classes.length) return null;
-
   function handleSelect(id: string) {
-    if (id === currentClassId) return;
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("classId", id);
-
     startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("classId", id);
       router.push(`/dashboard?${params.toString()}`);
     });
   }
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-slate-800 bg-slate-950/70 px-2 py-1">
+    <div className="flex items-center gap-2 overflow-x-auto">
       {classes.map((cls) => {
         const isActive = cls.id === currentClassId;
-        const label = `${cls.name} • ${cls.subject}${
-          cls.term ? ` • ${cls.term}` : ""
-        }`;
-
         return (
           <Button
             key={cls.id}
-            type="button"
             variant={isActive ? "primary" : "ghost"}
+            className="whitespace-nowrap text-xs"
+            disabled={isPending && isActive}
             onClick={() => handleSelect(cls.id)}
-            disabled={isPending && !isActive}
-            className="whitespace-nowrap rounded-full px-3 py-1 text-[11px]"
           >
-            {label}
+            {cls.name}
           </Button>
         );
       })}

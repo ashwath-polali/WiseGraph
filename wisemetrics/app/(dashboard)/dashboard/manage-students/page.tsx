@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   getClassScoreSummary,
   getTeacherClassesWithSummary,
+  getDefaultClassIdForTeacher,
 } from "@/lib/classSummary";
 import { Card } from "@/components/ui/Card";
 import { ManageStudentsClient } from "@/components/ManageStudentsClient";
@@ -10,8 +11,10 @@ import { ManageStudentsClient } from "@/components/ManageStudentsClient";
 export default async function ManageStudentsPage({
   searchParams,
 }: {
-  searchParams: { classId?: string };
+  searchParams: Promise<{ classId?: string }>;
 }) {
+  const { classId } = await searchParams;
+
   const classes = await getTeacherClassesWithSummary();
   if (!classes.length) {
     return (
@@ -31,7 +34,20 @@ export default async function ManageStudentsPage({
     );
   }
 
-  const currentClassId = searchParams.classId ?? classes[0].id;
+  // 1) URL classId if valid
+  const idFromQuery =
+    classId && classes.some((c) => c.id === classId) ? classId : null;
+
+  // 2) Default if valid
+  const defaultClassId = await getDefaultClassIdForTeacher();
+  const idFromDefault =
+    defaultClassId && classes.some((c) => c.id === defaultClassId)
+      ? defaultClassId
+      : null;
+
+  // 3) First class
+  const currentClassId = idFromQuery ?? idFromDefault ?? classes[0].id;
+
   const cls = await getClassScoreSummary(currentClassId);
   if (!cls) {
     return (

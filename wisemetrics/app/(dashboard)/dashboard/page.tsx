@@ -20,7 +20,7 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const { classId } = await searchParams;
+  const { classId } = await searchParams; // <-- unwrap Promise
 
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
@@ -50,20 +50,28 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   // Read teacher's defaultClassId WITHOUT adding it to the select type
   const teacherRaw = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: {
-      id: true,
-    },
+    select: { id: true },
   });
 
   const defaultFromTeacher = (teacherRaw as any)?.defaultClassId ?? null;
 
-  // Determine current class from teacher default, query, or fallback
-  let currentClassId = defaultFromTeacher ?? classId;
-  if (!currentClassId) {
-    currentClassId = (await getDefaultClassIdForTeacher()) ?? classes[0].id;
-  }
+  // 1) URL classId if it belongs to this teacher
+  const idFromQuery =
+    classId && classes.some((c) => c.id === classId) ? classId : null;
 
-  const cls = currentClassId ? await getClassScoreSummary(currentClassId) : null;
+  // 2) Teacher default if valid
+  const idFromTeacher =
+    defaultFromTeacher &&
+    classes.some((c) => c.id === defaultFromTeacher)
+      ? defaultFromTeacher
+      : null;
+
+  // 3) First class
+  const fallbackId = classes[0].id;
+
+  const currentClassId = idFromQuery ?? idFromTeacher ?? fallbackId;
+
+  const cls = await getClassScoreSummary(currentClassId);
 
   if (!cls) {
     return (
@@ -98,7 +106,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 {cls.term ? ` · ${cls.term}` : ""}
               </p>
             </div>
-            <Link href="/dashboard/configure-assessment">
+            <Link
+              href={`/dashboard/configure-assessment?classId=${encodeURIComponent(
+                cls.id,
+              )}`}
+            >
               <Button variant="secondary" className="text-xs">
                 Configure assessment
               </Button>
@@ -136,7 +148,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   Click a student to open detailed charts and subskills.
                 </p>
               </div>
-              <Link href="/dashboard/manage-students">
+              <Link
+                href={`/dashboard/manage-students?classId=${encodeURIComponent(
+                  cls.id,
+                )}`}
+              >
                 <Button variant="ghost" className="text-xs">
                   Manage
                 </Button>
