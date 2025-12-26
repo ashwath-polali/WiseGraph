@@ -1,4 +1,4 @@
-// app/(auth)/signup/page.tsx
+// app/auth/signup/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -14,17 +14,20 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    setMessage(null);
 
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      // emailRedirectTo: `${window.location.origin}/auth/callback`,
+      // If you later add email confirmation, you can restore:
+      // options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
 
     setSubmitting(false);
@@ -34,8 +37,10 @@ export default function SignupPage() {
       return;
     }
 
-    // After signup, send to login
-    router.push("/auth/login");
+    setMessage("Successfully created account. Redirecting to login...");
+    setTimeout(() => {
+      router.push("/auth/login");
+    }, 1500);
   }
 
   return (
@@ -52,6 +57,12 @@ export default function SignupPage() {
           {error && (
             <p className="text-xs text-red-400">
               {error}
+            </p>
+          )}
+
+          {message && (
+            <p className="text-xs text-emerald-400">
+              {message}
             </p>
           )}
 
