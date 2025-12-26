@@ -63,7 +63,7 @@ export function ClassExplodingRadialChart({ cls }: Props) {
       let final = abbr;
       let suffix = 2;
       while (used.has(final)) {
-        final = `${abbr}${suffix}`;
+        final = abbr + suffix;
         suffix += 1;
       }
 
@@ -74,10 +74,9 @@ export function ClassExplodingRadialChart({ cls }: Props) {
     return result;
   }
 
-  const categories = useMemo<CategoryView[]>(() => {
+  const categories: CategoryView[] = useMemo(() => {
     const names = cls.categories.map((c) => c.name);
     const abbrevs = buildAbbreviations(names);
-
     return cls.categories.map((cat, i) => ({
       id: cat.id,
       name: cat.name,
@@ -86,7 +85,9 @@ export function ClassExplodingRadialChart({ cls }: Props) {
     }));
   }, [cls]);
 
-  const hovered = categories.find((c) => c.id === hoveredId) ?? null;
+  const hovered =
+    hoveredId != null ? categories.find((c) => c.id === hoveredId) ?? null : null;
+
   const selectedStudent: StudentScoreSummary | null =
     selectedStudentId != null
       ? cls.students.find((s) => s.id === selectedStudentId) ?? null
@@ -97,7 +98,6 @@ export function ClassExplodingRadialChart({ cls }: Props) {
       ? categories.find((c) => c.id === drillCategoryId) ?? null
       : null;
 
-  // Reset subskill + dot selection when switching drilled category
   function handleDrillToggle(id: string) {
     setDrillCategoryId((prev) => {
       const next = prev === id ? null : id;
@@ -109,7 +109,6 @@ export function ClassExplodingRadialChart({ cls }: Props) {
     });
   }
 
-  // Reset dot when switching view
   function handleSetViewMode(m: ViewMode) {
     setViewMode(m);
     if (m !== "students") {
@@ -142,7 +141,7 @@ export function ClassExplodingRadialChart({ cls }: Props) {
               onClick={() => setDrillCategoryId(null)}
               className="rounded-full border border-slate-700/80 bg-slate-900/80 px-2.5 py-1 text-[10px] text-slate-300 hover:border-sky-400 hover:text-sky-200"
             >
-              ← Back to all categories
+              Back to all categories
             </button>
           )}
           {viewMode === "compare" && cls.students.length > 0 && (
@@ -333,10 +332,9 @@ function RadialBars({
   const epsilon = 0.002;
 
   const ringScores = [60, 75, 90, 105, 120, 135, 150];
-
   const labelRadius = baseOuter + 36;
 
-  function scoreToRadius(score: number, maxRadius: number) {
+  function scoreToRadius(score: number, maxRadius: number): number {
     const t = (clampScore(score) - SCORE_MIN) / (SCORE_MAX - SCORE_MIN);
     return baseInner + t * maxRadius;
   }
@@ -371,7 +369,7 @@ function RadialBars({
   function studentPolylinePoints(
     student: StudentScoreSummary,
     explodeOffsets: Record<string, { dx: number; dy: number }>,
-  ) {
+  ): string {
     const pts: string[] = [];
     categories.forEach((cat, idx) => {
       const catScore = student.categories.find((c) => c.id === cat.id);
@@ -393,18 +391,23 @@ function RadialBars({
     dx: number,
     dy: number,
     forcedAngles?: { angleStart: number; angleEnd: number },
-  ) {
+  ): {
+    classLine: string;
+    studentBaseline: string;
+    studentPeaks: string;
+    classPoints: { id: string; x: number; y: number }[];
+    studentPoints: { id: string; x: number; y: number }[];
+  } {
     const classSubs: SubcategoryScore[] = clsCategory?.subcategories ?? [];
-    const studentSubs: SubcategoryScore[] =
-      studentCategory?.subcategories ?? [];
+    const studentSubs: SubcategoryScore[] = studentCategory?.subcategories ?? [];
 
     if (!classSubs.length && !studentSubs.length) {
       return {
         classLine: "",
         studentBaseline: "",
         studentPeaks: "",
-        classPoints: [] as { id: string; x: number; y: number }[],
-        studentPoints: [] as { id: string; x: number; y: number }[],
+        classPoints: [],
+        studentPoints: [],
       };
     }
 
@@ -412,8 +415,7 @@ function RadialBars({
     const { angleStart, angleEnd } = baseAngles;
 
     const innerR = maxRadius * 0.4;
-
-    const halfSpan = (angleEnd - angleStart) * 0.8 * 0.5;
+    const halfSpan = ((angleEnd - angleStart) * 0.8) / 2;
     const mid = (angleStart + angleEnd) / 2;
     const startAngle = mid - halfSpan;
     const endAngle = mid + halfSpan;
@@ -429,7 +431,6 @@ function RadialBars({
     for (let i = 0; i < count; i++) {
       const tAngle = count === 1 ? 0.5 : i / (count - 1);
       const a = startAngle + tAngle * (endAngle - startAngle);
-
       const baseR = innerR + 6;
       const base = polarPoint(baseR, a);
       const baseX = base.x + dx;
@@ -447,9 +448,7 @@ function RadialBars({
 
       const studentSub = studentSubs[i];
       if (studentSub) {
-        // baseline stays near inner band for visual structure
         studentBaselinePts.push(`${baseX},${baseY}`);
-
         const r = scoreToRadius(studentSub.score, maxRadius);
         const p = polarPoint(r, a);
         const px = p.x + dx;
@@ -469,7 +468,6 @@ function RadialBars({
   }
 
   const explodeOffsets: Record<string, { dx: number; dy: number }> = {};
-
   const isDrill = drillCategoryId != null;
 
   return (
@@ -479,11 +477,13 @@ function RadialBars({
       onMouseLeave={() => !isDrill && setHoveredId(null)}
     >
       {/* subtle radial background */}
-      <radialGradient id="radial-bg" cx="50%" cy="50%" r="60%">
-        <stop offset="0%" stopColor="#0f172a" stopOpacity="0.1" />
-        <stop offset="70%" stopColor="#020617" stopOpacity="0.9" />
-        <stop offset="100%" stopColor="#020617" stopOpacity="1" />
-      </radialGradient>
+      <defs>
+        <radialGradient id="radial-bg" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stopColor="#0f172a" stopOpacity="0.1" />
+          <stop offset="70%" stopColor="#020617" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#020617" stopOpacity="1" />
+        </radialGradient>
+      </defs>
       <rect
         x={0}
         y={0}
@@ -493,11 +493,10 @@ function RadialBars({
         opacity={0.85}
       />
 
-      {/* rings (still visible in drill) */}
+      {/* rings */}
       {ringScores.map((score) => {
         const t = (score - SCORE_MIN) / (SCORE_MAX - SCORE_MIN);
         const r = baseInner + t * baseOuter;
-
         return (
           <g key={score}>
             <circle
@@ -522,16 +521,20 @@ function RadialBars({
       })}
 
       {/* origin pulse */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={3}
-        className="fill-sky-400/90"
-        style={{ filter: "drop-shadow(0 0 8px rgba(56,189,248,0.9))" }}
-      />
-      <circle cx={cx} cy={cy} r={8} className="fill-sky-500/10" />
+      <g>
+        <circle
+          cx={cx}
+          cy={cy}
+          r={3}
+          className="fill-sky-400/90"
+          style={{
+            filter: "drop-shadow(0 0 8px rgba(56,189,248,0.9))",
+          }}
+        />
+        <circle cx={cx} cy={cy} r={8} className="fill-sky-500/10" />
+      </g>
 
-      {/* DRILL MODE: single wide wedge for one category */}
+      {/* DRILL MODE: single wide wedge */}
       {isDrill ? (
         (() => {
           const cat = categories.find((c) => c.id === drillCategoryId);
@@ -542,7 +545,7 @@ function RadialBars({
           const studentCategory =
             selectedStudent?.categories.find((c) => c.id === cat.id) ?? null;
 
-          const angleSpan = (160 * Math.PI) / 180; // 160°
+          const angleSpan = (160 * Math.PI) / 180;
           const angleStart = -Math.PI / 2 - angleSpan / 2;
           const angleEnd = -Math.PI / 2 + angleSpan / 2;
           const mid = (-Math.PI / 2 + -Math.PI / 2) / 2;
@@ -573,23 +576,24 @@ function RadialBars({
             studentPeaks,
             classPoints,
             studentPoints,
-          } = clsCategory
-            ? subskillPolylineForCategory(
-                clsCategory,
-                viewMode === "compare" ? studentCategory : null,
-                0,
-                maxRadius,
-                dx,
-                dy,
-                { angleStart, angleEnd },
-              )
-            : {
-                classLine: "",
-                studentBaseline: "",
-                studentPeaks: "",
-                classPoints: [] as { id: string; x: number; y: number }[],
-                studentPoints: [] as { id: string; x: number; y: number }[],
-              };
+          } =
+            clsCategory && (viewMode === "average" || viewMode === "compare")
+              ? subskillPolylineForCategory(
+                  clsCategory,
+                  viewMode === "compare" ? studentCategory ?? null : null,
+                  0,
+                  maxRadius,
+                  dx,
+                  dy,
+                  { angleStart, angleEnd },
+                )
+              : {
+                  classLine: "",
+                  studentBaseline: "",
+                  studentPeaks: "",
+                  classPoints: [],
+                  studentPoints: [],
+                };
 
           const labelPoint = polarPoint(rOuter + 30, -Math.PI / 2);
 
@@ -603,8 +607,8 @@ function RadialBars({
                 strokeWidth={2.4}
               />
 
-              {/* category name centered above */}
-              <g transform={`translate(${labelPoint.x}, ${labelPoint.y})`}>
+              {/* category name */}
+              <g transform={`translate(${labelPoint.x},${labelPoint.y})`}>
                 <text
                   className="fill-slate-50 text-[11px] font-semibold"
                   textAnchor="middle"
@@ -614,9 +618,9 @@ function RadialBars({
                 </text>
               </g>
 
-              {/* score label at tip */}
+              {/* score label */}
               <g
-                transform={`translate(${cx + Math.cos(mid) * scoreRadius}, ${
+                transform={`translate(${cx + Math.cos(mid) * scoreRadius},${
                   cy + Math.sin(mid) * scoreRadius
                 })`}
               >
@@ -626,9 +630,8 @@ function RadialBars({
                   width={32}
                   height={18}
                   rx={9}
-                  className="fill-slate-950/90"
+                  className="fill-slate-950/90 stroke-[0.8]"
                   stroke="#38bdf8"
-                  strokeWidth={0.8}
                 />
                 <text
                   textAnchor="middle"
@@ -639,7 +642,7 @@ function RadialBars({
                 </text>
               </g>
 
-              {/* class polyline */}
+              {/* class subskill polyline */}
               {classLine && (
                 <polyline
                   points={classLine}
@@ -651,7 +654,7 @@ function RadialBars({
                 />
               )}
 
-              {/* student polyline + baseline in compare */}
+              {/* student baseline / peaks in compare */}
               {viewMode === "compare" && selectedStudent && (
                 <>
                   {studentBaseline && (
@@ -684,7 +687,7 @@ function RadialBars({
               {/* class points */}
               {classPoints.map((pt) => (
                 <circle
-                  key={`class-${pt.id}`}
+                  key={`class-pt-${pt.id}`}
                   cx={pt.x}
                   cy={pt.y}
                   r={activeSubskillId === pt.id ? 4 : 3}
@@ -713,7 +716,7 @@ function RadialBars({
                 selectedStudent &&
                 studentPoints.map((pt) => (
                   <circle
-                    key={`student-${pt.id}`}
+                    key={`student-pt-${pt.id}`}
                     cx={pt.x}
                     cy={pt.y}
                     r={activeSubskillId === pt.id ? 4 : 3}
@@ -745,13 +748,10 @@ function RadialBars({
           {categories.map((cat, idx) => {
             const { angleStart, angleEnd, mid } = categoryAngles(idx);
             const isHovered = hoveredId === cat.id;
-
             const maxRadius = fixedOuter;
-            const explodeOffset = 2;
-
+            const explodeOffset = isHovered ? 8 : 2;
             const rOuter = scoreToRadius(cat.avgScore, maxRadius);
             const rInner = baseInner;
-
             const dx = Math.cos(mid) * explodeOffset;
             const dy = Math.sin(mid) * explodeOffset;
             explodeOffsets[cat.id] = { dx, dy };
@@ -765,24 +765,24 @@ function RadialBars({
               angleEnd,
             );
 
-            const baseFill = [
-              "rgba(56,189,248,0.22)",
-              "rgba(96,165,250,0.22)",
-              "rgba(129,140,248,0.22)",
-              "rgba(52,211,153,0.22)",
-              "rgba(250,204,21,0.22)",
-            ][idx % 5];
+            const baseFill =
+              [
+                "rgba(56,189,248,0.22)",
+                "rgba(96,165,250,0.22)",
+                "rgba(129,140,248,0.22)",
+                "rgba(52,211,153,0.22)",
+                "rgba(250,204,21,0.22)",
+              ][idx % 5] ?? "rgba(56,189,248,0.22)";
 
             const fill = baseFill;
             const stroke = isHovered
               ? "rgba(56,189,248,1)"
               : "rgba(15,23,42,0.9)";
-
             const scoreRadius = rOuter + 14;
 
-            const clsCategory: CategoryScore | null =
+            const clsCategory =
               cls.categories.find((c) => c.id === cat.id) ?? null;
-            const studentCategory: CategoryScore | null =
+            const studentCategory =
               selectedStudent?.categories.find((c) => c.id === cat.id) ?? null;
 
             const {
@@ -792,12 +792,10 @@ function RadialBars({
               classPoints,
               studentPoints,
             } =
-              ((viewMode === "compare" && selectedStudent && isHovered) ||
-                (viewMode === "average" && isHovered)) &&
-              clsCategory
+              (viewMode === "average" || viewMode === "compare") && isHovered
                 ? subskillPolylineForCategory(
                     clsCategory,
-                    viewMode === "compare" ? studentCategory : null,
+                    viewMode === "compare" ? studentCategory ?? null : null,
                     idx,
                     maxRadius,
                     dx,
@@ -807,16 +805,8 @@ function RadialBars({
                     classLine: "",
                     studentBaseline: "",
                     studentPeaks: "",
-                    classPoints: [] as {
-                      id: string;
-                      x: number;
-                      y: number;
-                    }[],
-                    studentPoints: [] as {
-                      id: string;
-                      x: number;
-                      y: number;
-                    }[],
+                    classPoints: [],
+                    studentPoints: [],
                   };
 
             const labelPoint = polarPoint(labelRadius, mid);
@@ -829,7 +819,6 @@ function RadialBars({
                 onClick={() => onDrillToggle(cat.id)}
                 className="cursor-pointer"
               >
-                {/* glow behind hovered wedge */}
                 {isHovered && (
                   <path
                     d={radialRingPath(
@@ -854,7 +843,7 @@ function RadialBars({
                 />
 
                 {/* abbreviated label */}
-                <g transform={`translate(${labelPoint.x}, ${labelPoint.y})`}>
+                <g transform={`translate(${labelPoint.x},${labelPoint.y})`}>
                   <text
                     className="fill-slate-50 text-[10px] font-semibold"
                     textAnchor="middle"
@@ -866,9 +855,9 @@ function RadialBars({
 
                 {/* score label */}
                 <g
-                  transform={`translate(${
-                    cx + dx + Math.cos(mid) * scoreRadius
-                  }, ${cy + dy + Math.sin(mid) * scoreRadius})`}
+                  transform={`translate(${cx + dx + Math.cos(mid) * scoreRadius},${
+                    cy + dy + Math.sin(mid) * scoreRadius
+                  })`}
                 >
                   <rect
                     x={-14}
@@ -876,9 +865,8 @@ function RadialBars({
                     width={28}
                     height={16}
                     rx={8}
-                    className="fill-slate-950/90"
+                    className="fill-slate-950/90 stroke-[0.7]"
                     stroke={isHovered ? "#38bdf8" : "rgba(15,23,42,0.9)"}
-                    strokeWidth={0.7}
                   />
                   <text
                     textAnchor="middle"
@@ -889,50 +877,47 @@ function RadialBars({
                   </text>
                 </g>
 
-                {/* subskill lines + points: class in avg+compare, student only in compare */}
-                {isHovered && (classLine || studentPeaks) && (
+                {/* subskill lines & points */}
+                {isHovered && classLine && (
                   <g>
-                    {classLine && (
-                      <polyline
-                        points={classLine}
-                        fill="none"
-                        stroke="rgba(148,163,184,0.9)"
-                        strokeWidth={1.6}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    )}
+                    <polyline
+                      points={classLine}
+                      fill="none"
+                      stroke="rgba(148,163,184,0.9)"
+                      strokeWidth={1.6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {viewMode === "compare" &&
+                      selectedStudent &&
+                      studentBaseline && (
+                        <polyline
+                          points={studentBaseline}
+                          fill="none"
+                          stroke="rgba(148,163,184,0.7)"
+                          strokeWidth={1}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      )}
+                    {viewMode === "compare" &&
+                      selectedStudent &&
+                      studentPeaks && (
+                        <polyline
+                          points={studentPeaks}
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{
+                            filter:
+                              "drop-shadow(0 0 6px rgba(34,197,94,0.9))",
+                          }}
+                        />
+                      )}
 
-                    {viewMode === "compare" && selectedStudent && (
-                      <>
-                        {studentBaseline && (
-                          <polyline
-                            points={studentBaseline}
-                            fill="none"
-                            stroke="rgba(148,163,184,0.7)"
-                            strokeWidth={1}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        )}
-                        {studentPeaks && (
-                          <polyline
-                            points={studentPeaks}
-                            fill="none"
-                            stroke="#22c55e"
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            style={{
-                              filter:
-                                "drop-shadow(0 0 6px rgba(34,197,94,0.9))",
-                            }}
-                          />
-                        )}
-                      </>
-                    )}
-
-                    {/* points are clickable here too (average/compare) */}
+                    {/* class points clickable */}
                     {classPoints.map((pt) => (
                       <circle
                         key={`class-${cat.id}-${pt.id}`}
@@ -953,6 +938,8 @@ function RadialBars({
                         }}
                       />
                     ))}
+
+                    {/* student points in compare */}
                     {viewMode === "compare" &&
                       selectedStudent &&
                       studentPoints.map((pt) => (
@@ -981,10 +968,10 @@ function RadialBars({
             );
           })}
 
-          {/* student dots */}
+          {/* student dots view */}
           {viewMode === "students" && (
             <g opacity={0.98}>
-              {/* Category-level dots: bigger bright green; click selects category dot */}
+              {/* category-level dots */}
               {students.flatMap((s) =>
                 categories.map((cat, idx) => {
                   const catScore = s.categories.find((c) => c.id === cat.id);
@@ -1000,7 +987,6 @@ function RadialBars({
                     activeDot.kind === "category" &&
                     activeDot.studentId === s.id &&
                     activeDot.categoryId === cat.id;
-
                   return (
                     <circle
                       key={`cat-${s.id}-${cat.id}`}
@@ -1028,29 +1014,24 @@ function RadialBars({
                 }),
               )}
 
-              {/* Subskill dots: smaller purple; click selects this subskill */}
+              {/* subskill dots */}
               {students.flatMap((s) =>
                 categories.map((cat, idx) => {
                   const clsCategory =
                     cls.categories.find((c) => c.id === cat.id) ?? null;
                   const stuCategory =
                     s.categories.find((c) => c.id === cat.id) ?? null;
-
                   const classSubs: SubcategoryScore[] =
                     clsCategory?.subcategories ?? [];
                   const studentSubs: SubcategoryScore[] =
                     stuCategory?.subcategories ?? [];
-
-                  if (!classSubs.length && !studentSubs.length) {
-                    return null;
-                  }
+                  if (!classSubs.length && !studentSubs.length) return null;
 
                   const { angleStart, angleEnd } = categoryAngles(idx);
-                  const halfSpan = (angleEnd - angleStart) * 0.8 * 0.5;
+                  const halfSpan = ((angleEnd - angleStart) * 0.8) / 2;
                   const mid = (angleStart + angleEnd) / 2;
                   const startAngle = mid - halfSpan;
                   const endAngle = mid + halfSpan;
-
                   const count = Math.max(
                     classSubs.length,
                     studentSubs.length,
@@ -1058,25 +1039,19 @@ function RadialBars({
                   );
 
                   const dots: React.ReactNode[] = [];
-
                   for (let i = 0; i < count; i++) {
                     const stuSub = studentSubs[i];
                     if (!stuSub) continue;
-
                     const tAngle = count === 1 ? 0.5 : i / (count - 1);
-                    const a =
-                      startAngle + tAngle * (endAngle - startAngle);
-
+                    const a = startAngle + tAngle * (endAngle - startAngle);
                     const r = scoreToRadius(stuSub.score, fixedOuter);
                     const p = polarPoint(r, a);
-
                     const isActive =
                       activeDot &&
                       activeDot.kind === "subskill" &&
                       activeDot.studentId === s.id &&
                       activeDot.categoryId === cat.id &&
                       activeDot.subskillId === stuSub.id;
-
                     dots.push(
                       <circle
                         key={`sub-${s.id}-${cat.id}-${stuSub.id}`}
@@ -1104,14 +1079,15 @@ function RadialBars({
                       />,
                     );
                   }
-
-                  return <g key={`sub-group-${s.id}-${cat.id}`}>{dots}</g>;
+                  return (
+                    <g key={`sub-group-${s.id}-${cat.id}`}>{dots}</g>
+                  );
                 }),
               )}
             </g>
           )}
 
-          {/* compare student polyline */}
+          {/* compare student polyline (orange only) */}
           {viewMode === "compare" && selectedStudent && (
             <g>
               {(() => {
@@ -1121,30 +1097,19 @@ function RadialBars({
                 );
                 if (!pts) return null;
                 return (
-                  <>
-                    <polyline
-                      points={pts}
-                      fill="none"
-                      stroke="rgba(15,23,42,0.9)"
-                      strokeWidth={3.4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      opacity={0.9}
-                    />
-                    <polyline
-                      points={pts}
-                      fill="none"
-                      stroke="#f97316"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      opacity={0.95}
-                      style={{
-                        filter:
-                          "drop-shadow(0 0 8px rgba(248,250,252,0.45))",
-                      }}
-                    />
-                  </>
+                  <polyline
+                    points={pts}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={0.95}
+                    style={{
+                      filter:
+                        "drop-shadow(0 0 8px rgba(248,250,252,0.45))",
+                    }}
+                  />
                 );
               })()}
             </g>
@@ -1164,17 +1129,34 @@ function radialRingPath(
   angleEnd: number,
 ): string {
   const largeArc = angleEnd - angleStart > Math.PI ? 1 : 0;
-
   const startOuter = polar(cx, cy, rOuter, angleStart);
   const endOuter = polar(cx, cy, rOuter, angleEnd);
   const startInner = polar(cx, cy, rInner, angleEnd);
   const endInner = polar(cx, cy, rInner, angleStart);
 
   return [
-    `M ${startOuter.x} ${startOuter.y}`,
-    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${endOuter.x} ${endOuter.y}`,
-    `L ${startInner.x} ${startInner.y}`,
-    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${endInner.x} ${endInner.y}`,
+    "M",
+    startOuter.x,
+    startOuter.y,
+    "A",
+    rOuter,
+    rOuter,
+    0,
+    largeArc,
+    1,
+    endOuter.x,
+    endOuter.y,
+    "L",
+    startInner.x,
+    startInner.y,
+    "A",
+    rInner,
+    rInner,
+    0,
+    largeArc,
+    0,
+    endInner.x,
+    endInner.y,
     "Z",
   ].join(" ");
 }
@@ -1185,10 +1167,9 @@ function polar(
   r: number,
   angle: number,
 ): { x: number; y: number } {
-  return {
-    x: cx + r * Math.cos(angle),
-    y: cy + r * Math.sin(angle),
-  };
+  const x = cx + r * Math.cos(angle);
+  const y = cy + r * Math.sin(angle);
+  return { x, y };
 }
 
 type DetailPanelProps = {
@@ -1214,19 +1195,22 @@ function DetailPanel({
     );
   }
 
-  const classCat = cls.categories.find((c) => c.id === category.id) ?? null;
+  const classCat =
+    cls.categories.find((c) => c.id === category.id) ?? null;
   const classSubs: SubcategoryScore[] = classCat?.subcategories ?? [];
 
   const studentCat =
     viewMode === "compare" && selectedStudent
       ? selectedStudent.categories.find((c) => c.id === category.id) ?? null
       : null;
-
   const studentSubs: SubcategoryScore[] =
     viewMode === "compare" ? studentCat?.subcategories ?? [] : [];
 
   const combinedSubIds = Array.from(
-    new Set([...classSubs.map((s) => s.id), ...studentSubs.map((s) => s.id)]),
+    new Set([
+      ...classSubs.map((s) => s.id),
+      ...studentSubs.map((s) => s.id),
+    ]),
   );
 
   return (
@@ -1236,12 +1220,22 @@ function DetailPanel({
           <h3 className="text-xs font-semibold text-slate-100">
             {category.name}
           </h3>
-          <p className="text-[11px] text-slate-400">
-            Class average{" "}
-            <span className="font-mono text-slate-100">
-              {category.avgScore.toFixed(0)}
+          <div className="flex items-center gap-2 text-[11px] text-slate-400">
+            <span>
+              Class average{" "}
+              <span className="font-mono text-slate-100">
+                {category.avgScore.toFixed(0)}
+              </span>
             </span>
-          </p>
+            {viewMode === "compare" && studentCat && (
+              <span>
+                · Student category{" "}
+                <span className="rounded-full bg-sky-500/15 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
+                  {Math.round(studentCat.score)}
+                </span>
+              </span>
+            )}
+          </div>
         </div>
         {viewMode === "compare" && selectedStudent && (
           <div className="rounded-lg bg-slate-900/70 px-2 py-1 text-right text-[10px]">
@@ -1265,7 +1259,8 @@ function DetailPanel({
           combinedSubIds.map((id) => {
             const classSub = classSubs.find((s) => s.id === id) ?? null;
             const studentSub = studentSubs.find((s) => s.id === id) ?? null;
-            const name = classSub?.name ?? studentSub?.name ?? "Subskill";
+            const name =
+              classSub?.name ?? studentSub?.name ?? "Subskill";
             const isActive = activeSubskillId === id;
 
             return (
@@ -1279,14 +1274,14 @@ function DetailPanel({
                 }
               >
                 <div className="flex flex-col">
-                  <span className="text-[11px] text-slate-100">{name}</span>
+                  <span className="text-[11px] text-slate-100">
+                    {name}
+                  </span>
                   <span className="text-[10px] text-slate-500">
                     {viewMode === "compare"
                       ? isActive
                         ? "Selected subskill · Class vs student"
                         : "Class vs student"
-                      : isActive
-                      ? "Selected subskill · Class average"
                       : "Class average subskill"}
                   </span>
                 </div>
