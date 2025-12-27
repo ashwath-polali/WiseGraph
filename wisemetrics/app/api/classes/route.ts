@@ -60,58 +60,66 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const teacherId = await getCurrentTeacherId();
-  if (!teacherId) {
+  try {
+    const teacherId = await getCurrentTeacherId();
+    if (!teacherId) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = (await req.json()) as { id?: string };
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    const cls = await prisma.class.findFirst({
+      where: { id, teacherId },
+      select: { id: true },
+    });
+
+    if (!cls) {
+      return NextResponse.json(
+        { error: "Class not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete dependents in FK-safe order
+    await prisma.score.deleteMany({
+      where: {
+        student: {
+          classId: id,
+        },
+      },
+    });
+
+    await prisma.subcategory.deleteMany({
+      where: {
+        category: {
+          classId: id,
+        },
+      },
+    });
+
+    await prisma.category.deleteMany({
+      where: { classId: id },
+    });
+
+    await prisma.student.deleteMany({
+      where: { classId: id },
+    });
+
+    await prisma.class.delete({ where: { id } });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE /api/classes failed", err);
     return NextResponse.json(
-      { error: "Not authenticated" },
-      { status: 401 }
+      { error: "Failed to delete class" },
+      { status: 500 }
     );
   }
-
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
-
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  }
-
-  const cls = await prisma.class.findFirst({
-    where: { id, teacherId },
-    select: { id: true },
-  });
-
-  if (!cls) {
-    return NextResponse.json(
-      { error: "Class not found" },
-      { status: 404 }
-    );
-  }
-
-  await prisma.score.deleteMany({
-    where: {
-      student: {
-        classId: id,
-      },
-    },
-  });
-
-  await prisma.subcategory.deleteMany({
-    where: {
-      category: {
-        classId: id,
-      },
-    },
-  });
-
-  await prisma.category.deleteMany({
-    where: { classId: id },
-  });
-
-  await prisma.student.deleteMany({
-    where: { classId: id },
-  });
-
-  await prisma.class.delete({ where: { id } });
-
-  return NextResponse.json({ ok: true });
 }
