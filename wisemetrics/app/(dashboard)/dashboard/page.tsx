@@ -63,7 +63,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     select: { id: true, defaultClassId: true },
   });
 
-  const defaultFromTeacher = (teacherRaw as TeacherWithDefault | null)?.defaultClassId ?? null;
+  const defaultFromTeacher =
+    (teacherRaw as TeacherWithDefault | null)?.defaultClassId ?? null;
 
   const idFromQuery =
     classId &&
@@ -178,24 +179,43 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <ul className="divide-y divide-slate-800 text-xs">
                   {cls.students.map((student) => (
                     <li key={student.id}>
-                      <Link
-                        href={`/dashboard/students/${student.id}?classId=${encodeURIComponent(
-                          cls.id,
-                        )}`}
-                        className="flex items-center justify-between px-3 py-2 hover:bg-slate-800/60"
-                      >
-                        <div>
-                          <p className="text-[13px] font-medium text-slate-50">
-                            {student.name}
-                          </p>
-                          <p className="text-[10px] text-slate-400">
-                            Grade {student.gradeLevel}
-                          </p>
+                      <div className="flex items-center justify-between px-3 py-2 hover:bg-slate-800/60">
+                        <div className="flex items-center gap-1">
+                          <Link
+                            href={`/dashboard/students/${student.id}?classId=${encodeURIComponent(
+                              cls.id,
+                            )}`}
+                          >
+                            <div>
+                              <p className="text-[13px] font-medium text-slate-50">
+                                {student.name}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                Grade {student.gradeLevel}
+                              </p>
+                            </div>
+                          </Link>
+                          <Link
+                            href={`/dashboard/students/${student.id}/edit-scores`}
+                            className="inline-flex h-4 w-4 items-center justify-center rounded-sm text-slate-400 hover:text-slate-200"
+                            aria-label={`Edit scores for ${student.name}`}
+                          >
+                            <svg
+                              viewBox="0 0 16 16"
+                              className="h-3 w-3"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M11.8 2.2a1 1 0 0 1 1.4 1.4l-7.2 7.2L4 11.5l.7-2.1 7.1-7.2zM3 6.5v6h6l2-2H5a1 1 0 0 1-1-1V6.5z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          </Link>
                         </div>
                         <span className="rounded-full border border-slate-600 bg-slate-900 px-2 py-0.5 text-[11px] font-mono text-slate-100">
                           {student.overallScore}
                         </span>
-                      </Link>
+                      </div>
                     </li>
                   ))}
                 </ul>

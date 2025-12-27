@@ -1,8 +1,8 @@
-// src/components/ManageStudentsClient.tsx
 "use client";
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { StudentScoreSummary } from "@/types/scores";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -63,7 +63,6 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
           id: student.id,
           name: student.name,
           gradeLevel: student.gradeLevel,
-          overallScore: student.overallScore,
         }),
       });
 
@@ -142,7 +141,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
             className="w-28"
           />
         </div>
-        <Button type="submit" variant="primary" className="text-xs">
+        <Button type="submit" variant="primary" className="text-xs h-8 px-3">
           Add student
         </Button>
       </form>
@@ -194,40 +193,28 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
                   />
                 </td>
                 <td className="px-3 py-2">
-                  <Input
-                    type="number"
-                    value={student.overallScore}
-                    onChange={(e) =>
-                      setStudents((prev) =>
-                        prev.map((s) =>
-                          s.id === student.id
-                            ? {
-                                ...s,
-                                overallScore: Number(e.target.value) || 0,
-                              }
-                            : s
-                        )
-                      )
-                    }
-                    className="h-7 w-24 text-[11px]"
-                  />
+                  <span className="text-[11px] text-slate-200">
+                    {student.overallScore}
+                  </span>
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap gap-1">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-[11px]"
-                      onClick={() =>
-                        (window.location.href = `/dashboard/students/${student.id}`)
-                      }
+                    <Link
+                      href={`/dashboard/students/${student.id}`}
+                      className="inline-flex items-center rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-100 hover:bg-slate-700"
                     >
                       View
-                    </Button>
+                    </Link>
+                    <Link
+                      href={`/dashboard/students/${student.id}/edit-scores`}
+                      className="inline-flex items-center rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-100 hover:bg-slate-700"
+                    >
+                      Edit scores
+                    </Link>
                     <Button
                       type="button"
                       variant="primary"
-                      className="text-[11px]"
+                      className="h-7 px-2 text-[11px]"
                       disabled={savingId === student.id}
                       onClick={() => handleSave(student)}
                     >
@@ -236,7 +223,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="text-[11px] text-red-400 hover:text-red-300"
+                      className="h-7 px-2 text-[11px] text-red-400 hover:text-red-300"
                       onClick={() => handleDelete(student.id, student.name)}
                     >
                       Delete

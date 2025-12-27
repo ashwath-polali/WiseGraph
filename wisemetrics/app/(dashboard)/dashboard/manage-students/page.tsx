@@ -32,10 +32,11 @@ export default async function ManageStudentsPage({
           <p className="mt-2 text-sm text-slate-400">
             No classes yet. Create a class first.
           </p>
-          <Link href="/dashboard">
-            <span className="mt-3 inline-block text-xs text-sky-400">
-              Back to dashboard
-            </span>
+          <Link
+            href="/dashboard"
+            className="mt-3 inline-block text-xs text-sky-400 hover:text-sky-300"
+          >
+            Back to dashboard
           </Link>
         </Card>
       </main>
@@ -43,8 +44,7 @@ export default async function ManageStudentsPage({
   }
 
   const idFromQuery =
-    classId &&
-    classes.some((c: TeacherClass) => c.id === classId)
+    classId && classes.some((c: TeacherClass) => c.id === classId)
       ? classId
       : null;
 
@@ -66,6 +66,12 @@ export default async function ManageStudentsPage({
           <p className="mt-2 text-sm text-slate-400">
             Selected class could not be loaded.
           </p>
+          <Link
+            href="/dashboard"
+            className="mt-3 inline-block text-xs text-sky-400 hover:text-sky-300"
+          >
+            Back to dashboard
+          </Link>
         </Card>
       </main>
     );
@@ -75,13 +81,12 @@ export default async function ManageStudentsPage({
     <main className="space-y-6">
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">
-            Students · {cls.name}
-          </h1>
-          <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
-            <span className="text-xs text-sky-400 hover:text-sky-300">
-              Back to dashboard
-            </span>
+          <h1 className="text-xl font-semibold">Students · {cls.name}</h1>
+          <Link
+            href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
+            className="text-xs text-sky-400 hover:text-sky-300"
+          >
+            Back to dashboard
           </Link>
         </div>
 
