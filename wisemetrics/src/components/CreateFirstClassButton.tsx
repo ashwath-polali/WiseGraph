@@ -1,4 +1,3 @@
-// src/components/CreateFirstClassButton.tsx
 "use client";
 
 import { useState } from "react";
@@ -9,10 +8,10 @@ import { Input } from "@/components/ui/Input";
 export function CreateFirstClassButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");        // e.g., "Period 1 – Algebra II"
-  const [gradeLevel, setGradeLevel] = useState(""); // e.g., "10"
-  const [subject, setSubject] = useState("");  // e.g., "Algebra II"
-  const [term, setTerm] = useState("");        // e.g., "Fall 2025"
+  const [name, setName] = useState("");        // "Period 1 – Algebra II"
+  const [gradeLevel, setGradeLevel] = useState(""); // "10"
+  const [subject, setSubject] = useState("");  // "Algebra II"
+  const [term, setTerm] = useState("");        // "Fall 2025"
   const [loading, setLoading] = useState(false);
 
   async function handleCreate() {

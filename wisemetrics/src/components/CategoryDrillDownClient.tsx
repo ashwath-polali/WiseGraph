@@ -1,4 +1,3 @@
-// src/components/CategoryDrillDownClient.tsx
 "use client";
 
 import { useState, useMemo } from "react";

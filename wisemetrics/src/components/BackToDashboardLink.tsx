@@ -1,4 +1,3 @@
-// src/components/BackToDashboardLink.tsx
 "use client";
 
 import Link from "next/link";

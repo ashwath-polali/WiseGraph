@@ -1,4 +1,3 @@
-// src/components/SettingsClient.tsx
 "use client";
 
 import { useState, FormEvent } from "react";
@@ -66,8 +65,6 @@ export function SettingsClient({ teacher, classes }: Props) {
         throw new Error(await accountRes.text());
       }
 
-      // If you’re abandoning the default settings feature entirely, you can
-      // safely no-op here or only keep name/email in /api/teacher too.
       setStatus("success");
       router.refresh();
     } catch (err) {
@@ -119,7 +116,7 @@ export function SettingsClient({ teacher, classes }: Props) {
         </div>
       </section>
 
-      {/* App defaults (can leave as-is or strip if you’re dropping the feature) */}
+      {/* App defaults*/}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-slate-50">App defaults</h2>
         <div className="grid gap-3 sm:grid-cols-3">

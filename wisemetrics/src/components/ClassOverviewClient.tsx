@@ -1,4 +1,3 @@
-// src/components/ClassOverviewClient.tsx
 "use client";
 
 import { useState } from "react";

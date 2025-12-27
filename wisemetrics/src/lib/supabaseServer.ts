@@ -1,4 +1,3 @@
-// src/lib/supabaseServer.ts
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
@@ -14,7 +13,7 @@ export async function createSupabaseServerClient() {
           return cookieStore.get(name)?.value;
         },
         set() {
-          // We let Supabase manage this in middleware/callback.
+          // we let Supabase manage this in middleware/callback.
         },
         remove() {},
       },

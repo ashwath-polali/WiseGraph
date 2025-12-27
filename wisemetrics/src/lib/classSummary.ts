@@ -1,4 +1,3 @@
-// src/lib/classSummary.ts
 import { prisma } from "@/lib/prisma";
 import { getCurrentTeacherId } from "./currentTeacher";
 import type {
@@ -90,7 +89,7 @@ export async function getClassScoreSummary(
 
   if (!cls) return null;
 
-  // --- Per-category class averages + subskill (subcategory) averages ---
+  //Per-category class averages + subskill (subcategory) averages 
 
   const categoryAverages: CategoryScore[] = cls.categories.map(
     (cat: RawCategory) => {
@@ -153,7 +152,7 @@ export async function getClassScoreSummary(
     },
   );
 
-  // --- Per-student category + subcategory scores ---
+  // Per-student category + subcategory scores
 
   const students: StudentScoreSummary[] = cls.students.map(
     (student: RawStudent): StudentScoreSummary => {
@@ -217,7 +216,7 @@ export async function getClassScoreSummary(
 }
 
 /**
- * List of all classes owned by the current teacher.
+ * List of all classes owned by the current teacher
  */
 export async function getTeacherClassesWithSummary() {
     const teacherId = await getCurrentTeacherId();

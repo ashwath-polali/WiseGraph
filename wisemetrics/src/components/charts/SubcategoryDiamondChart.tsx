@@ -1,4 +1,3 @@
-// src/components/charts/SubcategoryDiamondChart.tsx
 import { useMemo } from "react";
 import { Radar } from "react-chartjs-2";
 import {

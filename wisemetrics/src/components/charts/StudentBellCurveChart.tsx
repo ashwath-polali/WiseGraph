@@ -1,4 +1,3 @@
-// src/components/charts/StudentBellCurveChart.tsx
 "use client";
 
 import { useMemo } from "react";

@@ -1,4 +1,3 @@
-// src/types/scores.ts
 export type StandardScore = number; // 60–150
 
 export interface SubcategoryScore {

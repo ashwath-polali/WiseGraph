@@ -1,5 +1,3 @@
-// src/lib/chartScaling.ts
-
 export const SCOREMIN = 60;
 export const SCOREMAX = 150;
 

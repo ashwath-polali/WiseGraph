@@ -1,4 +1,3 @@
-// src/lib/currentTeacher.ts
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 

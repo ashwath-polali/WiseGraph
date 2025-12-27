@@ -1,4 +1,3 @@
-// src/components/charts/ClassExplodingRadialChart.tsx
 "use client";
 
 import { useMemo, useState } from "react";

@@ -1,4 +1,3 @@
-// src/components/charts/ClassBellCurveChart.tsx
 "use client";
 
 import { useMemo, useState } from "react";

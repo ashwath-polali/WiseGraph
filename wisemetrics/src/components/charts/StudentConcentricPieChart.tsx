@@ -1,4 +1,3 @@
-// src/components/charts/StudentConcentricPieChart.tsx
 "use client";
 
 import { useMemo } from "react";
@@ -17,7 +16,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface Props {
   student: StudentScoreSummary;
-  cls: ClassScoreSummary; // kept for future use if you want class comparison
+  cls: ClassScoreSummary; 
 }
 
 export function StudentConcentricPieChart({ student }: Props) {

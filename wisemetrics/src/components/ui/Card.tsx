@@ -1,4 +1,3 @@
-// src/components/ui/Card.tsx
 import type { HTMLAttributes, ReactNode } from "react";
 import clsx from "clsx";
 
