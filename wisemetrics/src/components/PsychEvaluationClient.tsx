@@ -114,6 +114,7 @@ export function ChartDisplay({
             cls={evaluation}
             viewMode="bell"
             onExpand={() => setIsExpanded(true)}
+            comparisonSnapshotId={comparisonSnapshotId}
           />
         )}
       </div>
@@ -158,7 +159,11 @@ export function ChartDisplay({
                   comparisonSnapshotId={comparisonSnapshotId}
                 />
               ) : (
-                <EnhancedBellCurveChart cls={evaluation} viewMode="bell" />
+                <EnhancedBellCurveChart 
+                  cls={evaluation} 
+                  viewMode="bell" 
+                  comparisonSnapshotId={comparisonSnapshotId}
+                />
               )}
             </div>
           </div>

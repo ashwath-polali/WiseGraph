@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { ClassScoreSummary, CategoryScore, SubcategoryScore } from "@/types/scores";
 import { clampScore } from "@/lib/chartScaling";
 
@@ -13,6 +13,7 @@ type Props = {
   cls: ClassScoreSummary;
   viewMode?: 'polar' | 'bell';
   onExpand?: () => void;
+  comparisonSnapshotId?: string | null;
 };
 
 type SelectedItem = {
@@ -21,7 +22,17 @@ type SelectedItem = {
   categoryId?: string;
   name: string;
   score: number;
+  snapshotScore?: number;
 };
+
+interface SnapshotScore {
+  categoryName: string;
+  categoryId: string | null;
+  subcategoryName: string | null;
+  subcategoryId: string | null;
+  standardScore: number;
+  overallScore: number;
+}
 
 function normalPdf(x: number, mean: number, sd: number): number {
   const z = (x - mean) / sd;
@@ -37,12 +48,57 @@ function jitterForKey(key: string, jitter = 6): number {
   return (v * 2 - 1) * jitter;
 }
 
-export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
+export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: Props) {
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [showFullNames, setShowFullNames] = useState(false);
+  const [snapshotScores, setSnapshotScores] = useState<SnapshotScore[] | null>(null);
 
   // Get student (for psychologist there's only 1)
   const student = cls.students[0];
+
+  // Fetch snapshot data when comparisonSnapshotId changes
+  useEffect(() => {
+    if (!comparisonSnapshotId) {
+      setSnapshotScores(null);
+      return;
+    }
+
+    async function fetchSnapshot() {
+      try {
+        const res = await fetch(`/api/snapshots/${comparisonSnapshotId}`);
+        if (!res.ok) throw new Error("Failed to fetch snapshot");
+        const data = await res.json();
+        setSnapshotScores(data.scores || []);
+      } catch (error) {
+        console.error("Error fetching snapshot:", error);
+        setSnapshotScores(null);
+      }
+    }
+
+    fetchSnapshot();
+  }, [comparisonSnapshotId]);
+
+  // Helper to get snapshot overall score
+  const getSnapshotOverallScore = (): number | null => {
+    if (!snapshotScores || snapshotScores.length === 0) return null;
+    return snapshotScores[0]?.overallScore ?? null;
+  };
+
+  // Helper to get snapshot score for a category
+  const getSnapshotCategoryScore = (categoryId: string): number | null => {
+    if (!snapshotScores) return null;
+    const score = snapshotScores.find((s) => s.categoryId === categoryId && !s.subcategoryId);
+    return score ? score.standardScore : null;
+  };
+
+  // Helper to get snapshot score for a subcategory
+  const getSnapshotSubcategoryScore = (categoryId: string, subcategoryId: string): number | null => {
+    if (!snapshotScores) return null;
+    const score = snapshotScores.find(
+      (s) => s.categoryId === categoryId && s.subcategoryId === subcategoryId
+    );
+    return score ? score.standardScore : null;
+  };
 
   const width = 520;
   const height = 270;
@@ -87,32 +143,40 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
 
   const handleOverallClick = () => {
     if (!student) return;
+    const snapshotScore = getSnapshotOverallScore();
     setSelectedItem({
       type: 'overall',
       id: 'overall',
       name: 'Overall Score',
       score: student.overallScore,
+      snapshotScore: snapshotScore ?? undefined,
     });
   };
 
   const handleCategoryClick = (cat: CategoryScore) => {
+    const snapshotScore = getSnapshotCategoryScore(cat.id);
     setSelectedItem({
       type: 'category',
       id: cat.id,
       name: cat.name,
       score: cat.score,
+      snapshotScore: snapshotScore ?? undefined,
     });
   };
 
   const handleSubcategoryClick = (sub: SubcategoryScore, cat: CategoryScore) => {
+    const snapshotScore = getSnapshotSubcategoryScore(cat.id, sub.id);
     setSelectedItem({
       type: 'subcategory',
       id: sub.id,
       categoryId: cat.id,
       name: sub.name,
       score: sub.score,
+      snapshotScore: snapshotScore ?? undefined,
     });
   };
+
+  const snapshotOverallScore = getSnapshotOverallScore();
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-950 via-slate-900/40 to-slate-950 p-4 shadow-[0_20px_60px_rgba(8,47,73,0.6)] ring-1 ring-slate-800/40 backdrop-blur-sm">
@@ -137,12 +201,39 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
             <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
               Overall Score
             </span>
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-orange-400">
-                {Math.round(student.overallScore)}
+            {snapshotOverallScore !== null ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold">
+                  <span className="text-2xl font-bold text-orange-400">
+                    {Math.round(student.overallScore)}
+                  </span>
+                  <span className="text-lg text-slate-500">
+                    {Math.round(snapshotOverallScore)}
+                  </span>
+                  <span className={`text-sm ${
+                    student.overallScore - snapshotOverallScore > 0
+                      ? 'text-emerald-400'
+                      : student.overallScore - snapshotOverallScore < 0
+                      ? 'text-red-400'
+                      : 'text-slate-400'
+                  }`}>
+                    {student.overallScore - snapshotOverallScore > 0
+                      ? `+${Math.round(student.overallScore - snapshotOverallScore)}`
+                      : student.overallScore - snapshotOverallScore < 0
+                      ? `${Math.round(student.overallScore - snapshotOverallScore)}`
+                      : '±0'}
+                  </span>
+                </div>
+                <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
               </div>
-              <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
-            </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-bold text-orange-400">
+                  {Math.round(student.overallScore)}
+                </div>
+                <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -248,6 +339,20 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
               strokeWidth={1.5}
             />
 
+            {/* Snapshot overall score line (if comparing) */}
+            {student && snapshotOverallScore !== null && (
+              <line
+                x1={xScale(snapshotOverallScore)}
+                y1={marginTop}
+                x2={xScale(snapshotOverallScore)}
+                y2={height - marginBottom}
+                className="stroke-violet-400/50"
+                strokeWidth={2}
+                strokeDasharray="4 3"
+                opacity={0.7}
+              />
+            )}
+
             {/* Student overall score line */}
             {student && (
               <>
@@ -303,6 +408,27 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
                     </g>
                   );
                 })()}
+
+                {/* Snapshot overall score dot (if comparing) */}
+                {snapshotOverallScore !== null && (() => {
+                  const x = xScale(snapshotOverallScore);
+                  const pdf = normalPdf(snapshotOverallScore, MEAN, SD);
+                  const y = yScaleFromPdf(pdf);
+                  return (
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={3.5}
+                      fill="none"
+                      stroke="#a78bfa"
+                      strokeWidth={2}
+                      opacity={0.8}
+                      style={{
+                        filter: "drop-shadow(0 0 8px rgba(167,139,250,0.8))",
+                      }}
+                    />
+                  );
+                })()}
               </>
             )}
 
@@ -316,53 +442,79 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
                 const isSelected = selectedItem?.type === 'category' && selectedItem.id === cat.id;
                 const initial = cat.name.charAt(0).toUpperCase();
 
+                const snapshotScore = getSnapshotCategoryScore(cat.id);
+
                 return (
-                  <g
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat)}
-                    className="cursor-pointer transition-all duration-200"
-                    style={{ transformOrigin: `${x}px ${y}px` }}
-                  >
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={isSelected ? 5.5 : 4}
-                      className={isSelected ? "fill-emerald-300" : "fill-emerald-400"}
-                      stroke="#fff"
-                      strokeWidth={isSelected ? 2 : 1.5}
-                      opacity={isSelected ? 1 : 0.95}
-                      style={{
-                        filter: isSelected
-                          ? "drop-shadow(0 0 12px rgba(52,211,153,1))"
-                          : "drop-shadow(0 0 6px rgba(52,211,153,0.8))",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
-                    {showFullNames ? (
-                      <text
-                        x={x}
-                        y={y - 12}
-                        className="fill-emerald-300 text-[8px] font-semibold"
-                        textAnchor="middle"
+                  <g key={cat.id}>
+                    {/* Snapshot category dot (hollow) */}
+                    {snapshotScore !== null && (() => {
+                      const snapX = xScale(snapshotScore);
+                      const snapPdf = normalPdf(snapshotScore, MEAN, SD);
+                      const snapBaseY = yScaleFromPdf(snapPdf);
+                      const snapY = snapBaseY + jitterForKey(`cat-${cat.id}`, 4);
+                      return (
+                        <circle
+                          cx={snapX}
+                          cy={snapY}
+                          r={3}
+                          fill="none"
+                          stroke="#a78bfa"
+                          strokeWidth={1.5}
+                          opacity={0.7}
+                          style={{
+                            filter: "drop-shadow(0 0 6px rgba(167,139,250,0.7))",
+                          }}
+                        />
+                      );
+                    })()}
+
+                    {/* Current category dot (solid) */}
+                    <g
+                      onClick={() => handleCategoryClick(cat)}
+                      className="cursor-pointer transition-all duration-200"
+                      style={{ transformOrigin: `${x}px ${y}px` }}
+                    >
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={isSelected ? 5.5 : 4}
+                        className={isSelected ? "fill-emerald-300" : "fill-emerald-400"}
+                        stroke="#fff"
+                        strokeWidth={isSelected ? 2 : 1.5}
+                        opacity={isSelected ? 1 : 0.95}
                         style={{
-                          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                          filter: isSelected
+                            ? "drop-shadow(0 0 12px rgba(52,211,153,1))"
+                            : "drop-shadow(0 0 6px rgba(52,211,153,0.8))",
+                          transition: "all 0.2s ease",
                         }}
-                      >
-                        {cat.name}
-                      </text>
-                    ) : (
-                      <text
-                        x={x}
-                        y={y - 8}
-                        className="fill-emerald-300 text-[9px] font-bold"
-                        textAnchor="middle"
-                        style={{
-                          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                        }}
-                      >
-                        {initial}
-                      </text>
-                    )}
+                      />
+                      {showFullNames ? (
+                        <text
+                          x={x}
+                          y={y - 12}
+                          className="fill-emerald-300 text-[8px] font-semibold"
+                          textAnchor="middle"
+                          style={{
+                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                          }}
+                        >
+                          {cat.name}
+                        </text>
+                      ) : (
+                        <text
+                          x={x}
+                          y={y - 8}
+                          className="fill-emerald-300 text-[9px] font-bold"
+                          textAnchor="middle"
+                          style={{
+                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                          }}
+                        >
+                          {initial}
+                        </text>
+                      )}
+                    </g>
                   </g>
                 );
               })}
@@ -378,52 +530,78 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
                   const isSelected = selectedItem?.type === 'subcategory' && selectedItem.id === sub.id;
                   const initial = sub.name.charAt(0).toUpperCase();
 
+                  const snapshotScore = getSnapshotSubcategoryScore(cat.id, sub.id);
+
                   return (
-                    <g
-                      key={`sub-${sub.id}`}
-                      onClick={() => handleSubcategoryClick(sub, cat)}
-                      className="cursor-pointer transition-all duration-200"
-                    >
-                      <circle
-                        cx={x}
-                        cy={y}
-                        r={isSelected ? 4 : 2.8}
-                        className={isSelected ? "fill-violet-300" : "fill-violet-400"}
-                        stroke="#fff"
-                        strokeWidth={isSelected ? 1.5 : 1}
-                        opacity={isSelected ? 1 : 0.85}
-                        style={{
-                          filter: isSelected
-                            ? "drop-shadow(0 0 10px rgba(167,139,250,1))"
-                            : "drop-shadow(0 0 4px rgba(167,139,250,0.7))",
-                          transition: "all 0.2s ease",
-                        }}
-                      />
-                      {showFullNames ? (
-                        <text
-                          x={x}
-                          y={y - 10}
-                          className="fill-violet-300 text-[7px] font-medium"
-                          textAnchor="middle"
+                    <g key={`sub-${sub.id}`}>
+                      {/* Snapshot subcategory dot (hollow) */}
+                      {snapshotScore !== null && (() => {
+                        const snapX = xScale(snapshotScore);
+                        const snapPdf = normalPdf(snapshotScore, MEAN, SD);
+                        const snapBaseY = yScaleFromPdf(snapPdf);
+                        const snapY = snapBaseY + jitterForKey(`sub-${sub.id}`, 3);
+                        return (
+                          <circle
+                            cx={snapX}
+                            cy={snapY}
+                            r={2.2}
+                            fill="none"
+                            stroke="#a78bfa"
+                            strokeWidth={1.2}
+                            opacity={0.6}
+                            style={{
+                              filter: "drop-shadow(0 0 4px rgba(167,139,250,0.6))",
+                            }}
+                          />
+                        );
+                      })()}
+
+                      {/* Current subcategory dot (solid) */}
+                      <g
+                        onClick={() => handleSubcategoryClick(sub, cat)}
+                        className="cursor-pointer transition-all duration-200"
+                      >
+                        <circle
+                          cx={x}
+                          cy={y}
+                          r={isSelected ? 4 : 2.8}
+                          className={isSelected ? "fill-violet-300" : "fill-violet-400"}
+                          stroke="#fff"
+                          strokeWidth={isSelected ? 1.5 : 1}
+                          opacity={isSelected ? 1 : 0.85}
                           style={{
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                            filter: isSelected
+                              ? "drop-shadow(0 0 10px rgba(167,139,250,1))"
+                              : "drop-shadow(0 0 4px rgba(167,139,250,0.7))",
+                            transition: "all 0.2s ease",
                           }}
-                        >
-                          {sub.name}
-                        </text>
-                      ) : (
-                        <text
-                          x={x}
-                          y={y - 7}
-                          className="fill-violet-300 text-[8px] font-bold"
-                          textAnchor="middle"
-                          style={{
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                          }}
-                        >
-                          {initial}
-                        </text>
-                      )}
+                        />
+                        {showFullNames ? (
+                          <text
+                            x={x}
+                            y={y - 10}
+                            className="fill-violet-300 text-[7px] font-medium"
+                            textAnchor="middle"
+                            style={{
+                              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                            }}
+                          >
+                            {sub.name}
+                          </text>
+                        ) : (
+                          <text
+                            x={x}
+                            y={y - 7}
+                            className="fill-violet-300 text-[8px] font-bold"
+                            textAnchor="middle"
+                            style={{
+                              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                            }}
+                          >
+                            {initial}
+                          </text>
+                        )}
+                      </g>
                     </g>
                   );
                 })
@@ -528,15 +706,45 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
                     <span className="text-[10px] font-medium text-slate-400">
                       Standard Score
                     </span>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2.5 w-2.5 rounded-full ${
-                        selectedItem.type === 'overall' ? 'bg-orange-400' :
-                        selectedItem.type === 'category' ? 'bg-emerald-400' : 'bg-violet-400'
-                      }`} />
-                      <span className="text-xl font-bold text-slate-50">
-                        {Math.round(selectedItem.score)}
-                      </span>
-                    </div>
+                    {selectedItem.snapshotScore !== undefined ? (
+                      <div className="flex items-center gap-2">
+                        <div className={`h-2.5 w-2.5 rounded-full ${
+                          selectedItem.type === 'overall' ? 'bg-orange-400' :
+                          selectedItem.type === 'category' ? 'bg-emerald-400' : 'bg-violet-400'
+                        }`} />
+                        <div className="flex items-center gap-1.5 text-xs font-semibold">
+                          <span className="text-xl text-slate-50">
+                            {Math.round(selectedItem.score)}
+                          </span>
+                          <span className="text-base text-slate-500">
+                            {Math.round(selectedItem.snapshotScore)}
+                          </span>
+                          <span className={`text-sm ${
+                            selectedItem.score - selectedItem.snapshotScore > 0
+                              ? 'text-emerald-400'
+                              : selectedItem.score - selectedItem.snapshotScore < 0
+                              ? 'text-red-400'
+                              : 'text-slate-400'
+                          }`}>
+                            {selectedItem.score - selectedItem.snapshotScore > 0
+                              ? `+${Math.round(selectedItem.score - selectedItem.snapshotScore)}`
+                              : selectedItem.score - selectedItem.snapshotScore < 0
+                              ? `${Math.round(selectedItem.score - selectedItem.snapshotScore)}`
+                              : '±0'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className={`h-2.5 w-2.5 rounded-full ${
+                          selectedItem.type === 'overall' ? 'bg-orange-400' :
+                          selectedItem.type === 'category' ? 'bg-emerald-400' : 'bg-violet-400'
+                        }`} />
+                        <span className="text-xl font-bold text-slate-50">
+                          {Math.round(selectedItem.score)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -548,20 +756,37 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
                         Related Subcategories
                       </div>
                       <div className="space-y-1">
-                        {category.subcategories.map((sub) => (
-                          <button
-                            key={sub.id}
-                            onClick={() => handleSubcategoryClick(sub, category)}
-                            className="flex w-full items-center justify-between rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5 text-left transition-all hover:border-violet-500/40 hover:bg-slate-900/60"
-                          >
-                            <span className="truncate text-[10px] text-slate-300">
-                              {sub.name}
-                            </span>
-                            <span className="ml-2 font-mono text-[10px] font-semibold text-violet-400">
-                              {Math.round(sub.score)}
-                            </span>
-                          </button>
-                        ))}
+                        {category.subcategories.map((sub) => {
+                          const snapSubScore = getSnapshotSubcategoryScore(category.id, sub.id);
+                          return (
+                            <button
+                              key={sub.id}
+                              onClick={() => handleSubcategoryClick(sub, category)}
+                              className="flex w-full items-center justify-between rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5 text-left transition-all hover:border-violet-500/40 hover:bg-slate-900/60"
+                            >
+                              <span className="truncate text-[10px] text-slate-300">
+                                {sub.name}
+                              </span>
+                              {snapSubScore !== null ? (
+                                <div className="ml-2 flex items-center gap-1 text-[10px] font-semibold">
+                                  <span className="text-violet-400">{Math.round(sub.score)}</span>
+                                  <span className="text-slate-500">{Math.round(snapSubScore)}</span>
+                                  <span className={
+                                    sub.score - snapSubScore > 0 ? 'text-emerald-400' :
+                                    sub.score - snapSubScore < 0 ? 'text-red-400' : 'text-slate-400'
+                                  }>
+                                    {sub.score - snapSubScore > 0 ? `+${Math.round(sub.score - snapSubScore)}` :
+                                     sub.score - snapSubScore < 0 ? `${Math.round(sub.score - snapSubScore)}` : '±0'}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="ml-2 font-mono text-[10px] font-semibold text-violet-400">
+                                  {Math.round(sub.score)}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ) : null;
@@ -600,6 +825,12 @@ export function EnhancedBellCurveChart({ cls, onExpand }: Props) {
           <div className="h-0.5 w-4 rounded bg-sky-400" />
           <span className="font-medium text-slate-400">Normal Distribution (μ=100, σ=15)</span>
         </div>
+        {snapshotScores && (
+          <div className="flex items-center gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full border-2 border-violet-400" />
+            <span className="font-medium text-slate-400">Snapshot Scores</span>
+          </div>
+        )}
       </div>
     </div>
   );
