@@ -7,8 +7,13 @@ import { Button } from '@/components/ui/Button';
 import { PsychStudentViewClient } from '@/components/PsychStudentViewClient';
 import { PsychEvaluationProvider, ViewModeToggle, ChartDisplay } from '@/components/PsychEvaluationClient';
 import { ExportChartButtons } from '@/components/ExportChartButtons';
+import { SnapshotManager } from '@/components/SnapshotManager';
+
+
 
 type Props = { params: Promise<{ id: string }> };
+
+
 
 export default async function PsychEvaluationPage(props: Props) {
   const params = await props.params;
@@ -121,10 +126,10 @@ export default async function PsychEvaluationPage(props: Props) {
             </div>
           </Card>
         ) : (
-          <PsychEvaluationProvider>
+          <PsychEvaluationProvider evaluation={evaluation}>
             <div className="grid grid-cols-12 gap-6">
               {/* Left Sidebar */}
-              <div className="col-span-3">
+              <div className="col-span-3 space-y-6">
                 <Card className="sticky top-6 border border-slate-800/80 bg-slate-900/60 backdrop-blur-sm shadow-xl">
                   <div className="p-5 border-b border-slate-800/60">
                     <h3 className="text-sm font-bold text-slate-50 uppercase tracking-wider flex items-center gap-2">
@@ -144,7 +149,12 @@ export default async function PsychEvaluationPage(props: Props) {
                     />
                   </div>
                 </Card>
+
+
+                {/* Snapshot Manager */}
+                <SnapshotManager classId={params.id} />
               </div>
+
 
               {/* Main Visualization */}
               <div className="col-span-9 space-y-6">
@@ -162,7 +172,7 @@ export default async function PsychEvaluationPage(props: Props) {
                           Standard score visualization across all assessment areas
                         </p>
                       </div>
-                      {/* TOGGLE BUTTONS IN THE HEADER */}
+                      {/* ONLY VIEW MODE TOGGLE */}
                       <ViewModeToggle />
                     </div>
                   </div>
@@ -172,6 +182,7 @@ export default async function PsychEvaluationPage(props: Props) {
                     <ChartDisplay evaluation={evaluation} />
                   </div>
                 </Card>
+
 
                 {/* Action Bar */}
                 <div className="flex items-center justify-between">
@@ -198,8 +209,10 @@ export default async function PsychEvaluationPage(props: Props) {
                     )}
                   </div>
 
+
                   <ExportChartButtons studentName={student?.name || evaluation.name} />
                 </div>
+
 
                 {/* Category Breakdown Cards */}
                 <div className="grid grid-cols-2 gap-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type {
   ClassScoreSummary,
   CategoryScore,
@@ -14,6 +14,7 @@ type Props = {
   showFullNames?: boolean;
   onToggleNames?: () => void;
   onExpand?: () => void;
+  comparisonSnapshotId?: string | null;
 };
 
 type SelectedItem = {
@@ -23,6 +24,20 @@ type SelectedItem = {
   categoryName?: string;
   categoryId?: string;
   subcategoryId?: string;
+  snapshotScore?: number;
+};
+
+type SnapshotData = {
+  id: string;
+  name: string;
+  scores: {
+    categoryId: string;
+    categoryName: string;
+    subcategoryId: string | null;
+    subcategoryName: string | null;
+    standardScore: number;
+    overallScore: number;
+  }[];
 };
 
 export function PolarStudentChart({ 
@@ -30,11 +45,13 @@ export function PolarStudentChart({
   svgRef, 
   showFullNames = false,
   onToggleNames,
-  onExpand
+  onExpand,
+  comparisonSnapshotId,
 }: Props) {
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [drillCategoryId, setDrillCategoryId] = useState<string | null>(null);
   const [isOverallHovered, setIsOverallHovered] = useState(false);
+  const [snapshotData, setSnapshotData] = useState<SnapshotData | null>(null);
 
   const size = 600;
   const cx = size / 2;
@@ -48,6 +65,28 @@ export function PolarStudentChart({
 
   const baseInner = 0;
   const maxRadius = 240;
+
+  // Fetch snapshot data when comparisonSnapshotId changes
+  useEffect(() => {
+    if (!comparisonSnapshotId) {
+      setSnapshotData(null);
+      return;
+    }
+
+    async function fetchSnapshot() {
+      try {
+        const res = await fetch(`/api/snapshots/${comparisonSnapshotId}`);
+        if (!res.ok) throw new Error('Failed to fetch snapshot');
+        const data = await res.json();
+        setSnapshotData(data);
+      } catch (error) {
+        console.error('Error fetching snapshot:', error);
+        setSnapshotData(null);
+      }
+    }
+
+    fetchSnapshot();
+  }, [comparisonSnapshotId]);
 
   function scoreToRadius(score: number): number {
     const clamped = clampScore(score);
@@ -72,6 +111,12 @@ export function PolarStudentChart({
     }
     return SCORE_MEAN;
   }, [evaluation]);
+
+  // Get snapshot overall score
+  const snapshotOverallScore = useMemo(() => {
+    if (!snapshotData || snapshotData.scores.length === 0) return null;
+    return snapshotData.scores[0].overallScore;
+  }, [snapshotData]);
 
   const categories = evaluation.categories;
   const numCategories = Math.max(categories.length, 1);
@@ -105,6 +150,14 @@ export function PolarStudentChart({
       const labelRadius = maxRadius + 45;
       const labelPoint = polarPoint(labelRadius, mid);
 
+      // Get snapshot score for this category
+      const snapshotCategoryScores = snapshotData?.scores.filter(
+        s => s.categoryId === cat.id && s.subcategoryId === null
+      ) || [];
+      const snapshotCategoryScore = snapshotCategoryScores.length > 0 
+        ? snapshotCategoryScores[0].standardScore 
+        : null;
+
       const subcategories = cat.subcategories || [];
       const subcategoryPoints = subcategories.map((sub, subIdx) => {
         const subAngleFraction = subcategories.length === 1 
@@ -115,10 +168,16 @@ export function PolarStudentChart({
         const subR = scoreToRadius(sub.score);
         const point = polarPoint(subR, subAngle);
 
+        // Get snapshot score for this subcategory
+        const snapshotSubScore = snapshotData?.scores.find(
+          s => s.categoryId === cat.id && s.subcategoryId === sub.id
+        )?.standardScore || null;
+
         return {
           id: sub.id,
           name: sub.name,
           score: sub.score,
+          snapshotScore: snapshotSubScore,
           x: point.x,
           y: point.y,
           angle: subAngle,
@@ -130,6 +189,7 @@ export function PolarStudentChart({
         id: cat.id,
         name: cat.name,
         score: cat.score,
+        snapshotScore: snapshotCategoryScore,
         path,
         angleStart,
         angleEnd,
@@ -139,7 +199,7 @@ export function PolarStudentChart({
         color: getCategoryColor(idx),
       };
     });
-  }, [categories, anglePer, maxRadius]);
+  }, [categories, anglePer, maxRadius, snapshotData]);
 
   const drillCategory = drillCategoryId 
     ? categoryWedges.find(c => c.id === drillCategoryId) 
@@ -246,9 +306,26 @@ export function PolarStudentChart({
 
                   const labelPoint = polarPoint(maxRadius + 45, mid);
 
+                  // Snapshot comparison wedge
+                  const snapshotPath = drillCategory.snapshotScore 
+                    ? radialRingPath(cx, cy, rInner, scoreToRadius(drillCategory.snapshotScore), angleStart, angleEnd)
+                    : null;
+
                   return (
                     <>
-                      {/* Wedge */}
+                      {/* Snapshot wedge (baseline) */}
+                      {snapshotPath && (
+                        <path
+                          d={snapshotPath}
+                          fill="rgba(148,163,184,0.2)"
+                          stroke="rgba(148,163,184,0.6)"
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          opacity={0.7}
+                        />
+                      )}
+
+                      {/* Current wedge */}
                       <path
                         d={path}
                         fill={drillCategory.color.fill}
@@ -269,7 +346,7 @@ export function PolarStudentChart({
                         {drillCategory.name}
                       </text>
 
-                      {/* Score badge */}
+                      {/* Score badges */}
                       <g transform={`translate(${cx + Math.cos(mid) * (rOuter + 22)},${cy + Math.sin(mid) * (rOuter + 22)})`}>
                         <rect
                           x={-18}
@@ -290,6 +367,29 @@ export function PolarStudentChart({
                         </text>
                       </g>
 
+                      {/* Snapshot score badge */}
+                      {drillCategory.snapshotScore && (
+                        <g transform={`translate(${cx + Math.cos(mid) * (scoreToRadius(drillCategory.snapshotScore) + 22)},${cy + Math.sin(mid) * (scoreToRadius(drillCategory.snapshotScore) + 22)})`}>
+                          <rect
+                            x={-18}
+                            y={-10}
+                            width={36}
+                            height={20}
+                            rx={10}
+                            className="fill-slate-950/90"
+                            stroke="rgba(148,163,184,0.6)"
+                            strokeWidth={1}
+                          />
+                          <text
+                            textAnchor="middle"
+                            alignmentBaseline="middle"
+                            className="fill-slate-400 text-[10px] font-semibold"
+                          >
+                            {Math.round(drillCategory.snapshotScore)}
+                          </text>
+                        </g>
+                      )}
+
                       {/* Subcategory polygon and points */}
                       {drillCategory.subcategories.length > 0 && (() => {
                         const redistributed = drillCategory.subcategories.map((sub, idx) => {
@@ -300,11 +400,31 @@ export function PolarStudentChart({
                           const subR = scoreToRadius(sub.score);
                           const point = polarPoint(subR, subAngle);
                           
-                          return { ...sub, x: point.x, y: point.y, angle: subAngle };
+                          // Snapshot point
+                          const snapshotPoint = sub.snapshotScore 
+                            ? polarPoint(scoreToRadius(sub.snapshotScore), subAngle)
+                            : null;
+                          
+                          return { ...sub, x: point.x, y: point.y, angle: subAngle, snapshotPoint };
                         });
 
                         return (
                           <>
+                            {/* Snapshot baseline polyline */}
+                            {comparisonSnapshotId && (
+                              <polyline
+                                points={redistributed
+                                  .filter(s => s.snapshotPoint)
+                                  .map(s => `${s.snapshotPoint!.x},${s.snapshotPoint!.y}`)
+                                  .join(" ")}
+                                stroke="rgba(148,163,184,0.5)"
+                                strokeWidth={2}
+                                fill="none"
+                                strokeDasharray="4 4"
+                              />
+                            )}
+
+                            {/* Current polyline */}
                             <polyline
                               points={redistributed.map(s => `${s.x},${s.y}`).join(" ")}
                               stroke="rgba(139,92,246,0.6)"
@@ -313,6 +433,21 @@ export function PolarStudentChart({
                               strokeDasharray="4 4"
                             />
 
+                            {/* Snapshot points */}
+                            {comparisonSnapshotId && redistributed.map((sub) => sub.snapshotPoint && (
+                              <circle
+                                key={`snapshot-${sub.id}`}
+                                cx={sub.snapshotPoint.x}
+                                cy={sub.snapshotPoint.y}
+                                r={3.5}
+                                className="fill-slate-400"
+                                stroke="rgba(148,163,184,0.7)"
+                                strokeWidth={1.5}
+                                opacity={0.6}
+                              />
+                            ))}
+
+                            {/* Current points */}
                             {redistributed.map((sub) => (
                               <g key={sub.id}>
                                 <circle
@@ -327,6 +462,7 @@ export function PolarStudentChart({
                                     type: "subcategory",
                                     name: sub.name,
                                     score: sub.score,
+                                    snapshotScore: sub.snapshotScore || undefined,
                                     categoryName: drillCategory.name,
                                     categoryId: drillCategory.id,
                                     subcategoryId: sub.id,
@@ -378,7 +514,25 @@ export function PolarStudentChart({
               <>
                 {categoryWedges.map((wedge) => (
                   <g key={wedge.id}>
-                    {/* Wedge */}
+                    {/* Snapshot wedge (baseline) */}
+                    {wedge.snapshotScore && (() => {
+                      const r = scoreToRadius(wedge.snapshotScore);
+                      const innerR = baseInner + 10;
+                      const snapshotPath = radialRingPath(cx, cy, innerR, r, wedge.angleStart, wedge.angleEnd);
+                      
+                      return (
+                        <path
+                          d={snapshotPath}
+                          fill="rgba(148,163,184,0.15)"
+                          stroke="rgba(148,163,184,0.5)"
+                          strokeWidth={1}
+                          strokeDasharray="3 3"
+                          opacity={0.6}
+                        />
+                      );
+                    })()}
+
+                    {/* Current wedge */}
                     <path
                       d={wedge.path}
                       fill={wedge.color.fill}
@@ -411,7 +565,20 @@ export function PolarStudentChart({
                       {wedge.name}
                     </text>
 
-                    {/* Category score dot */}
+                    {/* Snapshot category score dot */}
+                    {wedge.snapshotScore && (
+                      <circle
+                        cx={polarPoint(scoreToRadius(wedge.snapshotScore), wedge.mid).x}
+                        cy={polarPoint(scoreToRadius(wedge.snapshotScore), wedge.mid).y}
+                        r={3.5}
+                        fill="rgba(148,163,184,0.6)"
+                        stroke="rgba(148,163,184,0.8)"
+                        strokeWidth={1.2}
+                        opacity={0.7}
+                      />
+                    )}
+
+                    {/* Current category score dot */}
                     <circle
                       cx={polarPoint(scoreToRadius(wedge.score), wedge.mid).x}
                       cy={polarPoint(scoreToRadius(wedge.score), wedge.mid).y}
@@ -427,6 +594,7 @@ export function PolarStudentChart({
                           type: "category",
                           name: wedge.name,
                           score: wedge.score,
+                          snapshotScore: wedge.snapshotScore || undefined,
                           categoryId: wedge.id,
                         });
                       }}
@@ -435,6 +603,25 @@ export function PolarStudentChart({
                     {/* Subcategory polygon */}
                     {wedge.subcategories.length > 0 && (
                       <>
+                        {/* Snapshot subcategory polyline */}
+                        {comparisonSnapshotId && wedge.subcategories.some(s => s.snapshotScore) && (
+                          <polyline
+                            points={wedge.subcategories
+                              .filter(sub => sub.snapshotScore)
+                              .map(sub => {
+                                const pt = polarPoint(scoreToRadius(sub.snapshotScore!), sub.angle);
+                                return `${pt.x},${pt.y}`;
+                              })
+                              .join(" ")}
+                            stroke="rgba(148,163,184,0.4)"
+                            strokeWidth={1.2}
+                            fill="none"
+                            strokeDasharray="3 3"
+                            className="pointer-events-none"
+                          />
+                        )}
+
+                        {/* Current subcategory polyline */}
                         <polyline
                           points={wedge.subcategories.map(sub => `${sub.x},${sub.y}`).join(" ")}
                           stroke="rgba(139,92,246,0.5)"
@@ -444,6 +631,21 @@ export function PolarStudentChart({
                           className="pointer-events-none"
                         />
 
+                        {/* Snapshot subcategory dots */}
+                        {comparisonSnapshotId && wedge.subcategories.map((sub) => sub.snapshotScore && (
+                          <circle
+                            key={`snapshot-${sub.id}`}
+                            cx={polarPoint(scoreToRadius(sub.snapshotScore), sub.angle).x}
+                            cy={polarPoint(scoreToRadius(sub.snapshotScore), sub.angle).y}
+                            r={2.5}
+                            className="fill-slate-400"
+                            stroke="rgba(148,163,184,0.7)"
+                            strokeWidth={1}
+                            opacity={0.6}
+                          />
+                        ))}
+
+                        {/* Current subcategory dots */}
                         {wedge.subcategories.map((sub) => (
                           <g key={sub.id}>
                             <circle
@@ -460,6 +662,7 @@ export function PolarStudentChart({
                                   type: "subcategory",
                                   name: sub.name,
                                   score: sub.score,
+                                  snapshotScore: sub.snapshotScore || undefined,
                                   categoryName: wedge.name,
                                   categoryId: wedge.id,
                                   subcategoryId: sub.id,
@@ -485,7 +688,20 @@ export function PolarStudentChart({
               </>
             )}
 
-            {/* Overall Score Circle - YELLOW HIGHLIGHT ON HOVER */}
+            {/* Snapshot Overall Score Circle */}
+            {comparisonSnapshotId && snapshotOverallScore && (
+              <circle
+                cx={cx}
+                cy={cy}
+                r={scoreToRadius(snapshotOverallScore)}
+                className="fill-none stroke-slate-400"
+                strokeWidth={2}
+                opacity={0.5}
+                strokeDasharray="6 4"
+              />
+            )}
+
+            {/* Current Overall Score Circle - YELLOW HIGHLIGHT ON HOVER */}
             <circle
               cx={cx}
               cy={cy}
@@ -501,6 +717,7 @@ export function PolarStudentChart({
                 type: "overall",
                 name: "Overall Score",
                 score: overallScore,
+                snapshotScore: snapshotOverallScore || undefined,
               })}
               onMouseEnter={() => setIsOverallHovered(true)}
               onMouseLeave={() => setIsOverallHovered(false)}
@@ -517,14 +734,26 @@ export function PolarStudentChart({
 
             {/* Overall text - ONLY SHOW WHEN showFullNames is true */}
             {showFullNames && (
-              <text
-                x={cx}
-                y={cy + 22}
-                className="fill-slate-300 text-[10px] font-semibold pointer-events-none"
-                textAnchor="middle"
-              >
-                Overall: {Math.round(overallScore)}
-              </text>
+              <>
+                <text
+                  x={cx}
+                  y={cy + 22}
+                  className="fill-slate-300 text-[10px] font-semibold pointer-events-none"
+                  textAnchor="middle"
+                >
+                  Current: {Math.round(overallScore)}
+                </text>
+                {comparisonSnapshotId && snapshotOverallScore && (
+                  <text
+                    x={cx}
+                    y={cy + 34}
+                    className="fill-slate-500 text-[9px] font-medium pointer-events-none"
+                    textAnchor="middle"
+                  >
+                    Before: {Math.round(snapshotOverallScore)}
+                  </text>
+                )}
+              </>
             )}
           </svg>
         </div>
@@ -593,10 +822,32 @@ export function PolarStudentChart({
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-violet-500/5 to-blue-500/5 rounded-xl blur-2xl" />
               <div className="relative rounded-xl border border-slate-700/40 bg-slate-900/60 backdrop-blur-sm p-5 text-center">
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-semibold">Standard Score</div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-semibold">
+                  {comparisonSnapshotId && selectedItem.snapshotScore ? "Current Score" : "Standard Score"}
+                </div>
                 <div className="text-5xl font-bold bg-gradient-to-br from-slate-100 to-slate-300 bg-clip-text text-transparent mb-3">
                   {Math.round(selectedItem.score)}
                 </div>
+                
+                {/* Comparison delta */}
+                {comparisonSnapshotId && selectedItem.snapshotScore && (
+                  <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/50 mb-2">
+                    <span className="text-xs text-slate-500">Previous:</span>
+                    <span className="text-sm font-semibold text-slate-400">
+                      {Math.round(selectedItem.snapshotScore)}
+                    </span>
+                    <span className={`text-sm font-bold ${
+                      selectedItem.score > selectedItem.snapshotScore 
+                        ? "text-emerald-400" 
+                        : selectedItem.score < selectedItem.snapshotScore 
+                        ? "text-amber-400" 
+                        : "text-slate-400"
+                    }`}>
+                      {selectedItem.score > selectedItem.snapshotScore && "+"}
+                      {Math.round(selectedItem.score - selectedItem.snapshotScore)}
+                    </span>
+                  </div>
+                )}
                 
                 {/* Performance indicator */}
                 <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/50">

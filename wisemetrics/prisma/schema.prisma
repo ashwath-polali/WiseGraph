@@ -7,29 +7,31 @@ datasource db {
 }
 
 model Teacher {
-  id                 String         @id @default(uuid())
+  id                 String           @id @default(uuid())
   email              String         
   name               String?
-  accountType        String         @default("teacher")  // Change this line
-  createdAt          DateTime       @default(now())
+  accountType        String           @default("teacher")
+  createdAt          DateTime         @default(now())
   defaultClassId     String?
   defaultStudentView String?
   school             String?
   classes            Class[]
   PsychStudent       PsychStudent[]
+  ScoreSnapshots     ScoreSnapshot[]  // NEW
 }
 
 model Class {
-  id         String     @id @default(uuid())
-  teacherId  String
-  name       String
-  gradeLevel String
-  subject    String
-  term       String?
-  createdAt  DateTime   @default(now())
-  categories Category[]
-  teacher    Teacher    @relation(fields: [teacherId], references: [id])
-  students   Student[]
+  id             String          @id @default(uuid())
+  teacherId      String
+  name           String
+  gradeLevel     String
+  subject        String
+  term           String?
+  createdAt      DateTime        @default(now())
+  categories     Category[]
+  teacher        Teacher         @relation(fields: [teacherId], references: [id])
+  students       Student[]
+  scoreSnapshots ScoreSnapshot[] // NEW
 }
 
 model Student {
@@ -78,14 +80,15 @@ model Score {
 }
 
 model PsychStudent {
-  id           String         @id @default(uuid())
-  teacherId    String
-  name         String
-  gradeLevel   String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  teacher      Teacher        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  subtests     PsychSubtest[]
+  id             String          @id @default(uuid())
+  teacherId      String
+  name           String
+  gradeLevel     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  teacher        Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subtests       PsychSubtest[]
+  scoreSnapshots ScoreSnapshot[] // NEW
 
   @@unique([teacherId, name])
 }
@@ -99,4 +102,45 @@ model PsychSubtest {
   student       PsychStudent @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, name])
+}
+
+// NEW: Represents a finalized term/quarter snapshot
+model ScoreSnapshot {
+  id             String          @id @default(uuid())
+  name           String          // "Term 1", "Q2", "Fall 2024", etc.
+  classId        String?         // For teacher accounts (entire class snapshot)
+  teacherId      String          // Owner of this snapshot
+  psychStudentId String?         // For psychologist accounts (single student)
+  snapshotDate   DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+
+  scores       SnapshotScore[]
+  
+  class        Class?        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher      Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  psychStudent PsychStudent? @relation(fields: [psychStudentId], references: [id], onDelete: Cascade)
+
+  @@index([classId])
+  @@index([psychStudentId])
+  @@index([teacherId])
+}
+
+// NEW: Frozen scores from a specific term
+model SnapshotScore {
+  id              String   @id @default(uuid())
+  snapshotId      String
+  studentId       String?  // Original student ID (may be null if student deleted)
+  studentName     String   // Store name in case student is deleted later
+  categoryId      String?
+  categoryName    String
+  subcategoryId   String?
+  subcategoryName String?
+  standardScore   Int
+  overallScore    Int      // Student's overall score at time of snapshot
+  createdAt       DateTime @default(now())
+
+  snapshot ScoreSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@index([snapshotId])
+  @@index([studentId])
 }
