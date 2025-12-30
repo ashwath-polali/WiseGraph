@@ -1,4 +1,3 @@
-// app/psych/evaluations/[id]/edit-scores/page.tsx
 import { notFound, redirect } from 'next/navigation';
 import { getClassScoreSummary } from '@/lib/classSummary';
 import { getCurrentTeacherId } from '@/lib/currentTeacher';
@@ -17,7 +16,7 @@ export default async function EditPsychScoresPage(props: Props) {
   return (
     <div className="min-h-screen bg-slate-950">
       <div className="max-w-[1800px] mx-auto px-6 py-6">
-        {/* Let EditScoresPsychClient render everything */}
+        {/* EditScoresPsychClient render everything */}
         <EditScoresPsychClient evaluation={evaluation} />
       </div>
     </div>

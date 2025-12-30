@@ -1,4 +1,3 @@
-// src/components/PolarStudentChartWrapper.tsx
 "use client";
 
 import { useState } from "react";

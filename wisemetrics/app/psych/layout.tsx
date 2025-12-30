@@ -17,7 +17,6 @@ export default async function PsychLayout({
     select: { accountType: true },
   });
   
-  // Verify this is a psychologist account
   if (teacher?.accountType !== 'psychologist') {
     redirect('/dashboard');
   }

@@ -1,4 +1,3 @@
-// src/components/charts/EnhancedBellCurveChart.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -24,13 +23,11 @@ type SelectedItem = {
   score: number;
 };
 
-/** Normal PDF */
 function normalPdf(x: number, mean: number, sd: number): number {
   const z = (x - mean) / sd;
   return (1 / (sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
 }
 
-/** Deterministic small vertical jitter in [-jitter, jitter] */
 function jitterForKey(key: string, jitter = 6): number {
   let hash = 0;
   for (let i = 0; i < key.length; i++) {

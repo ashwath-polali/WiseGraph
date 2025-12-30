@@ -1,4 +1,3 @@
-// src/components/PsychEvaluationClient.tsx
 'use client';
 
 import { useState, createContext, useContext } from 'react';
