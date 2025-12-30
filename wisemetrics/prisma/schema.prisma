@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,80 +6,97 @@ datasource db {
   provider = "postgresql"
 }
 
-// ------------------ MODELS ------------------
-
 model Teacher {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-
-  // Settings
+  id                 String         @id @default(uuid())
+  email              String         @unique
+  name               String?
+  accountType        String         @default("teacher")  // Change this line
+  createdAt          DateTime       @default(now())
+  defaultClassId     String?
+  defaultStudentView String?
   school             String?
-  defaultClassId     String?  // just stores a Class.id as text
-  defaultStudentView String?  // "polar" | "bell" | "concentric"
-
-  classes Class[]
+  classes            Class[]
+  PsychStudent       PsychStudent[]
 }
 
 model Class {
-  id         String   @id @default(uuid())
+  id         String     @id @default(uuid())
   teacherId  String
   name       String
   gradeLevel String
   subject    String
   term       String?
-  createdAt  DateTime @default(now())
-
-  teacher Teacher @relation(fields: [teacherId], references: [id])
-  // REMOVE this line if you added it:
-  // defaultForTeachers Teacher[] @relation("DefaultClass")
-
-  students   Student[]
+  createdAt  DateTime   @default(now())
   categories Category[]
+  teacher    Teacher    @relation(fields: [teacherId], references: [id])
+  students   Student[]
 }
 
 model Student {
   id           String   @id @default(uuid())
   classId      String
-  class        Class    @relation(fields: [classId], references: [id])
   name         String
   studentCode  String?
   gradeLevel   String
   overallScore Int
-  scores       Score[]
   createdAt    DateTime @default(now())
+  scores       Score[]
+  class        Class    @relation(fields: [classId], references: [id])
 }
 
 model Category {
-  id           String        @id @default(uuid())
-  classId      String
-  class        Class         @relation(fields: [classId], references: [id])
-  name         String
-  order        Int           @default(0)
+  id            String        @id @default(uuid())
+  classId       String
+  name          String
+  order         Int           @default(0)
+  class         Class         @relation(fields: [classId], references: [id])
+  scores        Score[]
   subcategories Subcategory[]
-  scores       Score[]       // <-- add this line
 }
 
 model Subcategory {
-  id         String      @id @default(uuid())
+  id         String   @id @default(uuid())
   categoryId String
-  category   Category    @relation(fields: [categoryId], references: [id])
   name       String
-  order      Int         @default(0)
+  order      Int      @default(0)
   scores     Score[]
+  category   Category @relation(fields: [categoryId], references: [id])
 }
 
 model Score {
   id            String       @id @default(uuid())
   studentId     String
-  student       Student      @relation(fields: [studentId], references: [id])
   categoryId    String?
-  category      Category?    @relation(fields: [categoryId], references: [id])
   subcategoryId String?
-  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
   standardScore Int
   createdAt     DateTime     @default(now())
+  category      Category?    @relation(fields: [categoryId], references: [id])
+  student       Student      @relation(fields: [studentId], references: [id])
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
 
   @@unique([studentId, categoryId, subcategoryId], name: "student_category_sub_unique")
+}
+
+model PsychStudent {
+  id           String         @id @default(uuid())
+  teacherId    String
+  name         String
+  gradeLevel   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  teacher      Teacher        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subtests     PsychSubtest[]
+
+  @@unique([teacherId, name])
+}
+
+model PsychSubtest {
+  id            String       @id @default(uuid())
+  studentId     String
+  name          String
+  standardScore Int
+  createdAt     DateTime     @default(now())
+  student       PsychStudent @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, name])
 }

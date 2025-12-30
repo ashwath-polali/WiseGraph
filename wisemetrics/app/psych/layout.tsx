@@ -1,45 +1,49 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { LogoutButton } from "@/components/LogoutButton";
-import { getCurrentTeacherId } from "@/lib/currentTeacher";
-import { BackToDashboardLink } from "@/components/BackToDashboardLink";
-import { prisma } from "@/lib/prisma";
+import { getCurrentTeacherId } from '@/lib/currentTeacher';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
+import { LogoutButton } from '@/components/LogoutButton';
 
-export default async function DashboardLayout({
+export default async function PsychLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect("/login");
-
-  // ← ADD THIS CHECK
+  if (!teacherId) redirect('/auth/login');
+  
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
+    select: { accountType: true },
   });
-
-  if (teacher?.accountType === "psychologist") {
-    redirect("/psych/dashboard");
+  
+  // Verify this is a psychologist account
+  if (teacher?.accountType !== 'psychologist') {
+    redirect('/dashboard');
   }
-  // ← END ADD
-
+  
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       {/* Top nav */}
       <header className="flex items-center justify-between border-b border-slate-800 px-4 py-2">
-        {/* Brand → click to go back to dashboard (generic) */}
-        <Link href="/dashboard" className="flex items-center gap-2 text-sm">
+        {/* Brand → click to go back to dashboard */}
+        <Link href="/psych/dashboard" className="flex items-center gap-2 text-sm">
           <span className="font-semibold">WiseMetrics</span>
         </Link>
 
         <div className="flex items-center gap-3 text-xs">
-          {/* Explicit return-to-dashboard button that preserves classId */}
-          <BackToDashboardLink />
+          {/* Back button */}
+          <Link
+            href="/psych/dashboard"
+            className="text-slate-400 hover:text-slate-300 text-xs"
+            title="Back to dashboard"
+          >
+            Dashboard
+          </Link>
 
           {/* Settings button with a clean gear icon */}
           <Link
-            href="/dashboard/settings"
+            href="/psych/settings"
             className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-700 bg-slate-900 hover:bg-slate-800"
             aria-label="Settings"
           >

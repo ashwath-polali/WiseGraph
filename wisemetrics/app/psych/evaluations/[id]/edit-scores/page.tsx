@@ -1,0 +1,25 @@
+// app/psych/evaluations/[id]/edit-scores/page.tsx
+import { notFound, redirect } from 'next/navigation';
+import { getClassScoreSummary } from '@/lib/classSummary';
+import { getCurrentTeacherId } from '@/lib/currentTeacher';
+import { EditScoresPsychClient } from '@/components/EditScoresPsychClient';
+
+type Props = { params: Promise<{ id: string }> };
+
+export default async function EditPsychScoresPage(props: Props) {
+  const params = await props.params;
+  const teacherId = await getCurrentTeacherId();
+  if (!teacherId) redirect('/auth/login');
+  
+  const evaluation = await getClassScoreSummary(params.id);
+  if (!evaluation) notFound();
+
+  return (
+    <div className="min-h-screen bg-slate-950">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
+        {/* Let EditScoresPsychClient render everything */}
+        <EditScoresPsychClient evaluation={evaluation} />
+      </div>
+    </div>
+  );
+}

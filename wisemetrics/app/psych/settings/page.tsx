@@ -1,15 +1,13 @@
-import { prisma } from "@/lib/prisma";
-import { getCurrentTeacherId } from "@/lib/currentTeacher";
-import { Card } from "@/components/ui/Card";
-import { SettingsClient } from "@/components/SettingsClient";
+import { getCurrentTeacherId } from '@/lib/currentTeacher';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { Card } from '@/components/ui/Card';
+import { SettingsClient } from '@/components/SettingsClient';
 
-export default async function SettingsPage() {
+export default async function PsychSettingsPage() {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) {
-    // layout already redirects if unauthenticated
-    return null;
-  }
-
+  if (!teacherId) redirect('/auth/login');
+  
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
     select: {
@@ -20,13 +18,11 @@ export default async function SettingsPage() {
       accountType: true,
     },
   });
-
-  const classes = await prisma.class.findMany({
-    where: { teacherId },
-    orderBy: { createdAt: "asc" },
-    select: { id: true, name: true, subject: true },
-  });
-
+  
+  if (!teacher || teacher.accountType !== 'psychologist') {
+    redirect('/dashboard');
+  }
+  
   return (
     <main className="min-h-[calc(100vh-4rem)]">
       <section className="mx-auto max-w-5xl py-6 px-2">
@@ -35,7 +31,7 @@ export default async function SettingsPage() {
           <aside className="w-full border-b border-slate-800 pb-4 md:w-56 md:border-b-0 md:border-r md:pb-0 md:pr-4">
             <h1 className="text-lg font-semibold text-slate-50">Settings</h1>
             <p className="mt-1 text-xs text-slate-400">
-              Customize your WiseMetrics account and classroom defaults.
+              Customize your WiseMetrics account.
             </p>
 
             <nav className="mt-4 space-y-1 text-xs text-slate-300">
@@ -50,13 +46,7 @@ export default async function SettingsPage() {
                 type="button"
                 className="w-full rounded px-2 py-1 text-left text-[11px] text-slate-300 hover:bg-slate-900/60"
               >
-                App behavior
-              </button>
-              <button
-                type="button"
-                className="w-full rounded px-2 py-1 text-left text-[11px] text-slate-300 hover:bg-slate-900/60"
-              >
-                Shortcuts
+                Danger zone
               </button>
             </nav>
           </aside>
@@ -64,10 +54,15 @@ export default async function SettingsPage() {
           {/* Main content */}
           <div className="flex-1">
             <SettingsClient 
-              teacher={teacher}
-              classes={classes}
-              accountType={teacher?.accountType}
-              teacherId={teacher?.id}
+              teacher={{
+                id: teacher.id,
+                email: teacher.email,
+                name: teacher.name,
+                createdAt: teacher.createdAt,
+              }}
+              classes={[]}
+              accountType={teacher.accountType}
+              teacherId={teacher.id}
             />
           </div>
         </Card>

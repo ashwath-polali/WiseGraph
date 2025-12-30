@@ -15,10 +15,44 @@ export async function GET() {
       email: true,
       name: true,
       createdAt: true,
+      accountType: true,      // Add this
+      school: true,           // Add this
+      defaultClassId: true,   // Add this
+      defaultStudentView: true, // Add this
     },
   });
 
   return NextResponse.json(teacher);
+}
+
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { email, name, accountType = "teacher" } = body;
+
+  // Validate accountType
+  if (accountType !== "teacher" && accountType !== "psychologist") {
+    return NextResponse.json(
+      { error: "Invalid account type" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const teacher = await prisma.teacher.create({
+      data: {
+        email,
+        name,
+        accountType,
+      },
+    });
+
+    return NextResponse.json(teacher);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Failed to create teacher" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(req: Request) {

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
@@ -18,8 +18,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    "baseUrl": ".", // ⬅ add this
-    "paths": { // ⬅ and this
+    "downlevelIteration": true,
+    "baseUrl": ".",
+    "paths": {
       "@/*": [
         "src/*"
       ]

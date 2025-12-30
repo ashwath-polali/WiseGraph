@@ -3,16 +3,37 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { studentId, categoryId, subcategoryId, standardScore } =
-      await req.json();
+    const body = await req.json();
+    const { studentId, categoryId, subcategoryId, standardScore } = body;
 
-    if (!studentId || typeof standardScore !== "number") {
-      return NextResponse.json(
-        { error: "studentId and standardScore are required" },
-        { status: 400 }
-      );
+    // Validate the category/subcategory exists if provided
+    if (categoryId) {
+      const categoryExists = await prisma.category.findUnique({
+        where: { id: categoryId },
+      });
+      
+      if (!categoryExists) {
+        return NextResponse.json(
+          { error: `Category ${categoryId} not found` },
+          { status: 400 }
+        );
+      }
     }
 
+    if (subcategoryId) {
+      const subcategoryExists = await prisma.subcategory.findUnique({
+        where: { id: subcategoryId },
+      });
+      
+      if (!subcategoryExists) {
+        return NextResponse.json(
+          { error: `Subcategory ${subcategoryId} not found` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check if score already exists
     const existing = await prisma.score.findFirst({
       where: {
         studentId,
@@ -23,10 +44,7 @@ export async function POST(req: Request) {
 
     const score = await prisma.score.upsert({
       where: {
-        id: existing?.id ?? "___dummy___", // will not match if no existing row
-      },
-      update: {
-        standardScore,
+        id: existing?.id ?? "___dummy___",
       },
       create: {
         studentId,
@@ -34,16 +52,20 @@ export async function POST(req: Request) {
         subcategoryId: subcategoryId ?? null,
         standardScore,
       },
+      update: {
+        standardScore,
+      },
     });
 
-    return NextResponse.json({
-      id: score.id,
-      standardScore: score.standardScore,
-    });
-  } catch (err) {
-    console.error("Failed to upsert score", err);
+    return NextResponse.json(score);
+  } catch (error: any) {
+    console.error("Score save error:", error);
     return NextResponse.json(
-      { error: "Failed to upsert score" },
+      { 
+        error: error.message || "Failed to save score",
+        code: error.code,
+        details: error.meta 
+      },
       { status: 500 }
     );
   }

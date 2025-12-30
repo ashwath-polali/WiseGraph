@@ -41,7 +41,7 @@ export default function HomePage() {
               Log in
             </Link>
             <Link href="/signup">
-              <Button className="text-xs">Start for free</Button>
+              <Button className="text-xs">Sign Up</Button>
             </Link>
           </nav>
         </header>
