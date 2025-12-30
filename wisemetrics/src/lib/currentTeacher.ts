@@ -1,33 +1,26 @@
-import { prisma } from "@/lib/prisma";
-import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { createSupabaseServerClient } from './supabaseServer';
+import { prisma } from './prisma';
 
 export async function getCurrentTeacherId(): Promise<string | null> {
   const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user?.email) return null;
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  // Parse aliased email back to original
+  // teacher+psych@domain.com → teacher@domain.com
+  const originalEmail = user.email.replace('+psych@', '@');
 
-  if (error || !user?.email) {
-    return null;
-  }
+  // Determine account type from email alias
+  const accountType = user.email.includes('+psych@') ? 'psychologist' : 'teacher';
 
-  // email is unique, so this is safe once duplicates are cleaned up
-  const teacher = await prisma.teacher.upsert({
-    where: { email: user.email },
-    update: {
-      name:
-        (user.user_metadata as any)?.full_name ??
-        user.email,
-    },
-    create: {
-      email: user.email,
-      name:
-        (user.user_metadata as any)?.full_name ??
-        user.email,
+  // Find Teacher record by original email + account type
+  const teacher = await prisma.teacher.findFirst({
+    where: {
+      email: originalEmail,
+      accountType: accountType,
     },
   });
 
-  return teacher.id;
+  return teacher?.id ?? null;
 }

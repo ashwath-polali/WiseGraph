@@ -28,22 +28,27 @@ export default function SignupPage() {
     setError('');
 
     try {
-      // 1. Create Supabase auth user
+      // Email aliasing: teacher@domain.com vs teacher+psych@domain.com
+      const authEmail = accountType === 'psychologist'
+        ? email.replace('@', '+psych@')
+        : email;
+
+      // 1. Create Supabase auth user with aliased email
       const supabase = createSupabaseBrowserClient();
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
+        email: authEmail,
         password,
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('No user returned');
 
-      // 2. Create Teacher record with accountType
+      // 2. Create Teacher record with ORIGINAL email (can have duplicates)
       const res = await fetch('/api/teacher', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email,
+          email: email,  // Store original email, not aliased
           name,
           accountType,
         }),
@@ -77,7 +82,7 @@ export default function SignupPage() {
               Welcome to WiseGraph
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Choose your account type to get started with powerful assessment visualizations
+              Choose your account type to get started
             </p>
           </div>
 
@@ -91,7 +96,6 @@ export default function SignupPage() {
               }}
               className="group relative text-left p-8 rounded-2xl border-2 border-slate-700 bg-slate-900/50 backdrop-blur-sm hover:border-sky-400 hover:bg-slate-800/70 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300 hover:scale-[1.02]"
             >
-              {/* Icon */}
               <div className="w-14 h-14 rounded-xl bg-sky-500/10 flex items-center justify-center mb-5 group-hover:bg-sky-500/20 transition-colors">
                 <svg className="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -124,7 +128,6 @@ export default function SignupPage() {
                 ))}
               </ul>
 
-              {/* Arrow indicator */}
               <div className="flex items-center gap-2 text-sky-400 font-medium group-hover:gap-3 transition-all">
                 <span>Get Started</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +144,6 @@ export default function SignupPage() {
               }}
               className="group relative text-left p-8 rounded-2xl border-2 border-slate-700 bg-slate-900/50 backdrop-blur-sm hover:border-emerald-400 hover:bg-slate-800/70 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-[1.02]"
             >
-              {/* Icon */}
               <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-5 group-hover:bg-emerald-500/20 transition-colors">
                 <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -174,7 +176,6 @@ export default function SignupPage() {
                 ))}
               </ul>
 
-              {/* Arrow indicator */}
               <div className="flex items-center gap-2 text-emerald-400 font-medium group-hover:gap-3 transition-all">
                 <span>Get Started</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +203,6 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
       <Card className="w-full max-w-md p-8 border-slate-700 shadow-2xl">
-        {/* Back button */}
         <button
           onClick={() => {
             setStep(1);
@@ -216,7 +216,6 @@ export default function SignupPage() {
           <span>Back to account type</span>
         </button>
 
-        {/* Header with icon */}
         <div className="text-center mb-8">
           <div className={`w-16 h-16 rounded-2xl ${accountType === 'teacher' ? 'bg-sky-500/10' : 'bg-emerald-500/10'} flex items-center justify-center mx-auto mb-4`}>
             {accountType === 'teacher' ? (
@@ -262,6 +261,9 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+            <p className="text-xs text-slate-500 mt-1">
+              You can use the same email for both account types
+            </p>
           </div>
 
           <div>
