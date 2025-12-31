@@ -10,7 +10,7 @@ type Props = { params: Promise<{ id: string }> };
 export default async function ConfigureEvaluationPage(props: Props) {
   const params = await props.params;
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
   
   // Verify this class belongs to the current teacher
   const classData = await prisma.class.findFirst({

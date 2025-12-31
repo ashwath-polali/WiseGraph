@@ -192,6 +192,8 @@ export function EditScoresPsychClient({ evaluation }: Props) {
               max={150}
               value={scores["overall"] || ""}
               onChange={(e) => updateScore("overall", e.target.value)}
+              onFocus={(e) => e.target.select()}
+              onClick={(e) => e.currentTarget.select()}
               placeholder="100"
               className="max-w-xs"
             />
@@ -233,7 +235,11 @@ export function EditScoresPsychClient({ evaluation }: Props) {
                         e.stopPropagation();
                         updateScore(`cat_${cat.id}`, e.target.value);
                       }}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.currentTarget.select();
+                      }}
+                      onFocus={(e) => e.target.select()}
                       placeholder="100"
                       className="w-24"
                     />
@@ -272,6 +278,8 @@ export function EditScoresPsychClient({ evaluation }: Props) {
                             max={150}
                             value={scores[`sub_${sub.id}`] || ""}
                             onChange={(e) => updateScore(`sub_${sub.id}`, e.target.value)}
+                            onFocus={(e) => e.target.select()}
+                            onClick={(e) => e.currentTarget.select()}
                             placeholder="100"
                             className="w-20"
                           />

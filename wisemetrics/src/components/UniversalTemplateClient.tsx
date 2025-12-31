@@ -21,15 +21,19 @@ export function UniversalTemplateClient({ teacherId }: Props) {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage
-    const saved = localStorage.getItem(`psych-universal-${teacherId}`);
-    if (saved) {
+    // Load from DATABASE instead of localStorage
+    async function loadTemplate() {
       try {
-        setCategories(JSON.parse(saved));
-      } catch {
-        setCategories([]);
+        const res = await fetch('/api/universal-template');
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data.categories || []);
+        }
+      } catch (err) {
+        console.error('Failed to load template:', err);
       }
     }
+    loadTemplate();
   }, [teacherId]);
 
   async function handleSave(e: FormEvent) {
@@ -46,10 +50,14 @@ export function UniversalTemplateClient({ teacherId }: Props) {
         return;
       }
 
-      localStorage.setItem(
-        `psych-universal-${teacherId}`,
-        JSON.stringify(validCategories)
-      );
+      // Save to DATABASE instead of localStorage
+      const res = await fetch('/api/universal-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: validCategories }),
+      });
+
+      if (!res.ok) throw new Error('Failed to save');
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

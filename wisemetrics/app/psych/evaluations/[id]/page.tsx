@@ -18,7 +18,7 @@ type Props = { params: Promise<{ id: string }> };
 export default async function PsychEvaluationPage(props: Props) {
   const params = await props.params;
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
   
   const evaluation = await getClassScoreSummary(params.id);
   if (!evaluation) notFound();

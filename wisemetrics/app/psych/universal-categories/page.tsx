@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { CategoriesPageClient } from '@/components/CategoriesPageClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UniversalCategoriesPage() {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
 
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },

@@ -120,7 +120,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
 
       if (!res.ok) throw new Error('Failed to delete account');
 
-      router.push('/auth/login');
+      router.push('/login');
     } catch (err) {
       console.error('Error deleting account:', err);
       alert('Failed to delete account. Please try again.');

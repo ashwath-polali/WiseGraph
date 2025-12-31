@@ -22,7 +22,6 @@ export default function NewEvaluationPage() {
     if (stored) setTeacherId(stored);
   }, []);
 
-
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -47,18 +46,18 @@ export default function NewEvaluationPage() {
       let templateName: string;
 
       if (useUniversal) {
-        // Get teacherId from the API
-        const teacherRes = await fetch('/api/teacher');
-        const teacherData = await teacherRes.json();
-        const tid = teacherData.id;
-
-        const saved = localStorage.getItem(`psych-universal-${tid}`);
-        if (!saved) {
+        // Load template from DATABASE instead of localStorage
+        const templateRes = await fetch('/api/universal-template');
+        if (!templateRes.ok) {
           throw new Error('No universal categories defined. Please configure them first.');
         }
-        const universal = JSON.parse(saved);
+        const templateData = await templateRes.json();
+        if (!templateData.categories || templateData.categories.length === 0) {
+          throw new Error('No universal categories defined. Please configure them first.');
+        }
+        
         template = {
-          categories: universal.map((cat: any) => ({
+          categories: templateData.categories.map((cat: any) => ({
             name: cat.name,
             subcategories: cat.subcategories.map((s: any) =>
               typeof s === 'string' ? s : s.name

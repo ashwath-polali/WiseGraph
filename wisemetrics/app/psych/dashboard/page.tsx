@@ -8,7 +8,7 @@ import { PsychDashboardClient } from '@/components/PsychDashboardClient';
 
 export default async function PsychDashboardPage() {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
   
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },

@@ -6,9 +6,11 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { UniversalTemplateClient } from '@/components/UniversalTemplateClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function TemplatesPage() {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
 
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },

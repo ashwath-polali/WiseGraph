@@ -7,17 +7,18 @@ datasource db {
 }
 
 model Teacher {
-  id                 String           @id @default(uuid())
+  id                 String             @id @default(uuid())
   email              String         
   name               String?
-  accountType        String           @default("teacher")
-  createdAt          DateTime         @default(now())
+  accountType        String             @default("teacher")
+  createdAt          DateTime           @default(now())
   defaultClassId     String?
   defaultStudentView String?
   school             String?
   classes            Class[]
   PsychStudent       PsychStudent[]
-  ScoreSnapshots     ScoreSnapshot[]  // NEW
+  ScoreSnapshots     ScoreSnapshot[]
+  UniversalTemplate  UniversalTemplate? // NEW
 }
 
 model Class {
@@ -31,7 +32,7 @@ model Class {
   categories     Category[]
   teacher        Teacher         @relation(fields: [teacherId], references: [id])
   students       Student[]
-  scoreSnapshots ScoreSnapshot[] // NEW
+  scoreSnapshots ScoreSnapshot[]
 }
 
 model Student {
@@ -88,7 +89,7 @@ model PsychStudent {
   updatedAt      DateTime        @updatedAt
   teacher        Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   subtests       PsychSubtest[]
-  scoreSnapshots ScoreSnapshot[] // NEW
+  scoreSnapshots ScoreSnapshot[]
 
   @@unique([teacherId, name])
 }
@@ -104,13 +105,12 @@ model PsychSubtest {
   @@unique([studentId, name])
 }
 
-// NEW: Represents a finalized term/quarter snapshot
 model ScoreSnapshot {
   id             String          @id @default(uuid())
-  name           String          // "Term 1", "Q2", "Fall 2024", etc.
-  classId        String?         // For teacher accounts (entire class snapshot)
-  teacherId      String          // Owner of this snapshot
-  psychStudentId String?         // For psychologist accounts (single student)
+  name           String
+  classId        String?
+  teacherId      String
+  psychStudentId String?
   snapshotDate   DateTime        @default(now())
   createdAt      DateTime        @default(now())
 
@@ -125,22 +125,32 @@ model ScoreSnapshot {
   @@index([teacherId])
 }
 
-// NEW: Frozen scores from a specific term
 model SnapshotScore {
   id              String   @id @default(uuid())
   snapshotId      String
-  studentId       String?  // Original student ID (may be null if student deleted)
-  studentName     String   // Store name in case student is deleted later
+  studentId       String?
+  studentName     String
   categoryId      String?
   categoryName    String
   subcategoryId   String?
   subcategoryName String?
   standardScore   Int
-  overallScore    Int      // Student's overall score at time of snapshot
+  overallScore    Int
   createdAt       DateTime @default(now())
 
   snapshot ScoreSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@index([snapshotId])
   @@index([studentId])
+}
+
+// NEW: Store universal category templates as JSON
+model UniversalTemplate {
+  id         String   @id @default(uuid())
+  teacherId  String   @unique
+  categories Json     // Stores the entire category structure
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 }

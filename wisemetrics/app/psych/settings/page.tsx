@@ -6,7 +6,7 @@ import { SettingsClient } from '@/components/SettingsClient';
 
 export default async function PsychSettingsPage() {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
   
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },

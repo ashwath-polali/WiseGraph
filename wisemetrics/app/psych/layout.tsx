@@ -10,7 +10,7 @@ export default async function PsychLayout({
   children: React.ReactNode;
 }) {
   const teacherId = await getCurrentTeacherId();
-  if (!teacherId) redirect('/auth/login');
+  if (!teacherId) redirect('/login');
   
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
