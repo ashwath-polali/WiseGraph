@@ -664,16 +664,17 @@ export function PolarStudentChart({
                           y={0}
                           width={140}
                           height={32}
-                          rx={8}
+                          rx={6}  // slight rounding, not big pill
                           className="fill-slate-900/90"
                           stroke="rgba(148,163,184,0.3)"
                           strokeWidth={1}
                         />
                         <text
-                          x={20}
-                          y={20}
+                          x={70}  // center of width 140
+                          y={16}  // vertical middle of height 32
                           className="fill-slate-300 text-[11px] font-medium"
-                          alignmentBaseline="middle"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
                         >
                           ← All Categories
                         </text>
