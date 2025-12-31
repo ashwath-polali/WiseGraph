@@ -8,12 +8,9 @@ import { PsychStudentViewClient } from '@/components/PsychStudentViewClient';
 import { PsychEvaluationProvider, ViewModeToggle, ChartDisplay } from '@/components/PsychEvaluationClient';
 import { ExportChartButtons } from '@/components/ExportChartButtons';
 import { SnapshotManager } from '@/components/SnapshotManager';
-
-
+import { SyncCategoriesButton } from '@/components/SyncCategoriesButton';
 
 type Props = { params: Promise<{ id: string }> };
-
-
 
 export default async function PsychEvaluationPage(props: Props) {
   const params = await props.params;
@@ -150,11 +147,9 @@ export default async function PsychEvaluationPage(props: Props) {
                   </div>
                 </Card>
 
-
                 {/* Snapshot Manager */}
                 <SnapshotManager classId={params.id} />
               </div>
-
 
               {/* Main Visualization */}
               <div className="col-span-9 space-y-6">
@@ -183,7 +178,6 @@ export default async function PsychEvaluationPage(props: Props) {
                   </div>
                 </Card>
 
-
                 {/* Action Bar */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -197,6 +191,9 @@ export default async function PsychEvaluationPage(props: Props) {
                         </Button>
                       </Link>
                     )}
+                    {isUniversal && (
+                      <SyncCategoriesButton evaluationId={params.id} />
+                    )}
                     {!isUniversal && (
                       <Link href={`/psych/evaluations/${params.id}/configure`}>
                         <Button variant="secondary" className="inline-flex items-center gap-2">
@@ -209,10 +206,8 @@ export default async function PsychEvaluationPage(props: Props) {
                     )}
                   </div>
 
-
                   <ExportChartButtons studentName={student?.name || evaluation.name} />
                 </div>
-
 
                 {/* Category Breakdown Cards */}
                 <div className="grid grid-cols-2 gap-4">
