@@ -49,7 +49,7 @@ export function PsychEvaluationProvider({
 
   return (
     <ViewModeContext.Provider value={contextValue}>
-      {typeof children === 'function' ? children(contextValue) : children}
+      {typeof children === "function" ? children(contextValue) : children}
     </ViewModeContext.Provider>
   );
 }
@@ -85,7 +85,7 @@ export function ViewModeToggle() {
 
 export function ComparisonToggleWrapper({ evaluationId }: { evaluationId: string }) {
   const { setComparisonSnapshotId } = useViewMode();
-  
+
   return (
     <ComparisonToggle
       classId={evaluationId}
@@ -106,19 +106,19 @@ export function ChartDisplay({
 
   // Create portal container on mount
   useEffect(() => {
-    let container = document.getElementById('chart-modal-root');
-    
+    let container = document.getElementById("chart-modal-root");
+
     if (!container) {
-      container = document.createElement('div');
-      container.id = 'chart-modal-root';
-      container.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 999999;';
+      container = document.createElement("div");
+      container.id = "chart-modal-root";
+      container.style.cssText =
+        "position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 999999;";
       document.body.appendChild(container);
     }
-    
+
     setPortalRoot(container);
-    
+
     return () => {
-      // Cleanup on unmount
       if (container && container.childNodes.length === 0) {
         document.body.removeChild(container);
       }
@@ -128,36 +128,36 @@ export function ChartDisplay({
   // Handle escape key and body scroll
   useEffect(() => {
     if (!isExpanded) return;
-    
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsExpanded(false);
+      if (e.key === "Escape") setIsExpanded(false);
     };
-    
-    document.addEventListener('keydown', handleEscape);
-    document.body.style.overflow = 'hidden';
-    
+
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
     };
   }, [isExpanded]);
 
   const modalContent = isExpanded && portalRoot ? (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.95)',
-        backdropFilter: 'blur(12px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
+        backgroundColor: "rgba(0, 0, 0, 0.95)",
+        backdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
         zIndex: 999999,
-        pointerEvents: 'auto',
+        pointerEvents: "auto",
       }}
       onClick={() => setIsExpanded(false)}
     >
@@ -168,29 +168,29 @@ export function ChartDisplay({
           setIsExpanded(false);
         }}
         style={{
-          position: 'fixed',
-          top: '2rem',
-          right: '2rem',
-          padding: '1rem',
-          borderRadius: '0.75rem',
-          backgroundColor: 'rgba(30, 41, 59, 0.9)',
-          color: 'rgb(203, 213, 225)',
-          border: '1px solid rgb(71, 85, 105)',
-          cursor: 'pointer',
+          position: "fixed",
+          top: "1.5rem",
+          right: "1.5rem",
+          padding: "0.75rem",
+          borderRadius: "0.75rem",
+          backgroundColor: "rgba(30, 41, 59, 0.9)",
+          color: "rgb(203, 213, 225)",
+          border: "1px solid " + "rgb(71, 85, 105)",
+          cursor: "pointer",
           zIndex: 1000000,
-          transition: 'all 0.2s',
+          transition: "all 0.2s",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgb(51, 65, 85)';
-          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.backgroundColor = "rgb(51, 65, 85)";
+          e.currentTarget.style.transform = "scale(1.1)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(30, 41, 59, 0.9)';
-          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.backgroundColor = "rgba(30, 41, 59, 0.9)";
+          e.currentTarget.style.transform = "scale(1)";
         }}
       >
         <svg
-          style={{ width: '2rem', height: '2rem' }}
+          style={{ width: "1.5rem", height: "1.5rem" }}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -200,34 +200,55 @@ export function ChartDisplay({
         </svg>
       </button>
 
-      {/* Chart container */}
+      {/* Chart container - popup */}
       <div
         style={{
-          width: '94vw',
-          height: '88vh',
-          borderRadius: '1rem',
-          border: '2px solid rgb(71, 85, 105)',
-          backgroundColor: 'rgb(2, 6, 23)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-          overflow: 'auto',
+          width: "98vw",
+          height: "96vh",
+          borderRadius: "1rem",
+          border: "2px solid rgb(71, 85, 105)",
+          backgroundColor: "rgb(2, 6, 23)",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ height: '100%', width: '100%', padding: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {viewMode === "polar" ? (
-            <PolarStudentChart
-              evaluation={evaluation}
-              showFullNames={showFullNames}
-              onToggleNames={() => setShowFullNames(!showFullNames)}
-              comparisonSnapshotId={comparisonSnapshotId}
-            />
-          ) : (
-            <EnhancedBellCurveChart 
-              cls={evaluation} 
-              viewMode="bell" 
-              comparisonSnapshotId={comparisonSnapshotId}
-            />
-          )}
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2rem",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              maxWidth: "2000px",
+              maxHeight: "2000px",
+            }}
+          >
+            {viewMode === "polar" ? (
+              <PolarStudentChart
+                evaluation={evaluation}
+                showFullNames={showFullNames}
+                onToggleNames={() => setShowFullNames(!showFullNames)}
+                comparisonSnapshotId={comparisonSnapshotId}
+              />
+            ) : (
+              <EnhancedBellCurveChart
+                cls={evaluation}
+                viewMode="bell"
+                comparisonSnapshotId={comparisonSnapshotId}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -235,27 +256,21 @@ export function ChartDisplay({
 
   return (
     <>
-      {/* Main Chart */}
-      <div className="h-[600px]">
+      {/* Main Chart - more vertical space in regular view */}
+      <div className="h-[700px]">
         {viewMode === "polar" ? (
           <PolarStudentChart
             evaluation={evaluation}
             showFullNames={showFullNames}
             onToggleNames={() => setShowFullNames(!showFullNames)}
-            onExpand={() => {
-              console.log('EXPAND CLICKED'); // DEBUG
-              setIsExpanded(true);
-            }}
+            onExpand={() => setIsExpanded(true)}
             comparisonSnapshotId={comparisonSnapshotId}
           />
         ) : (
           <EnhancedBellCurveChart
             cls={evaluation}
             viewMode="bell"
-            onExpand={() => {
-              console.log('EXPAND CLICKED'); // DEBUG
-              setIsExpanded(true);
-            }}
+            onExpand={() => setIsExpanded(true)}
             comparisonSnapshotId={comparisonSnapshotId}
           />
         )}
