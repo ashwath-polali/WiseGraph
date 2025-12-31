@@ -3,9 +3,19 @@
 import { useState, createContext, useContext } from "react";
 import type { ClassScoreSummary } from "@/types/scores";
 import { Card } from "@/components/ui/Card";
-import { PolarStudentChart } from "@/components/charts/PolarStudentChart";
-import { EnhancedBellCurveChart } from "@/components/charts/EnhancedBellCurveChart";
+import dynamic from "next/dynamic";
 import { ComparisonToggle } from "@/components/ComparisonToggle";
+
+// Disable SSR for charts to avoid hydration mismatches from floating-point precision
+const PolarStudentChart = dynamic(
+  () => import("@/components/charts/PolarStudentChart").then(mod => ({ default: mod.PolarStudentChart })),
+  { ssr: false }
+);
+
+const EnhancedBellCurveChart = dynamic(
+  () => import("@/components/charts/EnhancedBellCurveChart").then(mod => ({ default: mod.EnhancedBellCurveChart })),
+  { ssr: false }
+);
 
 type ViewMode = "polar" | "bell";
 
