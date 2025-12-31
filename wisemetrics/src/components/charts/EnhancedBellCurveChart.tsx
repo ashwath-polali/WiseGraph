@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import type { ClassScoreSummary, CategoryScore, SubcategoryScore } from "@/types/scores";
 import { clampScore } from "@/lib/chartScaling";
 
-const MEAN = 100;
+const FIXED_MEAN = 100; // Reference mean for standard scores
 const SD = 15;
 const SCORE_MIN = 60;
 const SCORE_MAX = 150;
@@ -55,6 +55,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
 
   // Get student (for psychologist there's only 1)
   const student = cls.students[0];
+
+  // **DYNAMIC MEAN - Use actual overall score as the center of the curve**
+  const MEAN = student?.overallScore || FIXED_MEAN;
 
   // Fetch snapshot data when comparisonSnapshotId changes
   useEffect(() => {
@@ -120,6 +123,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
     sampleXs.push(s);
   }
 
+  // **USE DYNAMIC MEAN HERE - Curve peaks at actual overall score**
   const pdfValues = sampleXs.map((s) => normalPdf(s, MEAN, SD));
   const maxPdf = Math.max(...pdfValues, 1e-6);
 
@@ -280,7 +284,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
             {Array.from({ length: 10 }).map((_, i) => {
               const score = SCORE_MIN + i * ((SCORE_MAX - SCORE_MIN) / 9);
               const x = xScale(score);
-              const isKeyScore = score === 100;
+              const isKeyScore = score === FIXED_MEAN;
               return (
                 <g key={score}>
                   <line
@@ -328,11 +332,11 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
               />
             )}
 
-            {/* Mean line (100) */}
+            {/* Mean line (100 - reference) */}
             <line
-              x1={xScale(MEAN)}
+              x1={xScale(FIXED_MEAN)}
               y1={marginTop}
-              x2={xScale(MEAN)}
+              x2={xScale(FIXED_MEAN)}
               y2={height - marginBottom}
               className="stroke-slate-600/60"
               strokeDasharray="5 4"
@@ -634,7 +638,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
           </div>
         </div>
 
-        {/* Detail Panel */}
+        {/* Detail Panel - KEEP THE REST AS IS */}
         <div className="flex-[1.5] shrink-0">
           <div className="flex h-full flex-col rounded-xl border border-slate-800/60 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-900/80 p-4 shadow-xl backdrop-blur-sm ring-1 ring-slate-800/40">
             <div className="mb-3 flex items-start justify-between gap-2 border-b border-slate-800/50 pb-3">
@@ -823,7 +827,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-0.5 w-4 rounded bg-sky-400" />
-          <span className="font-medium text-slate-400">Normal Distribution (μ=100, σ=15)</span>
+          <span className="font-medium text-slate-400">Distribution (μ={Math.round(MEAN)}, σ=15)</span>
         </div>
         {snapshotScores && (
           <div className="flex items-center gap-1.5">
