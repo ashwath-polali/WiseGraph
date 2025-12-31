@@ -75,6 +75,7 @@ export function ConfigureAssessmentClient({
 
     const created: { id: string; name: string } = await res.json();
 
+    // ✅ OPTIMISTIC UPDATE - This fixes the refresh issue
     setCategories((prev) =>
       prev.map((cat) => {
         if (cat.id !== categoryId) return cat;
@@ -100,6 +101,7 @@ export function ConfigureAssessmentClient({
       })
     );
 
+    // Clear the input immediately
     setNewSubNameByCategory((prev) => ({ ...prev, [categoryId]: "" }));
   }
 

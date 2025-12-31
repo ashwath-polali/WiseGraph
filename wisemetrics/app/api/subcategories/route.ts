@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ subcategory });
+  return NextResponse.json(subcategory);
 }
 
 export async function DELETE(req: Request) {

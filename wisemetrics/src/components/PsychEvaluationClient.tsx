@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, createContext, useContext } from "react";
+import { useState, createContext, useContext, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { ClassScoreSummary } from "@/types/scores";
-import { Card } from "@/components/ui/Card";
 import dynamic from "next/dynamic";
 import { ComparisonToggle } from "@/components/ComparisonToggle";
 
-// Disable SSR for charts to avoid hydration mismatches from floating-point precision
 const PolarStudentChart = dynamic(
   () => import("@/components/charts/PolarStudentChart").then(mod => ({ default: mod.PolarStudentChart })),
   { ssr: false }
@@ -34,7 +33,6 @@ export function useViewMode() {
   return ctx;
 }
 
-// Export alias for convenience
 export const usePsychEvaluation = useViewMode;
 
 export function PsychEvaluationProvider({
@@ -56,7 +54,6 @@ export function PsychEvaluationProvider({
   );
 }
 
-// Export ViewModeToggle component - JUST THE VIEW MODE BUTTONS
 export function ViewModeToggle() {
   const { viewMode, setViewMode } = useViewMode();
 
@@ -86,7 +83,6 @@ export function ViewModeToggle() {
   );
 }
 
-// Separate comparison toggle for header use
 export function ComparisonToggleWrapper({ evaluationId }: { evaluationId: string }) {
   const { setComparisonSnapshotId } = useViewMode();
   
@@ -106,6 +102,136 @@ export function ChartDisplay({
   const { viewMode, comparisonSnapshotId } = useViewMode();
   const [showFullNames, setShowFullNames] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
+
+  // Create portal container on mount
+  useEffect(() => {
+    let container = document.getElementById('chart-modal-root');
+    
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'chart-modal-root';
+      container.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 999999;';
+      document.body.appendChild(container);
+    }
+    
+    setPortalRoot(container);
+    
+    return () => {
+      // Cleanup on unmount
+      if (container && container.childNodes.length === 0) {
+        document.body.removeChild(container);
+      }
+    };
+  }, []);
+
+  // Handle escape key and body scroll
+  useEffect(() => {
+    if (!isExpanded) return;
+    
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsExpanded(false);
+    };
+    
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isExpanded]);
+
+  const modalContent = isExpanded && portalRoot ? (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        zIndex: 999999,
+        pointerEvents: 'auto',
+      }}
+      onClick={() => setIsExpanded(false)}
+    >
+      {/* Close button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsExpanded(false);
+        }}
+        style={{
+          position: 'fixed',
+          top: '2rem',
+          right: '2rem',
+          padding: '1rem',
+          borderRadius: '0.75rem',
+          backgroundColor: 'rgba(30, 41, 59, 0.9)',
+          color: 'rgb(203, 213, 225)',
+          border: '1px solid rgb(71, 85, 105)',
+          cursor: 'pointer',
+          zIndex: 1000000,
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgb(51, 65, 85)';
+          e.currentTarget.style.transform = 'scale(1.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(30, 41, 59, 0.9)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        <svg
+          style={{ width: '2rem', height: '2rem' }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={3}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      {/* Chart container */}
+      <div
+        style={{
+          width: '94vw',
+          height: '88vh',
+          borderRadius: '1rem',
+          border: '2px solid rgb(71, 85, 105)',
+          backgroundColor: 'rgb(2, 6, 23)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          overflow: 'auto',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ height: '100%', width: '100%', padding: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {viewMode === "polar" ? (
+            <PolarStudentChart
+              evaluation={evaluation}
+              showFullNames={showFullNames}
+              onToggleNames={() => setShowFullNames(!showFullNames)}
+              comparisonSnapshotId={comparisonSnapshotId}
+            />
+          ) : (
+            <EnhancedBellCurveChart 
+              cls={evaluation} 
+              viewMode="bell" 
+              comparisonSnapshotId={comparisonSnapshotId}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -116,69 +242,27 @@ export function ChartDisplay({
             evaluation={evaluation}
             showFullNames={showFullNames}
             onToggleNames={() => setShowFullNames(!showFullNames)}
-            onExpand={() => setIsExpanded(true)}
+            onExpand={() => {
+              console.log('EXPAND CLICKED'); // DEBUG
+              setIsExpanded(true);
+            }}
             comparisonSnapshotId={comparisonSnapshotId}
           />
         ) : (
           <EnhancedBellCurveChart
             cls={evaluation}
             viewMode="bell"
-            onExpand={() => setIsExpanded(true)}
+            onExpand={() => {
+              console.log('EXPAND CLICKED'); // DEBUG
+              setIsExpanded(true);
+            }}
             comparisonSnapshotId={comparisonSnapshotId}
           />
         )}
       </div>
 
-      {/* Expanded Modal - for both polar and bell curve */}
-      {isExpanded && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setIsExpanded(false)}
-        >
-          <div
-            className="relative h-[95vh] w-[95vw] rounded-2xl border border-slate-800/50 bg-slate-950/95 p-6 shadow-[0_20px_50px_rgba(8,_47,_73,_0.9)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close button */}
-            <button
-              onClick={() => setIsExpanded(false)}
-              className="absolute right-6 top-6 z-10 rounded-lg bg-slate-900/90 p-2 text-slate-400 hover:text-slate-200 transition-colors"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Much larger container - almost full screen */}
-            <div className="h-full w-full">
-              {viewMode === "polar" ? (
-                <PolarStudentChart
-                  evaluation={evaluation}
-                  showFullNames={showFullNames}
-                  onToggleNames={() => setShowFullNames(!showFullNames)}
-                  comparisonSnapshotId={comparisonSnapshotId}
-                />
-              ) : (
-                <EnhancedBellCurveChart 
-                  cls={evaluation} 
-                  viewMode="bell" 
-                  comparisonSnapshotId={comparisonSnapshotId}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Portal the modal */}
+      {portalRoot && modalContent && createPortal(modalContent, portalRoot)}
     </>
   );
 }
