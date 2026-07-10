@@ -141,7 +141,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
             className="w-28"
           />
         </div>
-        <Button type="submit" variant="primary" className="text-xs h-8 px-3">
+        <Button type="submit" variant="default" className="text-xs h-8 px-3">
           Add student
         </Button>
       </form>
@@ -213,7 +213,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
                     </Link>
                     <Button
                       type="button"
-                      variant="primary"
+                      variant="default"
                       className="h-7 px-2 text-[11px]"
                       disabled={savingId === student.id}
                       onClick={() => handleSave(student)}

@@ -55,7 +55,7 @@ export function CreateFirstClassButton() {
     return (
       <Button
         type="button"
-        variant="primary"
+        variant="default"
         className="text-xs"
         onClick={() => setOpen(true)}
       >
@@ -92,7 +92,7 @@ export function CreateFirstClassButton() {
       />
       <Button
         type="button"
-        variant="primary"
+        variant="default"
         onClick={handleCreate}
         disabled={loading}
         className="text-xs"

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__cortex__get_briefing"
+    ]
+  }
+}

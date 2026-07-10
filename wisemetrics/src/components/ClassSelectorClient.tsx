@@ -37,7 +37,7 @@ export function ClassSelectorClient({
         return (
           <Button
             key={cls.id}
-            variant={isActive ? "primary" : "ghost"}
+            variant={isActive ? "default" : "ghost"}
             className="whitespace-nowrap text-xs"
             disabled={isPending && isActive}
             onClick={() => handleSelect(cls.id)}
