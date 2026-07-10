@@ -143,7 +143,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         </div>
 
         {/* Top row: class overview + students sidebar */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-6 lg:h-[680px] lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
           {/* Left: big class card with chart + radial/bell toggle */}
           <ClassOverviewClient cls={cls as ClassScoreSummary} />
 
