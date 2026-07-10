@@ -43,7 +43,7 @@ export function DeleteClassButton({ classId, className }: DeleteClassButtonProps
   return (
     <Button
       variant="ghost"
-      className="text-xs text-red-400 hover:text-red-300"
+      className="text-xs text-destructive/80 hover:text-destructive"
       onClick={handleDelete}
       disabled={loading}
     >

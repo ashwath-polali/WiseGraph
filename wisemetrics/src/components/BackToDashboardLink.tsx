@@ -13,7 +13,7 @@ export function BackToDashboardLink() {
 
   return (
     <Link href={href}>
-      <span className="text-xs text-sky-400 hover:text-sky-300">
+      <span className="inline-flex h-8 items-center rounded-lg px-2.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground">
         Back to dashboard
       </span>
     </Link>
