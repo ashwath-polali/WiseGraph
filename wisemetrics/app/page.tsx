@@ -9,21 +9,6 @@ import { HeroStory, MagneticButton } from "@/components/landing/HeroStory";
 
 const ENTER = [0.22, 1, 0.36, 1] as const;
 
-const FEATURES = [
-  {
-    title: "The whole class on one dial",
-    body: "See every student's profile in a single view. The ones who need attention and the ones who are ahead show up side by side, not buried in separate reports.",
-  },
-  {
-    title: "From a score to its subskills",
-    body: "Open a category to see the subskills underneath it. You get what to work on, not just a number that says something is off.",
-  },
-  {
-    title: "Made to share",
-    body: "Export a clean chart for a report, a conference, or a projector. It reads on its own, without a legend or a walkthrough.",
-  },
-];
-
 export default function HomePage() {
   return (
     <main className="relative min-h-dvh text-foreground">
@@ -63,28 +48,36 @@ export default function HomePage() {
       <HeroStory />
 
       <div className="mx-auto max-w-6xl px-5 pb-28">
-        {/* Feature blocks */}
-        <section className="border-t border-border pt-14">
-          <div className="grid gap-x-12 gap-y-12 md:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5, ease: ENTER, delay: i * 0.08 }}
-              >
-                <span className="font-mono text-xs text-muted-foreground" data-numeric>
-                  0{i + 1}
-                </span>
-                <h3 className="mt-3 font-display text-xl font-medium text-foreground">
-                  {f.title}
-                </h3>
-                <p className="mt-2.5 text-[15px] leading-relaxed text-muted-foreground">
-                  {f.body}
-                </p>
-              </motion.div>
-            ))}
+        {/* What it does — asymmetric editorial, not a 3-up card grid */}
+        <section className="border-t border-border pt-16">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-20">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.55, ease: ENTER }}
+              className="font-display text-[1.9rem] font-medium leading-[1.12] tracking-tight text-balance sm:text-[2.6rem]"
+            >
+              From the whole class down to a single subskill.
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.55, ease: ENTER, delay: 0.1 }}
+              className="flex flex-col justify-end gap-4 text-[15px] leading-relaxed text-muted-foreground"
+            >
+              <p>
+                The class overview and the score behind it live in the same view.
+                Open a category to find the subskill that&apos;s actually moving
+                it.
+              </p>
+              <p>
+                Then export a chart clean enough to read from the back of a room,
+                or across a table from a parent who&apos;s never seen a standard
+                score.
+              </p>
+            </motion.div>
           </div>
         </section>
 

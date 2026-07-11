@@ -176,8 +176,8 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
         {classes.length > 0 && (
           <section className="space-y-2">
             <h2 className="text-sm font-semibold text-foreground">App defaults</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="sm:col-span-1">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-xs text-muted-foreground">
                   School / district
                 </label>
