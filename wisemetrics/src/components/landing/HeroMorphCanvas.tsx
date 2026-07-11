@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import { line, area, curveMonotoneX } from "d3-shape";
 import {
   type MotionValue,
+  animate,
   motion,
   useTransform,
 } from "motion/react";
+
+const ENTER = [0.22, 1, 0.36, 1] as const;
 import {
   RING_SCORES,
   categoryAngles,
@@ -96,6 +99,7 @@ export function HeroMorphCanvas({
   const bandOpacity = useTransform(progress, [0.56, 0.72], [0, 0.6]);
   const studentOpacity = useTransform(progress, [0.68, 0.84], [0, 1]);
   const studentDraw = useTransform(progress, [0.7, 0.9], [0, 1]);
+  const dotLabelOpacity = useTransform(progress, [0.52, 0.64], [0, 1]);
 
   return (
     <div className="relative aspect-[620/540] w-full max-w-[560px]">
@@ -171,7 +175,7 @@ export function HeroMorphCanvas({
               <g>
                 <circle cx={CX} cy={CY_R} r={30} fill="var(--card)" stroke="var(--border)" />
                 <text x={CX} y={CY_R - 3} textAnchor="middle" dominantBaseline="central" className="font-mono" fontSize={17} fontWeight={600} fill="var(--foreground)">
-                  {CLASS_AVG}
+                  <MedallionValue />
                 </text>
                 <text x={CX} y={CY_R + 14} textAnchor="middle" dominantBaseline="central" fontSize={6.5} fontWeight={600} fill="var(--muted-foreground)" letterSpacing="0.12em">
                   CLASS AVG
@@ -218,6 +222,24 @@ export function HeroMorphCanvas({
                 progress={progress}
               />
             ))}
+
+            {/* score labels above each dot once it lands on the curve */}
+            <motion.g style={{ opacity: dotLabelOpacity }}>
+              {CATS.map((c) => (
+                <text
+                  key={c.key}
+                  x={n2(xScale(c.score))}
+                  y={n2(bellY(c.score)) - 12}
+                  textAnchor="middle"
+                  className="font-mono"
+                  fontSize={9}
+                  fontWeight={600}
+                  fill={c.color}
+                >
+                  {c.score}
+                </text>
+              ))}
+            </motion.g>
 
             {/* -------- student marker (phase 3) -------- */}
             <motion.g style={{ opacity: studentOpacity }}>
@@ -269,4 +291,18 @@ function MorphDot({
       strokeWidth={1.6}
     />
   );
+}
+
+function MedallionValue() {
+  const [v, setV] = useState(60);
+  useEffect(() => {
+    const controls = animate(60, CLASS_AVG, {
+      duration: 1,
+      delay: 0.3,
+      ease: ENTER,
+      onUpdate: (x) => setV(Math.round(x)),
+    });
+    return () => controls.stop();
+  }, []);
+  return <>{v}</>;
 }

@@ -32,10 +32,42 @@ export function HeroStory() {
     setPhase((prev) => (prev === next ? prev : next));
   });
 
+  // cursor-reactive glow
+  const mx = useMotionValue(-600);
+  const my = useMotionValue(-600);
+  const sx = useSpring(mx, { stiffness: 120, damping: 22, mass: 0.5 });
+  const sy = useSpring(my, { stiffness: 120, damping: 22, mass: 0.5 });
+
   return (
     <section ref={wrapperRef} className="relative h-[300vh]">
-      <div className="sticky top-0 flex h-dvh items-center">
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
+      <div
+        className="sticky top-0 flex h-dvh items-center overflow-hidden"
+        onMouseMove={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          mx.set(e.clientX - r.left - 176);
+          my.set(e.clientY - r.top - 176);
+        }}
+      >
+        {/* cursor-reactive glow */}
+        <motion.div
+          aria-hidden
+          style={{ x: sx, y: sy }}
+          className="pointer-events-none absolute left-0 top-0 h-[352px] w-[352px] rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,color-mix(in_oklch,var(--primary)_20%,transparent),transparent_70%)] blur-2xl"
+        />
+
+        {/* scroll-phase rail */}
+        <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 flex-col gap-2 sm:flex">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={`w-1 rounded-full transition-all duration-500 ${
+                phase === i ? "h-7 bg-foreground" : "h-4 bg-border"
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
           {/* left column: overlapping phase slides */}
           <div className="relative min-h-[380px]">
             {/* phase 0 — the hero */}
