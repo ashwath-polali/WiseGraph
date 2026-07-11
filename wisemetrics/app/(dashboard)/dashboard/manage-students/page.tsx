@@ -28,13 +28,13 @@ export default async function ManageStudentsPage({
     return (
       <main className="space-y-6">
         <Card className="p-6">
-          <h1 className="text-xl font-semibold">Manage students</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="text-xl font-semibold text-foreground">Manage students</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             No classes yet. Create a class first.
           </p>
           <Link
             href="/dashboard"
-            className="mt-3 inline-block text-xs text-sky-400 hover:text-sky-300"
+            className="mt-3 inline-block text-xs text-primary transition-colors hover:text-primary/80"
           >
             Back to dashboard
           </Link>
@@ -62,13 +62,13 @@ export default async function ManageStudentsPage({
     return (
       <main className="space-y-6">
         <Card className="p-6">
-          <h1 className="text-xl font-semibold">Manage students</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="text-xl font-semibold text-foreground">Manage students</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Selected class could not be loaded.
           </p>
           <Link
             href="/dashboard"
-            className="mt-3 inline-block text-xs text-sky-400 hover:text-sky-300"
+            className="mt-3 inline-block text-xs text-primary transition-colors hover:text-primary/80"
           >
             Back to dashboard
           </Link>
@@ -81,10 +81,10 @@ export default async function ManageStudentsPage({
     <main className="space-y-6">
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Students · {cls.name}</h1>
+          <h1 className="text-xl font-semibold text-foreground">Students · {cls.name}</h1>
           <Link
             href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
-            className="text-xs text-sky-400 hover:text-sky-300"
+            className="text-xs text-primary transition-colors hover:text-primary/80"
           >
             Back to dashboard
           </Link>

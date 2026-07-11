@@ -40,12 +40,12 @@ export default async function ConfigureAssessmentPage({
     return (
       <main className="space-y-6">
         <Card className="space-y-4 p-6">
-          <h1 className="text-xl font-semibold">Configure assessment</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-xl font-semibold text-foreground">Configure assessment</h1>
+          <p className="text-sm text-muted-foreground">
             Before you can configure categories and subskills, create a class.
           </p>
           <CreateFirstClassButton />
-          <Link href="/dashboard" className="text-xs text-sky-400">
+          <Link href="/dashboard" className="text-xs text-primary transition-colors hover:text-primary/80">
             Back to dashboard
           </Link>
         </Card>
@@ -86,11 +86,11 @@ export default async function ConfigureAssessmentPage({
     return (
       <main className="space-y-6">
         <Card className="p-6">
-          <h1 className="text-xl font-semibold">Configure assessment</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="text-xl font-semibold text-foreground">Configure assessment</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Selected class could not be loaded.
           </p>
-          <Link href="/dashboard" className="text-xs text-sky-400">
+          <Link href="/dashboard" className="text-xs text-primary transition-colors hover:text-primary/80">
             Back to dashboard
           </Link>
         </Card>
@@ -103,15 +103,15 @@ export default async function ConfigureAssessmentPage({
       <Card className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-xl font-semibold text-foreground">
               Configure assessment · {cls.name}
             </h1>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-muted-foreground">
               Grade {cls.gradeLevel} · {cls.subject}
             </p>
           </div>
           <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
-            <span className="text-xs text-sky-400">Back to dashboard</span>
+            <span className="text-xs text-primary transition-colors hover:text-primary/80">Back to dashboard</span>
           </Link>
         </div>
 

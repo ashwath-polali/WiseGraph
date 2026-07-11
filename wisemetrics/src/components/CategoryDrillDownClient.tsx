@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { motion } from "motion/react";
 import type {
   StudentScoreSummary,
   SubcategoryScore,
@@ -26,12 +27,12 @@ export function CategoryDrillDownClient({ student }: Props) {
 
   return (
     <div className="space-y-3">
-      <header className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-slate-200">
+      <header className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-foreground">
           Category drill-down
         </h2>
         <select
-          className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-50"
+          className="rounded-md border border-input bg-card px-2 py-1 text-xs text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           value={selectedId ?? ""}
           onChange={(e) => setSelectedId(e.target.value || null)}
         >
@@ -47,7 +48,7 @@ export function CategoryDrillDownClient({ student }: Props) {
         {/* Fixed, centered chart area so size is stable across categories */}
         <div className="flex h-[400px] items-center justify-center">
           {!selectedCategory || subskills.length === 0 ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               No subskills recorded for this category yet.
             </p>
           ) : (
@@ -57,15 +58,29 @@ export function CategoryDrillDownClient({ student }: Props) {
           )}
         </div>
 
-        <ul className="space-y-2 text-xs text-slate-300">
-          {subskills.map((sub) => (
-            <li
+        <ul className="space-y-1.5">
+          {subskills.map((sub, i) => (
+            <motion.li
               key={sub.id}
-              className="flex items-center justify-between border-b border-slate-800 pb-1 last:border-b-0 last:pb-0"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: [0.22, 1, 0.36, 1],
+                delay: i * 0.03,
+              }}
+              className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 transition-colors duration-150 hover:bg-accent/40"
             >
-              <span>{sub.name}</span>
-              <span className="text-slate-400">{sub.score}</span>
-            </li>
+              <span className="min-w-0 truncate text-sm text-foreground">
+                {sub.name}
+              </span>
+              <span
+                data-numeric
+                className="shrink-0 rounded-md border border-border bg-muted/60 px-2 py-0.5 font-mono text-xs text-muted-foreground"
+              >
+                {sub.score}
+              </span>
+            </motion.li>
           ))}
         </ul>
       </div>

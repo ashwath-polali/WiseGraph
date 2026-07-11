@@ -134,10 +134,10 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Account info */}
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-50">Account</h2>
+          <h2 className="text-sm font-semibold text-foreground">Account</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Name</label>
+              <label className="mb-1.5 block text-xs text-muted-foreground">Name</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -145,7 +145,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-slate-400">Email</label>
+              <label className="mb-1.5 block text-xs text-muted-foreground">Email</label>
               <Input
                 type="email"
                 value={email}
@@ -156,7 +156,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
           </div>
 
           <div className="flex flex-col gap-1">
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-muted-foreground">
               Joined{' '}
               {teacher
                 ? new Date(teacher.createdAt).toLocaleDateString()
@@ -164,7 +164,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
               .
             </p>
             <div className="mt-1">
-              <p className="text-[11px] text-slate-500 mb-1">
+              <p className="text-[11px] text-muted-foreground mb-1">
                 Send yourself a one‑time link to reset your password.
               </p>
               <ResetPasswordClient initialEmail={teacher?.email ?? ''} />
@@ -175,10 +175,10 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
         {/* App defaults (only for teacher mode) */}
         {classes.length > 0 && (
           <section className="space-y-2">
-            <h2 className="text-sm font-semibold text-slate-50">App defaults</h2>
+            <h2 className="text-sm font-semibold text-foreground">App defaults</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="sm:col-span-1">
-                <label className="mb-1 block text-xs text-slate-400">
+                <label className="mb-1.5 block text-xs text-muted-foreground">
                   School / district
                 </label>
                 <Input
@@ -189,11 +189,11 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-slate-400">
+                <label className="mb-1.5 block text-xs text-muted-foreground">
                   Default class
                 </label>
                 <select
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-50"
+                  className="h-9 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground transition-[border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
                   value={defaultClassId}
                   onChange={(e) => setDefaultClassId(e.target.value)}
                 >
@@ -207,11 +207,11 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-slate-400">
+                <label className="mb-1.5 block text-xs text-muted-foreground">
                   Default student view
                 </label>
                 <select
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-50"
+                  className="h-9 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground transition-[border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
                   value={defaultStudentView}
                   onChange={(e) =>
                     setDefaultStudentView(
@@ -234,10 +234,10 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
             {status === 'saving' ? 'Saving…' : 'Save settings'}
           </Button>
           {status === 'success' && (
-            <p className="text-xs text-emerald-400">Saved.</p>
+            <p className="text-xs text-psych">Saved.</p>
           )}
           {status === 'error' && (
-            <p className="text-xs text-red-400">
+            <p className="text-xs text-destructive">
               Could not save settings. Please try again.
             </p>
           )}
@@ -246,10 +246,10 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
 
       {/* Danger Zone - Collapsible */}
       {accountType && (
-        <div className="border-t border-slate-700 pt-6">
+        <div className="border-t border-border pt-6">
           <button
             onClick={() => setDangerExpanded(!dangerExpanded)}
-            className="flex items-center gap-2 text-xs font-semibold text-red-400 hover:text-red-300"
+            className="flex items-center gap-2 text-xs font-semibold text-destructive transition-colors duration-150 hover:text-destructive/80"
           >
             <svg
               className={`w-4 h-4 transition-transform ${dangerExpanded ? 'rotate-90' : ''}`}
@@ -265,34 +265,36 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
           {dangerExpanded && (
             <div className="mt-3 space-y-2">
               {/* Switch Mode */}
-              <div className="flex items-center justify-between p-2 bg-red-900/10 border border-red-900/30 rounded text-xs">
+              <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs">
                 <div>
-                  <p className="font-medium text-red-400">Switch mode</p>
-                  <p className="text-red-300/70 text-[11px]">
+                  <p className="font-medium text-destructive">Switch mode</p>
+                  <p className="text-[11px] text-muted-foreground">
                     Switch to {accountType === 'psychologist' ? 'Teacher' : 'Psychologist'} mode
                   </p>
                 </div>
                 <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={handleSwitchMode}
                   disabled={loading}
-                  className="bg-red-900/30 hover:bg-red-900/50 text-red-300 text-xs py-1 px-2"
                 >
                   {loading ? 'Switching...' : 'Switch'}
                 </Button>
               </div>
 
               {/* Delete Account */}
-              <div className="flex items-center justify-between p-2 bg-red-900/10 border border-red-900/30 rounded text-xs">
+              <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs">
                 <div>
-                  <p className="font-medium text-red-400">Delete account</p>
-                  <p className="text-red-300/70 text-[11px]">
+                  <p className="font-medium text-destructive">Delete account</p>
+                  <p className="text-[11px] text-muted-foreground">
                     Permanently delete your account
                   </p>
                 </div>
                 <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={handleDeleteAccount}
                   disabled={loading}
-                  className="bg-red-600/30 hover:bg-red-600/50 text-red-300 text-xs py-1 px-2"
                 >
                   {loading ? 'Deleting...' : 'Delete'}
                 </Button>

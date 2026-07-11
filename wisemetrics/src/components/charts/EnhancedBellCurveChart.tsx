@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import type { ClassScoreSummary, CategoryScore, SubcategoryScore } from "@/types/scores";
 import { clampScore } from "@/lib/chartScaling";
+import { Button } from "@/components/ui/Button";
 
 const FIXED_MEAN = 100; // Reference mean for standard scores
 const SD = 15;
@@ -183,18 +184,18 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
   const snapshotOverallScore = getSnapshotOverallScore();
 
   return (
-    <div className="flex h-full flex-col gap-4 rounded-2xl border border-slate-800/60 bg-gradient-to-br from-slate-950 via-slate-900/40 to-slate-950 p-4 shadow-[0_20px_60px_rgba(8,47,73,0.6)] ring-1 ring-slate-800/40 backdrop-blur-sm">
+    <div className="flex h-full flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm backdrop-blur-sm">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 border-b border-slate-800/40 pb-3">
+      <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-400/80">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Standard Score Distribution
           </span>
           <div className="flex items-baseline gap-2">
-            <h2 className="text-base font-bold text-slate-50">
+            <h2 className="text-base font-bold text-foreground font-display">
               {student?.name || cls.name}
             </h2>
-            <span className="rounded-full bg-slate-800/60 px-2.5 py-0.5 text-[10px] font-medium text-slate-300 ring-1 ring-slate-700/50">
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground ring-1 ring-border">
               {cls.subject} · Grade {cls.gradeLevel}
             </span>
           </div>
@@ -202,25 +203,29 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
 
         {student && (
           <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
               Overall Score
             </span>
             {snapshotOverallScore !== null ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold">
-                  <span className="text-2xl font-bold text-orange-400">
+                <div className="flex items-center gap-1.5 text-xs font-semibold font-mono" data-numeric>
+                  <span className="text-2xl font-bold" style={{ color: 'var(--chart-4)' }}>
                     {Math.round(student.overallScore)}
                   </span>
-                  <span className="text-lg text-slate-500">
+                  <span className="text-lg text-muted-foreground">
                     {Math.round(snapshotOverallScore)}
                   </span>
-                  <span className={`text-sm ${
-                    student.overallScore - snapshotOverallScore > 0
-                      ? 'text-emerald-400'
-                      : student.overallScore - snapshotOverallScore < 0
-                      ? 'text-red-400'
-                      : 'text-slate-400'
-                  }`}>
+                  <span
+                    className="text-sm"
+                    style={{
+                      color:
+                        student.overallScore - snapshotOverallScore > 0
+                          ? 'var(--chart-2)'
+                          : student.overallScore - snapshotOverallScore < 0
+                          ? 'var(--destructive)'
+                          : 'var(--muted-foreground)',
+                    }}
+                  >
                     {student.overallScore - snapshotOverallScore > 0
                       ? `+${Math.round(student.overallScore - snapshotOverallScore)}`
                       : student.overallScore - snapshotOverallScore < 0
@@ -228,14 +233,14 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                       : '±0'}
                   </span>
                 </div>
-                <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
+                <div className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--chart-4)' }} />
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="text-2xl font-bold text-orange-400">
+                <div className="text-2xl font-bold font-mono" data-numeric style={{ color: 'var(--chart-4)' }}>
                   {Math.round(student.overallScore)}
                 </div>
-                <div className="h-2 w-2 rounded-full bg-orange-400 shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
+                <div className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--chart-4)' }} />
               </div>
             )}
           </div>
@@ -250,13 +255,13 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
             {/* Gradients */}
             <defs>
               <linearGradient id="bell-bg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#020617" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#0f172a" stopOpacity="0.4" />
+                <stop offset="0%" stopColor="var(--card)" stopOpacity="0" />
+                <stop offset="50%" stopColor="var(--card)" stopOpacity="0" />
+                <stop offset="100%" stopColor="var(--card)" stopOpacity="0" />
               </linearGradient>
               <linearGradient id="bell-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="#0284c7" stopOpacity="0.1" />
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity="0.05" />
               </linearGradient>
               <filter id="glow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -276,7 +281,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
               y1={height - marginBottom}
               x2={width - marginRight}
               y2={height - marginBottom}
-              className="stroke-slate-700/60"
+              stroke="var(--border)"
               strokeWidth={1.5}
             />
 
@@ -292,13 +297,15 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                     y1={height - marginBottom}
                     x2={x}
                     y2={height - marginBottom + 5}
-                    className={isKeyScore ? "stroke-slate-600" : "stroke-slate-700/50"}
+                    stroke="var(--border)"
                     strokeWidth={isKeyScore ? 1.5 : 1}
+                    opacity={isKeyScore ? 1 : 0.7}
                   />
                   <text
                     x={x}
                     y={height - marginBottom + 16}
-                    className={isKeyScore ? "fill-slate-400 text-[10px] font-semibold" : "fill-slate-500 text-[9px]"}
+                    fill="var(--muted-foreground)"
+                    className={isKeyScore ? "text-[10px] font-semibold" : "text-[9px] opacity-70"}
                     textAnchor="middle"
                   >
                     {Math.round(score)}
@@ -325,7 +332,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
               <path
                 d={curvePath}
                 fill="none"
-                stroke="#38bdf8"
+                stroke="var(--chart-1)"
                 strokeWidth={2.5}
                 opacity={0.95}
                 filter="url(#glow)"
@@ -338,9 +345,10 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
               y1={marginTop}
               x2={xScale(FIXED_MEAN)}
               y2={height - marginBottom}
-              className="stroke-slate-600/60"
+              stroke="var(--muted-foreground)"
               strokeDasharray="5 4"
               strokeWidth={1.5}
+              opacity={0.6}
             />
 
             {/* Snapshot overall score line (if comparing) */}
@@ -350,10 +358,10 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                 y1={marginTop}
                 x2={xScale(snapshotOverallScore)}
                 y2={height - marginBottom}
-                className="stroke-violet-400/50"
+                stroke="var(--chart-5)"
                 strokeWidth={2}
                 strokeDasharray="4 3"
-                opacity={0.7}
+                opacity={0.6}
               />
             )}
 
@@ -365,7 +373,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                   y1={marginTop}
                   x2={xScale(student.overallScore)}
                   y2={height - marginBottom}
-                  className="stroke-orange-400"
+                  stroke="var(--chart-4)"
                   strokeWidth={2.5}
                   opacity={0.9}
                   filter="url(#glow)"
@@ -386,13 +394,11 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                         cx={x}
                         cy={y}
                         r={isSelected ? 5.5 : 4.5}
-                        fill={isSelected ? "#fed7aa" : "#fb923c"}
-                        stroke="#fff"
+                        fill="var(--chart-4)"
+                        stroke="var(--card)"
                         strokeWidth={isSelected ? 2 : 1.5}
+                        opacity={isSelected ? 1 : 0.95}
                         style={{
-                          filter: isSelected
-                            ? "drop-shadow(0 0 14px rgba(251,146,60,1))"
-                            : "drop-shadow(0 0 10px rgba(251,146,60,1))",
                           transition: "all 0.2s ease",
                         }}
                       />
@@ -400,11 +406,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                         <text
                           x={x}
                           y={y - 14}
-                          className="fill-orange-300 text-[8px] font-semibold"
+                          fill="var(--chart-4)"
+                          className="text-[8px] font-semibold"
                           textAnchor="middle"
-                          style={{
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                          }}
                         >
                           Overall
                         </text>
@@ -424,12 +428,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                       cy={y}
                       r={3.5}
                       fill="none"
-                      stroke="#a78bfa"
+                      stroke="var(--chart-5)"
                       strokeWidth={2}
                       opacity={0.8}
-                      style={{
-                        filter: "drop-shadow(0 0 8px rgba(167,139,250,0.8))",
-                      }}
                     />
                   );
                 })()}
@@ -462,12 +463,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                           cy={snapY}
                           r={3}
                           fill="none"
-                          stroke="#a78bfa"
+                          stroke="var(--chart-5)"
                           strokeWidth={1.5}
                           opacity={0.7}
-                          style={{
-                            filter: "drop-shadow(0 0 6px rgba(167,139,250,0.7))",
-                          }}
                         />
                       );
                     })()}
@@ -482,14 +480,11 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                         cx={x}
                         cy={y}
                         r={isSelected ? 5.5 : 4}
-                        className={isSelected ? "fill-emerald-300" : "fill-emerald-400"}
-                        stroke="#fff"
+                        fill="var(--chart-2)"
+                        stroke="var(--card)"
                         strokeWidth={isSelected ? 2 : 1.5}
                         opacity={isSelected ? 1 : 0.95}
                         style={{
-                          filter: isSelected
-                            ? "drop-shadow(0 0 12px rgba(52,211,153,1))"
-                            : "drop-shadow(0 0 6px rgba(52,211,153,0.8))",
                           transition: "all 0.2s ease",
                         }}
                       />
@@ -497,11 +492,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                         <text
                           x={x}
                           y={y - 12}
-                          className="fill-emerald-300 text-[8px] font-semibold"
+                          fill="var(--chart-2)"
+                          className="text-[8px] font-semibold"
                           textAnchor="middle"
-                          style={{
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                          }}
                         >
                           {cat.name}
                         </text>
@@ -509,11 +502,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                         <text
                           x={x}
                           y={y - 8}
-                          className="fill-emerald-300 text-[9px] font-bold"
+                          fill="var(--chart-2)"
+                          className="text-[9px] font-bold"
                           textAnchor="middle"
-                          style={{
-                            filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                          }}
                         >
                           {initial}
                         </text>
@@ -550,12 +541,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                             cy={snapY}
                             r={2.2}
                             fill="none"
-                            stroke="#a78bfa"
+                            stroke="var(--chart-5)"
                             strokeWidth={1.2}
                             opacity={0.6}
-                            style={{
-                              filter: "drop-shadow(0 0 4px rgba(167,139,250,0.6))",
-                            }}
                           />
                         );
                       })()}
@@ -569,14 +557,11 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                           cx={x}
                           cy={y}
                           r={isSelected ? 4 : 2.8}
-                          className={isSelected ? "fill-violet-300" : "fill-violet-400"}
-                          stroke="#fff"
+                          fill="var(--chart-6)"
+                          stroke="var(--card)"
                           strokeWidth={isSelected ? 1.5 : 1}
                           opacity={isSelected ? 1 : 0.85}
                           style={{
-                            filter: isSelected
-                              ? "drop-shadow(0 0 10px rgba(167,139,250,1))"
-                              : "drop-shadow(0 0 4px rgba(167,139,250,0.7))",
                             transition: "all 0.2s ease",
                           }}
                         />
@@ -584,11 +569,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                           <text
                             x={x}
                             y={y - 10}
-                            className="fill-violet-300 text-[7px] font-medium"
+                            fill="var(--chart-6)"
+                            className="text-[7px] font-medium"
                             textAnchor="middle"
-                            style={{
-                              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                            }}
                           >
                             {sub.name}
                           </text>
@@ -596,11 +579,9 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                           <text
                             x={x}
                             y={y - 7}
-                            className="fill-violet-300 text-[8px] font-bold"
+                            fill="var(--chart-6)"
+                            className="text-[8px] font-bold"
                             textAnchor="middle"
-                            style={{
-                              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                            }}
                           >
                             {initial}
                           </text>
@@ -614,42 +595,36 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
 
           {/* Bottom controls */}
           <div className="absolute bottom-2 left-2 flex items-center gap-2">
-            <button
-              onClick={() => setShowFullNames(!showFullNames)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-900/80 px-3 py-1.5 text-[10px] font-medium text-slate-300 shadow-lg backdrop-blur-sm transition-all hover:border-slate-600 hover:bg-slate-800/90 hover:text-slate-100"
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowFullNames(!showFullNames)}>
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
               </svg>
               {showFullNames ? 'Abbreviate' : 'Full Names'}
-            </button>
+            </Button>
 
             {onExpand && (
-              <button
-                onClick={onExpand}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/60 bg-slate-900/80 px-3 py-1.5 text-[10px] font-medium text-slate-300 shadow-lg backdrop-blur-sm transition-all hover:border-slate-600 hover:bg-slate-800/90 hover:text-slate-100"
-              >
+              <Button variant="outline" size="sm" onClick={onExpand}>
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
                 Expand
-              </button>
+              </Button>
             )}
           </div>
         </div>
 
         {/* Detail Panel - KEEP THE REST AS IS */}
         <div className="flex-[1.5] shrink-0">
-          <div className="flex h-full flex-col rounded-xl border border-slate-800/60 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-900/80 p-4 shadow-xl backdrop-blur-sm ring-1 ring-slate-800/40">
-            <div className="mb-3 flex items-start justify-between gap-2 border-b border-slate-800/50 pb-3">
+          <div className="flex h-full flex-col rounded-xl border border-border bg-muted/40 p-4 shadow-sm backdrop-blur-sm">
+            <div className="mb-3 flex items-start justify-between gap-2 border-b border-border pb-3">
               <div className="space-y-1">
-                <h3 className="text-xs font-bold text-slate-50">
+                <h3 className="text-xs font-bold text-foreground">
                   Selection Details
                 </h3>
                 {student && !selectedItem && (
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-muted-foreground">
                     Overall{" "}
-                    <span className="font-mono font-semibold text-orange-400">
+                    <span className="font-mono font-semibold" data-numeric style={{ color: 'var(--chart-4)' }}>
                       {Math.round(student.overallScore)}
                     </span>
                   </p>
@@ -659,26 +634,26 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
 
             {!selectedItem ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-                <div className="rounded-2xl bg-slate-800/40 p-4 ring-1 ring-slate-700/30">
-                  <svg className="h-8 w-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="rounded-2xl bg-muted p-4 ring-1 ring-border">
+                  <svg className="h-8 w-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[11px] font-medium text-slate-400">
+                  <p className="text-[11px] font-medium text-muted-foreground">
                     Click any dot to view details
                   </p>
-                  <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500">
+                  <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-orange-400" />
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--chart-4)' }} />
                       <span>Overall</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--chart-2)' }} />
                       <span>Category</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <div className="h-2 w-2 rounded-full bg-violet-400" />
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: 'var(--chart-6)' }} />
                       <span>Subskill</span>
                     </div>
                   </div>
@@ -688,16 +663,16 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
               <div className="space-y-3 text-[11px]">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">
+                    <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                       {selectedItem.type === 'overall' ? 'Overall' : selectedItem.type === 'category' ? 'Category' : 'Subcategory'}
                     </div>
-                    <div className="mt-0.5 font-semibold text-slate-50">
+                    <div className="mt-0.5 font-semibold text-foreground">
                       {selectedItem.name}
                     </div>
                   </div>
                   <button
                     onClick={() => setSelectedItem(null)}
-                    className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-800/60 hover:text-slate-300"
+                    className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground"
                   >
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -705,31 +680,42 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                   </button>
                 </div>
 
-                <div className="rounded-xl border border-slate-800/60 bg-slate-950/60 p-3 shadow-inner">
+                <div className="rounded-xl border border-border bg-muted/60 p-3 shadow-inner">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-slate-400">
+                    <span className="text-[10px] font-medium text-muted-foreground">
                       Standard Score
                     </span>
                     {selectedItem.snapshotScore !== undefined ? (
                       <div className="flex items-center gap-2">
-                        <div className={`h-2.5 w-2.5 rounded-full ${
-                          selectedItem.type === 'overall' ? 'bg-orange-400' :
-                          selectedItem.type === 'category' ? 'bg-emerald-400' : 'bg-violet-400'
-                        }`} />
-                        <div className="flex items-center gap-1.5 text-xs font-semibold">
-                          <span className="text-xl text-slate-50">
+                        <div
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{
+                            backgroundColor:
+                              selectedItem.type === 'overall'
+                                ? 'var(--chart-4)'
+                                : selectedItem.type === 'category'
+                                ? 'var(--chart-2)'
+                                : 'var(--chart-6)',
+                          }}
+                        />
+                        <div className="flex items-center gap-1.5 text-xs font-semibold font-mono" data-numeric>
+                          <span className="text-xl text-foreground">
                             {Math.round(selectedItem.score)}
                           </span>
-                          <span className="text-base text-slate-500">
+                          <span className="text-base text-muted-foreground">
                             {Math.round(selectedItem.snapshotScore)}
                           </span>
-                          <span className={`text-sm ${
-                            selectedItem.score - selectedItem.snapshotScore > 0
-                              ? 'text-emerald-400'
-                              : selectedItem.score - selectedItem.snapshotScore < 0
-                              ? 'text-red-400'
-                              : 'text-slate-400'
-                          }`}>
+                          <span
+                            className="text-sm"
+                            style={{
+                              color:
+                                selectedItem.score - selectedItem.snapshotScore > 0
+                                  ? 'var(--chart-2)'
+                                  : selectedItem.score - selectedItem.snapshotScore < 0
+                                  ? 'var(--destructive)'
+                                  : 'var(--muted-foreground)',
+                            }}
+                          >
                             {selectedItem.score - selectedItem.snapshotScore > 0
                               ? `+${Math.round(selectedItem.score - selectedItem.snapshotScore)}`
                               : selectedItem.score - selectedItem.snapshotScore < 0
@@ -740,11 +726,18 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <div className={`h-2.5 w-2.5 rounded-full ${
-                          selectedItem.type === 'overall' ? 'bg-orange-400' :
-                          selectedItem.type === 'category' ? 'bg-emerald-400' : 'bg-violet-400'
-                        }`} />
-                        <span className="text-xl font-bold text-slate-50">
+                        <div
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{
+                            backgroundColor:
+                              selectedItem.type === 'overall'
+                                ? 'var(--chart-4)'
+                                : selectedItem.type === 'category'
+                                ? 'var(--chart-2)'
+                                : 'var(--chart-6)',
+                          }}
+                        />
+                        <span className="text-xl font-bold text-foreground font-mono" data-numeric>
                           {Math.round(selectedItem.score)}
                         </span>
                       </div>
@@ -756,7 +749,7 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                   const category = student?.categories.find(c => c.id === selectedItem.id);
                   return category?.subcategories && category.subcategories.length > 0 ? (
                     <div className="space-y-2">
-                      <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">
+                      <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Related Subcategories
                       </div>
                       <div className="space-y-1">
@@ -766,25 +759,26 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                             <button
                               key={sub.id}
                               onClick={() => handleSubcategoryClick(sub, category)}
-                              className="flex w-full items-center justify-between rounded-lg border border-slate-800/60 bg-slate-950/40 px-2.5 py-1.5 text-left transition-all hover:border-violet-500/40 hover:bg-slate-900/60"
+                              className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-2.5 py-1.5 text-left transition-colors duration-150 hover:bg-accent/40"
                             >
-                              <span className="truncate text-[10px] text-slate-300">
+                              <span className="truncate text-[10px] text-muted-foreground">
                                 {sub.name}
                               </span>
                               {snapSubScore !== null ? (
-                                <div className="ml-2 flex items-center gap-1 text-[10px] font-semibold">
-                                  <span className="text-violet-400">{Math.round(sub.score)}</span>
-                                  <span className="text-slate-500">{Math.round(snapSubScore)}</span>
-                                  <span className={
-                                    sub.score - snapSubScore > 0 ? 'text-emerald-400' :
-                                    sub.score - snapSubScore < 0 ? 'text-red-400' : 'text-slate-400'
-                                  }>
+                                <div className="ml-2 flex items-center gap-1 text-[10px] font-semibold font-mono" data-numeric>
+                                  <span style={{ color: 'var(--chart-6)' }}>{Math.round(sub.score)}</span>
+                                  <span className="text-muted-foreground">{Math.round(snapSubScore)}</span>
+                                  <span style={{
+                                    color:
+                                      sub.score - snapSubScore > 0 ? 'var(--chart-2)' :
+                                      sub.score - snapSubScore < 0 ? 'var(--destructive)' : 'var(--muted-foreground)',
+                                  }}>
                                     {sub.score - snapSubScore > 0 ? `+${Math.round(sub.score - snapSubScore)}` :
                                      sub.score - snapSubScore < 0 ? `${Math.round(sub.score - snapSubScore)}` : '±0'}
                                   </span>
                                 </div>
                               ) : (
-                                <span className="ml-2 font-mono text-[10px] font-semibold text-violet-400">
+                                <span className="ml-2 font-mono text-[10px] font-semibold" data-numeric style={{ color: 'var(--chart-6)' }}>
                                   {Math.round(sub.score)}
                                 </span>
                               )}
@@ -796,8 +790,8 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
                   ) : null;
                 })()}
 
-                <div className="mt-4 rounded-lg bg-slate-900/40 p-2.5 ring-1 ring-slate-800/40">
-                  <p className="text-[10px] leading-relaxed text-slate-400">
+                <div className="mt-4 rounded-lg bg-muted/60 p-2.5 ring-1 ring-border">
+                  <p className="text-[10px] leading-relaxed text-muted-foreground">
                     {selectedItem.type === 'overall'
                       ? 'The overall score represents the comprehensive performance across all assessment categories and subcategories.'
                       : selectedItem.type === 'category' 
@@ -812,27 +806,27 @@ export function EnhancedBellCurveChart({ cls, onExpand, comparisonSnapshotId }: 
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-5 border-t border-slate-800/40 pt-3 text-[10px]">
+      <div className="flex items-center justify-center gap-5 border-t border-border pt-3 text-[10px]">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]" />
-          <span className="font-medium text-slate-400">Overall Score</span>
+          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--chart-4)' }} />
+          <span className="font-medium text-muted-foreground">Overall Score</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-          <span className="font-medium text-slate-400">Categories</span>
+          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--chart-2)' }} />
+          <span className="font-medium text-muted-foreground">Categories</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
-          <span className="font-medium text-slate-400">Subcategories</span>
+          <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--chart-6)' }} />
+          <span className="font-medium text-muted-foreground">Subcategories</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-0.5 w-4 rounded bg-sky-400" />
-          <span className="font-medium text-slate-400">Distribution (μ={Math.round(MEAN)}, σ=15)</span>
+          <div className="h-0.5 w-4 rounded" style={{ backgroundColor: 'var(--chart-1)' }} />
+          <span className="font-medium text-muted-foreground">Distribution (μ={Math.round(MEAN)}, σ=15)</span>
         </div>
         {snapshotScores && (
           <div className="flex items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full border-2 border-violet-400" />
-            <span className="font-medium text-slate-400">Snapshot Scores</span>
+            <div className="h-2.5 w-2.5 rounded-full border-2" style={{ borderColor: 'var(--chart-5)' }} />
+            <span className="font-medium text-muted-foreground">Snapshot Scores</span>
           </div>
         )}
       </div>

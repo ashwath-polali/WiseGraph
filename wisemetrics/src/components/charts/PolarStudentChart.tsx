@@ -7,6 +7,7 @@ import type {
   SubcategoryScore,
 } from '@/types/scores';
 import { clampScore } from '@/lib/chartScaling';
+import { Button } from '@/components/ui/Button';
 
 type Props = {
   evaluation: ClassScoreSummary;
@@ -306,7 +307,7 @@ export function PolarStudentChart({
   }
 
   return (
-    <div className="flex h-full w-full rounded-2xl border border-slate-800/50 bg-slate-950/70 shadow-[0_20px_50px_rgba(8,_47,_73,_0.7)] relative overflow-hidden">
+    <div className="flex h-full w-full rounded-2xl border border-border bg-card shadow-sm relative overflow-hidden">
       {/* Main Chart Area - Full width container */}
       <div className="flex-1 flex flex-col relative">
         {/* SVG Container - centered with padding */}
@@ -319,9 +320,9 @@ export function PolarStudentChart({
           >
             <defs>
               <radialGradient id="polar-bg" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stopColor="#0f172a" stopOpacity="0.15" />
-                <stop offset="70%" stopColor="#020617" stopOpacity="0.95" />
-                <stop offset="100%" stopColor="#020617" stopOpacity="1" />
+                <stop offset="0%" stopColor="var(--card)" stopOpacity="0" />
+                <stop offset="70%" stopColor="var(--card)" stopOpacity="0" />
+                <stop offset="100%" stopColor="var(--card)" stopOpacity="0" />
               </radialGradient>
 
               <filter id="wedge-glow">
@@ -344,18 +345,20 @@ export function PolarStudentChart({
                     cx={cx}
                     cy={cy}
                     r={r}
-                    className="fill-none stroke-slate-700/40"
+                    fill="none"
+                    stroke="var(--border)"
                     strokeWidth={score === SCORE_MEAN ? 1.2 : 0.6}
                     strokeDasharray={score === SCORE_MEAN ? 'none' : '3 5'}
-                    opacity={score === SCORE_MEAN ? 0.8 : 0.5}
+                    opacity={score === SCORE_MEAN ? 1 : 0.7}
                   />
                   <text
                     x={cx + r + 8}
                     y={cy}
+                    fill="var(--muted-foreground)"
                     className={
                       score === SCORE_MEAN
-                        ? 'fill-slate-300 text-[10px] font-medium'
-                        : 'fill-slate-600 text-[9px]'
+                        ? 'text-[10px] font-medium'
+                        : 'text-[9px] opacity-70'
                     }
                     textAnchor="start"
                     alignmentBaseline="middle"
@@ -400,8 +403,8 @@ export function PolarStudentChart({
                       {snapshotPath && (
                         <path
                           d={snapshotPath}
-                          fill="rgba(148,163,184,0.2)"
-                          stroke="rgba(148,163,184,0.6)"
+                          fill="color-mix(in oklch, var(--chart-5) 20%, transparent)"
+                          stroke="var(--chart-5)"
                           strokeWidth={2}
                           strokeDasharray="4 4"
                           opacity={0.7}
@@ -422,7 +425,8 @@ export function PolarStudentChart({
                       <text
                         x={labelPoint.x}
                         y={labelPoint.y}
-                        className="fill-slate-100 text-[12px] font-semibold"
+                        fill="var(--foreground)"
+                        className="text-[12px] font-semibold"
                         textAnchor="middle"
                         alignmentBaseline="middle"
                       >
@@ -441,14 +445,15 @@ export function PolarStudentChart({
                           width={36}
                           height={20}
                           rx={10}
-                          className="fill-slate-950/90"
+                          fill="var(--card)"
                           stroke={drillCategory.color.stroke}
                           strokeWidth={1}
                         />
                         <text
                           textAnchor="middle"
                           alignmentBaseline="middle"
-                          className="fill-slate-100 text-[10px] font-semibold"
+                          fill="var(--foreground)"
+                          className="text-[10px] font-semibold"
                         >
                           {Math.round(drillCategory.score)}
                         </text>
@@ -467,14 +472,15 @@ export function PolarStudentChart({
                             width={36}
                             height={20}
                             rx={10}
-                            className="fill-slate-950/90"
-                            stroke="rgba(148,163,184,0.6)"
+                            fill="var(--card)"
+                            stroke="var(--chart-5)"
                             strokeWidth={1}
                           />
                           <text
                             textAnchor="middle"
                             alignmentBaseline="middle"
-                            className="fill-slate-400 text-[10px] font-semibold"
+                            fill="var(--chart-5)"
+                            className="text-[10px] font-semibold"
                           >
                             {Math.round(drillCategory.snapshotScore)}
                           </text>
@@ -568,20 +574,22 @@ export function PolarStudentChart({
                                     .filter((s) => s.snapshotPoint)
                                     .map((s) => `${s.snapshotPoint!.x},${s.snapshotPoint!.y}`)
                                     .join(' ')}
-                                  stroke="rgba(148,163,184,0.5)"
+                                  stroke="var(--chart-5)"
                                   strokeWidth={2}
                                   fill="none"
                                   strokeDasharray="4 4"
+                                  opacity={0.6}
                                 />
                               )}
 
                               {/* Current polyline */}
                               <polyline
                                 points={redistributed.map((s) => `${s.x},${s.y}`).join(' ')}
-                                stroke="rgba(139,92,246,0.6)"
+                                stroke="var(--chart-6)"
                                 strokeWidth={2}
                                 fill="none"
                                 strokeDasharray="4 4"
+                                opacity={0.7}
                               />
 
                               {/* Snapshot points */}
@@ -594,8 +602,8 @@ export function PolarStudentChart({
                                         cx={sub.snapshotPoint.x}
                                         cy={sub.snapshotPoint.y}
                                         r={3.5}
-                                        className="fill-slate-400"
-                                        stroke="rgba(148,163,184,0.7)"
+                                        fill="var(--chart-5)"
+                                        stroke="var(--chart-5)"
                                         strokeWidth={1.5}
                                         opacity={0.6}
                                       />
@@ -609,17 +617,10 @@ export function PolarStudentChart({
                                     cx={sub.x}
                                     cy={sub.y}
                                     r={sub.isBookend ? 3 : 4.5}
-                                    className={
-                                      sub.isBookend
-                                        ? 'fill-slate-600 stroke-slate-700'
-                                        : 'fill-violet-400 cursor-pointer stroke-rgba(167,139,250,0.8)'
-                                    }
+                                    fill={sub.isBookend ? 'var(--muted-foreground)' : 'var(--chart-6)'}
+                                    stroke={sub.isBookend ? 'var(--border)' : 'var(--chart-6)'}
+                                    className={sub.isBookend ? undefined : 'cursor-pointer'}
                                     strokeWidth={1.5}
-                                    style={
-                                      sub.isBookend
-                                        ? {}
-                                        : { filter: 'drop-shadow(0 0 4px rgba(167,139,250,0.6))' }
-                                    }
                                     {...(!sub.isBookend &&
                                       sub.name &&
                                       sub.score !== undefined && {
@@ -640,7 +641,8 @@ export function PolarStudentChart({
                                     <text
                                       x={sub.x + Math.cos(sub.angle) * 22}
                                       y={sub.y + Math.sin(sub.angle) * 22}
-                                      className="fill-slate-300 text-[9px] font-medium pointer-events-none"
+                                      fill="var(--muted-foreground)"
+                                      className="text-[9px] font-medium pointer-events-none"
                                       textAnchor="middle"
                                       alignmentBaseline="middle"
                                     >
@@ -665,14 +667,15 @@ export function PolarStudentChart({
                           width={140}
                           height={32}
                           rx={6}  // slight rounding, not big pill
-                          className="fill-slate-900/90"
-                          stroke="rgba(148,163,184,0.3)"
+                          fill="var(--card)"
+                          stroke="var(--border)"
                           strokeWidth={1}
                         />
                         <text
                           x={70}  // center of width 140
                           y={16}  // vertical middle of height 32
-                          className="fill-slate-300 text-[11px] font-medium"
+                          fill="var(--muted-foreground)"
+                          className="text-[11px] font-medium"
                           textAnchor="middle"
                           dominantBaseline="middle"
                         >
@@ -705,8 +708,8 @@ export function PolarStudentChart({
                         return (
                           <path
                             d={snapshotPath}
-                            fill="rgba(148,163,184,0.15)"
-                            stroke="rgba(148,163,184,0.5)"
+                            fill="color-mix(in oklch, var(--chart-5) 15%, transparent)"
+                            stroke="var(--chart-5)"
                             strokeWidth={1}
                             strokeDasharray="3 3"
                             opacity={0.6}
@@ -732,7 +735,8 @@ export function PolarStudentChart({
                       y1={cy}
                       x2={polarPoint(maxRadius + 30, wedge.angleStart).x}
                       y2={polarPoint(maxRadius + 30, wedge.angleStart).y}
-                      className="stroke-slate-700/30 pointer-events-none"
+                      stroke="var(--border)"
+                      className="pointer-events-none"
                       strokeWidth={0.6}
                     />
 
@@ -740,7 +744,8 @@ export function PolarStudentChart({
                     <text
                       x={wedge.labelPoint.x}
                       y={wedge.labelPoint.y}
-                      className="fill-slate-200 text-[10px] font-semibold pointer-events-none"
+                      fill="var(--foreground)"
+                      className="text-[10px] font-semibold pointer-events-none"
                       textAnchor="middle"
                       alignmentBaseline="middle"
                     >
@@ -753,8 +758,8 @@ export function PolarStudentChart({
                         cx={polarPoint(scoreToRadius(wedge.snapshotScore), wedge.mid).x}
                         cy={polarPoint(scoreToRadius(wedge.snapshotScore), wedge.mid).y}
                         r={3.5}
-                        fill="rgba(148,163,184,0.6)"
-                        stroke="rgba(148,163,184,0.8)"
+                        fill="var(--chart-5)"
+                        stroke="var(--chart-5)"
                         strokeWidth={1.2}
                         opacity={0.7}
                       />
@@ -766,10 +771,9 @@ export function PolarStudentChart({
                       cy={polarPoint(scoreToRadius(wedge.score), wedge.mid).y}
                       r={4.5}
                       fill={wedge.color.stroke}
-                      stroke="rgba(248,250,252,0.6)"
+                      stroke="var(--card)"
                       strokeWidth={1.5}
                       className="cursor-pointer"
-                      style={{ filter: `drop-shadow(0 0 4px ${wedge.color.stroke})` }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedItem({
@@ -798,10 +802,11 @@ export function PolarStudentChart({
                                 return `${pt.x},${pt.y}`;
                               })
                               .join(' ')}
-                            stroke="rgba(148,163,184,0.4)"
+                            stroke="var(--chart-5)"
                             strokeWidth={1.2}
                             fill="none"
                             strokeDasharray="3 3"
+                            opacity={0.5}
                             className="pointer-events-none"
                           />
                         )}
@@ -809,10 +814,11 @@ export function PolarStudentChart({
                         {/* Current subcategory polyline */}
                         <polyline
                           points={wedge.subcategories.map((sub) => `${sub.x},${sub.y}`).join(' ')}
-                          stroke="rgba(139,92,246,0.5)"
+                          stroke="var(--chart-6)"
                           strokeWidth={1.5}
                           fill="none"
                           strokeDasharray="3 3"
+                          opacity={0.6}
                           className="pointer-events-none"
                         />
 
@@ -826,8 +832,8 @@ export function PolarStudentChart({
                                   cx={polarPoint(scoreToRadius(sub.snapshotScore), sub.angle).x}
                                   cy={polarPoint(scoreToRadius(sub.snapshotScore), sub.angle).y}
                                   r={2.5}
-                                  className="fill-slate-400"
-                                  stroke="rgba(148,163,184,0.7)"
+                                  fill="var(--chart-5)"
+                                  stroke="var(--chart-5)"
                                   strokeWidth={1}
                                   opacity={0.6}
                                 />
@@ -841,17 +847,10 @@ export function PolarStudentChart({
                               cx={sub.x}
                               cy={sub.y}
                               r={sub.isBookend ? 2.5 : 3.5}
-                              className={
-                                sub.isBookend
-                                  ? 'fill-slate-600 stroke-slate-700'
-                                  : 'fill-violet-400 cursor-pointer stroke-rgba(167,139,250,0.7)'
-                              }
+                              fill={sub.isBookend ? 'var(--muted-foreground)' : 'var(--chart-6)'}
+                              stroke={sub.isBookend ? 'var(--border)' : 'var(--chart-6)'}
+                              className={sub.isBookend ? undefined : 'cursor-pointer'}
                               strokeWidth={sub.isBookend ? 1 : 1.2}
-                              style={
-                                sub.isBookend
-                                  ? {}
-                                  : { filter: 'drop-shadow(0 0 3px rgba(167,139,250,0.5))' }
-                              }
                               {...(!sub.isBookend &&
                                 sub.name &&
                                 sub.score !== undefined && {
@@ -875,7 +874,8 @@ export function PolarStudentChart({
                               <text
                                 x={sub.x + Math.cos(sub.angle) * 18}
                                 y={sub.y + Math.sin(sub.angle) * 18}
-                                className="fill-slate-400 text-[8px] font-medium pointer-events-none"
+                                fill="var(--muted-foreground)"
+                                className="text-[8px] font-medium pointer-events-none"
                                 textAnchor="middle"
                                 alignmentBaseline="middle"
                               >
@@ -897,7 +897,8 @@ export function PolarStudentChart({
                 cx={cx}
                 cy={cy}
                 r={scoreToRadius(snapshotOverallScore)}
-                className="fill-none stroke-slate-400"
+                fill="none"
+                stroke="var(--chart-5)"
                 strokeWidth={2}
                 opacity={0.5}
                 strokeDasharray="6 4"
@@ -909,15 +910,12 @@ export function PolarStudentChart({
               cx={cx}
               cy={cy}
               r={scoreToRadius(overallScore)}
-              className={`fill-none cursor-pointer transition-all ${
-                isOverallHovered ? 'stroke-yellow-400' : 'stroke-slate-400'
-              }`}
+              fill="none"
+              stroke={isOverallHovered ? 'var(--chart-3)' : 'var(--muted-foreground)'}
+              className="cursor-pointer transition-all"
               strokeWidth={isOverallHovered ? 3 : 2}
               opacity={isOverallHovered ? 1 : 0.6}
               strokeDasharray="6 4"
-              style={
-                isOverallHovered ? { filter: 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.6))' } : {}
-              }
               onClick={() =>
                 setSelectedItem({
                   type: 'overall',
@@ -935,8 +933,7 @@ export function PolarStudentChart({
               cx={cx}
               cy={cy}
               r={5}
-              className="fill-sky-500"
-              style={{ filter: 'drop-shadow(0 0 6px rgba(14,165,233,0.7))' }}
+              fill="var(--chart-4)"
             />
 
             {/* Overall text - ONLY SHOW WHEN showFullNames is true */}
@@ -945,7 +942,8 @@ export function PolarStudentChart({
                 <text
                   x={cx}
                   y={cy + 22}
-                  className="fill-slate-300 text-[10px] font-semibold pointer-events-none"
+                  fill="var(--foreground)"
+                  className="text-[10px] font-semibold pointer-events-none"
                   textAnchor="middle"
                 >
                   Current: {Math.round(overallScore)}
@@ -954,7 +952,8 @@ export function PolarStudentChart({
                   <text
                     x={cx}
                     y={cy + 34}
-                    className="fill-slate-500 text-[9px] font-medium pointer-events-none"
+                    fill="var(--muted-foreground)"
+                    className="text-[9px] font-medium pointer-events-none"
                     textAnchor="middle"
                   >
                     Before: {Math.round(snapshotOverallScore)}
@@ -967,17 +966,11 @@ export function PolarStudentChart({
 
         {/* Controls at bottom left */}
         <div className="absolute bottom-6 left-6 flex items-center gap-2">
-          <button
-            onClick={onToggleNames}
-            className="px-3 py-1.5 rounded-lg border border-slate-700/50 bg-slate-900/90 backdrop-blur-sm text-slate-300 hover:text-slate-100 hover:border-slate-600 transition-all text-xs font-medium"
-          >
+          <Button variant="outline" size="sm" onClick={onToggleNames}>
             {showFullNames ? 'First Letter' : 'Full Names'}
-          </button>
+          </Button>
 
-          <button
-            onClick={onExpand}
-            className="px-3 py-1.5 rounded-lg border border-slate-700/50 bg-slate-900/90 backdrop-blur-sm text-slate-300 hover:text-slate-100 hover:border-slate-600 transition-all text-xs font-medium flex items-center gap-1.5"
-          >
+          <Button variant="outline" size="sm" onClick={onExpand} className="gap-1.5">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -987,43 +980,45 @@ export function PolarStudentChart({
               />
             </svg>
             Expand
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Modern Side Panel */}
       {selectedItem && (
-        <div className="w-80 border-l border-slate-800/50 bg-gradient-to-br from-slate-900/98 via-slate-950/98 to-slate-900/98 backdrop-blur-xl flex flex-col">
+        <div className="w-80 border-l border-border bg-card backdrop-blur-xl flex flex-col">
           {/* Header */}
-          <div className="flex items-start justify-between p-5 border-b border-slate-800/40">
+          <div className="flex items-start justify-between p-5 border-b border-border">
             <div className="flex-1">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-800/40 border border-slate-700/30 mb-3">
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted border border-border mb-3">
                 <div
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    selectedItem.type === 'overall'
-                      ? 'bg-slate-400'
-                      : selectedItem.type === 'category'
-                      ? 'bg-sky-400'
-                      : 'bg-violet-400'
-                  }`}
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    backgroundColor:
+                      selectedItem.type === 'overall'
+                        ? 'var(--muted-foreground)'
+                        : selectedItem.type === 'category'
+                        ? 'var(--chart-1)'
+                        : 'var(--chart-6)',
+                  }}
                 />
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-slate-500">
+                <span className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
                   {selectedItem.type}
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-slate-50 mb-0.5 leading-tight">
+              <h3 className="text-lg font-bold text-foreground mb-0.5 leading-tight">
                 {selectedItem.name}
               </h3>
 
               {selectedItem.categoryName && (
-                <p className="text-xs text-slate-500 mt-1">in {selectedItem.categoryName}</p>
+                <p className="text-xs text-muted-foreground mt-1">in {selectedItem.categoryName}</p>
               )}
             </div>
 
             <button
               onClick={() => setSelectedItem(null)}
-              className="text-slate-500 hover:text-slate-300 transition-colors p-1 hover:bg-slate-800/40 rounded-md"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-accent/40 rounded-md"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -1039,32 +1034,33 @@ export function PolarStudentChart({
           {/* Score Display */}
           <div className="p-5">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-violet-500/5 to-blue-500/5 rounded-xl blur-2xl" />
-              <div className="relative rounded-xl border border-slate-700/40 bg-slate-900/60 backdrop-blur-sm p-5 text-center">
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 mb-2 font-semibold">
+              <div className="relative rounded-xl border border-border bg-muted/60 backdrop-blur-sm p-5 text-center">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-semibold">
                   {comparisonSnapshotId && selectedItem.snapshotScore
                     ? 'Current Score'
                     : 'Standard Score'}
                 </div>
-                <div className="text-5xl font-bold bg-gradient-to-br from-slate-100 to-slate-300 bg-clip-text text-transparent mb-3">
+                <div className="text-5xl font-bold text-foreground mb-3 font-mono" data-numeric>
                   {Math.round(selectedItem.score)}
                 </div>
 
                 {/* Comparison delta */}
                 {comparisonSnapshotId && selectedItem.snapshotScore && (
-                  <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/50 mb-2">
-                    <span className="text-xs text-slate-500">Previous:</span>
-                    <span className="text-sm font-semibold text-slate-400">
+                  <div className="flex items-center justify-center gap-2 pt-2 border-t border-border mb-2">
+                    <span className="text-xs text-muted-foreground">Previous:</span>
+                    <span className="text-sm font-semibold text-muted-foreground">
                       {Math.round(selectedItem.snapshotScore)}
                     </span>
                     <span
-                      className={`text-sm font-bold ${
-                        selectedItem.score > selectedItem.snapshotScore
-                          ? 'text-emerald-400'
-                          : selectedItem.score < selectedItem.snapshotScore
-                          ? 'text-amber-400'
-                          : 'text-slate-400'
-                      }`}
+                      className="text-sm font-bold"
+                      style={{
+                        color:
+                          selectedItem.score > selectedItem.snapshotScore
+                            ? 'var(--chart-2)'
+                            : selectedItem.score < selectedItem.snapshotScore
+                            ? 'var(--chart-3)'
+                            : 'var(--muted-foreground)',
+                      }}
                     >
                       {selectedItem.score > selectedItem.snapshotScore && '+'}
                       {Math.round(selectedItem.score - selectedItem.snapshotScore)}
@@ -1073,23 +1069,23 @@ export function PolarStudentChart({
                 )}
 
                 {/* Performance indicator */}
-                <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/50">
+                <div className="flex items-center justify-center gap-2 pt-2 border-t border-border">
                   {selectedItem.score >= 115 && (
                     <>
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span className="text-xs text-emerald-400 font-medium">Above Average</span>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--chart-2)' }} />
+                      <span className="text-xs font-medium" style={{ color: 'var(--chart-2)' }}>Above Average</span>
                     </>
                   )}
                   {selectedItem.score >= 85 && selectedItem.score < 115 && (
                     <>
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                      <span className="text-xs text-blue-400 font-medium">Average Range</span>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--chart-1)' }} />
+                      <span className="text-xs font-medium" style={{ color: 'var(--chart-1)' }}>Average Range</span>
                     </>
                   )}
                   {selectedItem.score < 85 && (
                     <>
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <span className="text-xs text-amber-400 font-medium">Below Average</span>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--chart-3)' }} />
+                      <span className="text-xs font-medium" style={{ color: 'var(--chart-3)' }}>Below Average</span>
                     </>
                   )}
                 </div>
@@ -1098,9 +1094,9 @@ export function PolarStudentChart({
 
             {/* Additional Info */}
             <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-900/40 border border-slate-800/40">
-                <span className="text-xs text-slate-500 font-medium">Percentile</span>
-                <span className="text-sm font-semibold text-slate-200">
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-muted/60 border border-border">
+                <span className="text-xs text-muted-foreground font-medium">Percentile</span>
+                <span className="text-sm font-semibold text-foreground font-mono" data-numeric>
                   {selectedItem.score >= 130
                     ? '~98th'
                     : selectedItem.score >= 115
@@ -1113,9 +1109,9 @@ export function PolarStudentChart({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-900/40 border border-slate-800/40">
-                <span className="text-xs text-slate-500 font-medium">Classification</span>
-                <span className="text-xs font-semibold text-slate-200">
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-muted/60 border border-border">
+                <span className="text-xs text-muted-foreground font-medium">Classification</span>
+                <span className="text-xs font-semibold text-foreground">
                   {selectedItem.score >= 130
                     ? 'Very Superior'
                     : selectedItem.score >= 120
@@ -1132,9 +1128,9 @@ export function PolarStudentChart({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-900/40 border border-slate-800/40">
-                <span className="text-xs text-slate-500 font-medium">Standard Deviation</span>
-                <span className="text-sm font-semibold text-slate-200">
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-muted/60 border border-border">
+                <span className="text-xs text-muted-foreground font-medium">Standard Deviation</span>
+                <span className="text-sm font-semibold text-foreground font-mono" data-numeric>
                   {selectedItem.score >= 130
                     ? '+2σ'
                     : selectedItem.score >= 115
@@ -1148,12 +1144,14 @@ export function PolarStudentChart({
               </div>
 
               {/* Regular Score (deviation from 100) */}
-              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-900/40 border border-slate-800/40">
-                <span className="text-xs text-slate-500 font-medium">Regular Score</span>
+              <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-muted/60 border border-border">
+                <span className="text-xs text-muted-foreground font-medium">Regular Score</span>
                 <span
-                  className={`text-sm font-semibold ${
-                    selectedItem.score >= 100 ? 'text-emerald-400' : 'text-amber-400'
-                  }`}
+                  className="text-sm font-semibold font-mono"
+                  data-numeric
+                  style={{
+                    color: selectedItem.score >= 100 ? 'var(--chart-2)' : 'var(--chart-3)',
+                  }}
                 >
                   {selectedItem.score >= 100
                     ? `+${Math.round(selectedItem.score - 100)}`
@@ -1169,15 +1167,18 @@ export function PolarStudentChart({
 }
 
 function getCategoryColor(index: number): { fill: string; stroke: string } {
+  // Category wedges cycle the categorical chart tokens (indigo, moss, ochre,
+  // slate-blue, violet) with terracotta --chart-4 reserved for the student
+  // series. Tokens resolve per-theme and survive PNG/PDF export.
   const colors = [
-    { fill: 'rgba(56,189,248,0.2)', stroke: 'rgba(56,189,248,0.8)' },
-    { fill: 'rgba(99,102,241,0.2)', stroke: 'rgba(99,102,241,0.8)' },
-    { fill: 'rgba(52,211,153,0.2)', stroke: 'rgba(52,211,153,0.8)' },
-    { fill: 'rgba(251,146,60,0.2)', stroke: 'rgba(251,146,60,0.8)' },
-    { fill: 'rgba(139,92,246,0.2)', stroke: 'rgba(139,92,246,0.8)' },
-    { fill: 'rgba(236,72,153,0.2)', stroke: 'rgba(236,72,153,0.8)' },
-    { fill: 'rgba(34,197,94,0.2)', stroke: 'rgba(34,197,94,0.8)' },
-    { fill: 'rgba(20,184,166,0.2)', stroke: 'rgba(20,184,166,0.8)' },
+    { fill: 'color-mix(in oklch, var(--chart-1) 20%, transparent)', stroke: 'var(--chart-1)' },
+    { fill: 'color-mix(in oklch, var(--chart-2) 20%, transparent)', stroke: 'var(--chart-2)' },
+    { fill: 'color-mix(in oklch, var(--chart-3) 20%, transparent)', stroke: 'var(--chart-3)' },
+    { fill: 'color-mix(in oklch, var(--chart-5) 20%, transparent)', stroke: 'var(--chart-5)' },
+    { fill: 'color-mix(in oklch, var(--chart-6) 20%, transparent)', stroke: 'var(--chart-6)' },
+    { fill: 'color-mix(in oklch, var(--chart-1) 20%, transparent)', stroke: 'var(--chart-1)' },
+    { fill: 'color-mix(in oklch, var(--chart-2) 20%, transparent)', stroke: 'var(--chart-2)' },
+    { fill: 'color-mix(in oklch, var(--chart-3) 20%, transparent)', stroke: 'var(--chart-3)' },
   ];
   return colors[index % colors.length];
 }

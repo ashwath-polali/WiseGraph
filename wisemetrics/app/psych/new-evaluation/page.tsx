@@ -154,12 +154,12 @@ export default function NewEvaluationPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-6">
       <Card className="p-8">
-        <h1 className="text-2xl font-bold text-slate-50 mb-1">New Evaluation</h1>
-        <p className="text-sm text-slate-400 mb-6">Create a psychoeducational assessment</p>
-        
+        <h1 className="font-display text-2xl font-bold text-foreground mb-1">New Evaluation</h1>
+        <p className="text-sm text-muted-foreground mb-6">Create a psychoeducational assessment</p>
+
         <form onSubmit={handleCreate} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Student Name *
             </label>
             <Input
@@ -171,7 +171,7 @@ export default function NewEvaluationPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Grade Level *
             </label>
             <Input
@@ -183,31 +183,31 @@ export default function NewEvaluationPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               Assessment Categories
             </label>
-            
+
             <div className="space-y-3">
               {/* Your Categories */}
               <label className="group block cursor-pointer">
-                <div className="relative p-4 rounded-lg border-2 border-slate-700 hover:border-sky-500 transition-colors bg-slate-800/30 hover:bg-slate-800/50">
+                <div className="relative p-4 rounded-lg border-2 border-border hover:border-psych transition-colors bg-muted/40 hover:bg-muted/70">
                   <div className="flex items-start gap-3">
                     <input
                       type="radio"
                       name="type"
                       checked={useUniversal}
                       onChange={() => setUseUniversal(true)}
-                      className="w-4 h-4 mt-1 flex-shrink-0"
+                      className="w-4 h-4 mt-1 flex-shrink-0 accent-psych"
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-50 group-hover:text-sky-400 transition-colors">
+                      <p className="font-semibold text-foreground group-hover:text-psych transition-colors">
                         Your Categories
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Use your configured universal framework. Quick and consistent.
                       </p>
                     </div>
-                    <svg className="w-5 h-5 text-sky-500/0 group-hover:text-sky-500 transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-psych/0 group-hover:text-psych transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                     </svg>
                   </div>
@@ -216,24 +216,24 @@ export default function NewEvaluationPage() {
 
               {/* Custom Profile */}
               <label className="group block cursor-pointer">
-                <div className="relative p-4 rounded-lg border-2 border-slate-700 hover:border-amber-500 transition-colors bg-slate-800/30 hover:bg-slate-800/50">
+                <div className="relative p-4 rounded-lg border-2 border-border hover:border-primary transition-colors bg-muted/40 hover:bg-muted/70">
                   <div className="flex items-start gap-3">
                     <input
                       type="radio"
                       name="type"
                       checked={!useUniversal}
                       onChange={() => setUseUniversal(false)}
-                      className="w-4 h-4 mt-1 flex-shrink-0"
+                      className="w-4 h-4 mt-1 flex-shrink-0 accent-primary"
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-slate-50 group-hover:text-amber-400 transition-colors">
+                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
                         Custom Profile
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Build a unique assessment. Add categories after creation.
                       </p>
                     </div>
-                    <svg className="w-5 h-5 text-amber-500/0 group-hover:text-amber-500 transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-primary/0 group-hover:text-primary transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                     </svg>
                   </div>
@@ -243,10 +243,10 @@ export default function NewEvaluationPage() {
           </div>
 
           {useUniversal && (
-            <div className="p-3 bg-sky-900/20 border border-sky-800 rounded-lg">
-              <p className="text-sm text-sky-400">
+            <div className="p-3 bg-psych/10 border border-psych/30 rounded-lg">
+              <p className="text-sm text-psych">
                 Using your universal framework.{' '}
-                <Link href="/psych/universal-categories" className="underline hover:text-sky-300 font-semibold">
+                <Link href="/psych/universal-categories" className="underline hover:opacity-80 font-semibold">
                   Edit categories
                 </Link>
               </p>
@@ -254,15 +254,15 @@ export default function NewEvaluationPage() {
           )}
 
           {!useUniversal && (
-            <div className="p-3 bg-amber-900/20 border border-amber-800 rounded-lg">
-              <p className="text-sm text-amber-400">
+            <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+              <p className="text-sm text-primary">
                 You'll configure categories after creation via the Configure button.
               </p>
             </div>
           )}
-          
+
           {error && (
-            <div className="text-red-400 text-sm bg-red-900/20 border border-red-800 rounded-lg p-3">
+            <div className="text-destructive text-sm bg-destructive/10 border border-destructive/30 rounded-lg p-3">
               {error}
             </div>
           )}

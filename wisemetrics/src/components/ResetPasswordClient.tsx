@@ -42,7 +42,7 @@ export function ResetPasswordClient({ initialEmail }: { initialEmail: string }) 
   return (
     <div className="space-y-2">
       <div>
-        <label className="mb-1 block text-[11px] text-slate-400">
+        <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
           Password reset email
         </label>
         <Input
@@ -50,7 +50,7 @@ export function ResetPasswordClient({ initialEmail }: { initialEmail: string }) 
           onChange={(e) => setEmail(e.target.value)}
           className="text-xs"
         />
-        <p className="mt-1 text-[11px] text-slate-500">
+        <p className="mt-1 text-[11px] text-muted-foreground">
           Sends a reset link to this address.
         </p>
       </div>
@@ -59,13 +59,16 @@ export function ResetPasswordClient({ initialEmail }: { initialEmail: string }) 
           type="button"
           onClick={handleSend}
           disabled={sending}
+          size="sm"
           className="text-xs"
         >
           {sending ? "Sending…" : "Send reset link"}
         </Button>
         <div className="text-[11px]">
-          {error && <span className="text-red-400">{error}</span>}
-          {message && <span className="text-emerald-400">{message}</span>}
+          {error && <span className="text-destructive">{error}</span>}
+          {message && (
+            <span className="text-[color:var(--chart-2)]">{message}</span>
+          )}
         </div>
       </div>
     </div>

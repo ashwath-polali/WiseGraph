@@ -119,13 +119,13 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
   }
 
   return (
-    <Card className="border border-slate-800/80 bg-slate-900/60 backdrop-blur-sm shadow-xl">
-      <div className="p-5 border-b border-slate-800/60">
-        <h3 className="text-sm font-bold text-slate-50 uppercase tracking-wider flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-border px-5 py-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--chart-6)]" />
           Term Snapshots
         </h3>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="mt-1 text-xs text-muted-foreground">
           Compare against past assessments
         </p>
       </div>
@@ -133,9 +133,9 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
       <div className="p-4 space-y-3">
         {/* Snapshot List */}
         {snapshots.length === 0 ? (
-          <div className="text-center py-6">
+          <div className="py-6 text-center">
             <svg
-              className="w-12 h-12 mx-auto text-slate-600 mb-3"
+              className="mx-auto mb-3 h-12 w-12 text-muted-foreground/50"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -147,7 +147,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
               />
             </svg>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               No snapshots yet. Create one to save current scores.
             </p>
           </div>
@@ -156,10 +156,10 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
             {snapshots.map((snapshot) => (
               <div
                 key={snapshot.id}
-                className={`group relative rounded-lg border transition-all cursor-pointer ${
+                className={`group relative cursor-pointer rounded-lg border transition-colors duration-150 ${
                   comparisonSnapshotId === snapshot.id
-                    ? 'border-violet-400 bg-violet-400/10'
-                    : 'border-slate-700/50 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/60'
+                    ? 'border-[color:var(--chart-6)] bg-[color-mix(in_oklch,var(--chart-6)_12%,transparent)]'
+                    : 'border-border bg-muted hover:border-input hover:bg-accent/40'
                 }`}
                 onClick={() => handleSnapshotClick(snapshot.id)}
               >
@@ -185,7 +185,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                         e.stopPropagation();
                         handleRename(snapshot.id);
                       }}
-                      className="text-emerald-400 hover:text-emerald-300 text-xs"
+                      className="text-xs font-medium text-[color:var(--chart-2)] transition-colors hover:opacity-80"
                     >
                       Save
                     </button>
@@ -195,7 +195,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                         setEditingId(null);
                         setEditName('');
                       }}
-                      className="text-slate-400 hover:text-slate-300 text-xs"
+                      className="text-xs text-muted-foreground transition-colors hover:text-foreground"
                     >
                       Cancel
                     </button>
@@ -205,15 +205,15 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         {comparisonSnapshotId === snapshot.id && (
-                          <svg className="w-4 h-4 text-violet-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="h-4 w-4 flex-shrink-0 text-[color:var(--chart-6)]" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                         )}
-                        <p className="text-sm font-medium text-slate-100 truncate">
+                        <p className="truncate text-sm font-medium text-foreground">
                           {snapshot.name}
                         </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {new Date(snapshot.snapshotDate).toLocaleDateString()}
                       </p>
                     </div>
@@ -225,7 +225,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                           setEditingId(snapshot.id);
                           setEditName(snapshot.name);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-700/50 rounded transition-colors"
+                        className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
                         title="Rename"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -237,7 +237,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
                           e.stopPropagation();
                           handleDelete(snapshot.id);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700/50 rounded transition-colors"
+                        className="rounded p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                         title="Delete"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,7 +254,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
 
         {/* Create New Snapshot */}
         {isCreating ? (
-          <div className="space-y-2 pt-2 border-t border-slate-700/50">
+          <div className="space-y-2 border-t border-border pt-2">
             <Input
               placeholder="Snapshot name (e.g., Term 1, Q2)"
               value={newSnapshotName}
@@ -291,7 +291,7 @@ export function SnapshotManager({ classId, psychStudentId }: Props) {
         ) : (
           <button
             onClick={() => setIsCreating(true)}
-            className="w-full mt-2 py-2 px-3 rounded-lg border border-dashed border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-600 hover:bg-slate-800/40 transition-all text-xs font-medium flex items-center justify-center gap-2"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:border-input hover:bg-accent/40 hover:text-foreground"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

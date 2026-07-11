@@ -215,7 +215,7 @@ export function ExportChartButtons({ studentName }: Props) {
         variant="ghost"
         onClick={exportToPNG}
         disabled={isExporting}
-        className="inline-flex items-center gap-2 text-slate-300 hover:text-slate-100 disabled:opacity-50"
+        className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
       >
         {isExporting ? (
           <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -255,7 +255,7 @@ export function ExportChartButtons({ studentName }: Props) {
         variant="ghost"
         onClick={exportToPDF}
         disabled={isExporting}
-        className="inline-flex items-center gap-2 text-slate-300 hover:text-slate-100 disabled:opacity-50"
+        className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-50"
       >
         {isExporting ? (
           <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

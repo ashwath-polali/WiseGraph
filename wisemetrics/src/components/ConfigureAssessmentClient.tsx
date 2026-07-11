@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import { motion } from "motion/react";
 import type { CategoryScore, SubcategoryScore } from "@/types/scores";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -157,7 +158,7 @@ export function ConfigureAssessmentClient({
         className="flex flex-col items-start gap-3 sm:flex-row sm:items-end"
       >
         <div className="flex-1">
-          <label className="mb-1 block text-xs font-medium text-slate-400">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
             New category
           </label>
           <Input
@@ -174,23 +175,30 @@ export function ConfigureAssessmentClient({
       {/* Category list */}
       <div className="space-y-4">
         {categories.map((cat, index) => (
-          <div
+          <motion.div
             key={cat.id}
-            className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/60 p-3"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.2,
+              ease: [0.22, 1, 0.36, 1],
+              delay: index * 0.03,
+            }}
+            className="space-y-3 rounded-xl border border-border bg-card p-5 text-card-foreground shadow-[0_1px_2px_oklch(0.245_0.015_75/0.05),0_12px_32px_-16px_oklch(0.245_0.015_75/0.14)]"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-50">
+                <p className="text-sm font-semibold text-foreground">
                   {index + 1}. {cat.name}
                 </p>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Subskills: {cat.subcategories?.length ?? 0}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                className="rounded p-1 text-slate-500 hover:text-red-400"
+                className="rounded-md p-1.5 text-muted-foreground transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive"
                 aria-label={`Delete category ${cat.name}`}
               >
                 {/* simple trashcan icon */}
@@ -233,16 +241,16 @@ export function ConfigureAssessmentClient({
 
             <div className="space-y-2">
               {(cat.subcategories ?? []).length > 0 && (
-                <ul className="space-y-1 text-xs text-slate-300">
+                <ul className="space-y-1 text-xs text-foreground">
                   {(cat.subcategories ?? [])
                     .filter((sub) => sub && sub.id)
                     .map((sub, idx) => (
                       <li
                         key={`${sub.id}-${idx}`}
-                        className="flex items-center justify-between gap-2"
+                        className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1 transition-colors duration-150 hover:bg-accent/40"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="h-1 w-1 rounded-full bg-slate-500" />
+                          <span className="h-1 w-1 rounded-full bg-muted-foreground" />
                           <span>{sub.name}</span>
                         </div>
                         <button
@@ -250,7 +258,7 @@ export function ConfigureAssessmentClient({
                           onClick={() =>
                             handleDeleteSubcategory(sub.id, sub.name)
                           }
-                          className="rounded p-1 text-slate-500 hover:text-red-400"
+                          className="rounded-md p-1 text-muted-foreground transition-colors duration-150 hover:bg-destructive/10 hover:text-destructive"
                           aria-label={`Delete subskill ${sub.name}`}
                         >
                           <svg
@@ -281,7 +289,7 @@ export function ConfigureAssessmentClient({
                 className="flex items-end gap-2"
               >
                 <div className="flex-1">
-                  <label className="mb-1 block text-[11px] font-medium text-slate-400">
+                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                     Add subskill
                   </label>
                   <Input
@@ -298,11 +306,11 @@ export function ConfigureAssessmentClient({
                 <Button type="submit">Add</Button>
               </form>
             </div>
-          </div>
+          </motion.div>
         ))}
 
         {categories.length === 0 && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             No categories yet. Add at least one to configure assessments.
           </p>
         )}

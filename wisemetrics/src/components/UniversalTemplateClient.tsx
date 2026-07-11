@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
@@ -144,15 +145,18 @@ export function UniversalTemplateClient({ teacherId }: Props) {
   return (
     <form onSubmit={handleSave} className="space-y-4">
       <div className="space-y-4">
-        {categories.map((category) => (
-          <div
+        {categories.map((category, index) => (
+          <motion.div
             key={category.id}
-            className="p-4 bg-slate-800/50 rounded-lg border border-slate-700 space-y-3"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1], delay: index * 0.03 }}
+            className="p-4 bg-muted/50 rounded-lg border border-border space-y-3"
           >
             {/* Category */}
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Category
                 </label>
                 <Input
@@ -163,17 +167,19 @@ export function UniversalTemplateClient({ teacherId }: Props) {
                   placeholder="e.g., Verbal Comprehension"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="sm"
                 onClick={() => deleteCategory(category.id)}
-                className="mt-6 px-3 py-1 rounded text-xs bg-red-900/20 hover:bg-red-900/30 text-red-400"
+                className="mt-6"
               >
                 Delete
-              </button>
+              </Button>
             </div>
 
             {/* Subcategories */}
-            <div className="ml-2 space-y-2 border-l border-slate-600 pl-3">
+            <div className="ml-2 space-y-2 border-l border-border pl-3">
               {category.subcategories.map((sub) => (
                 <div key={sub.id} className="flex gap-2">
                   <div className="flex-1">
@@ -186,57 +192,65 @@ export function UniversalTemplateClient({ teacherId }: Props) {
                       className="text-sm"
                     />
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant="destructive"
+                    size="icon-sm"
                     onClick={() =>
                       deleteSubcategory(category.id, sub.id)
                     }
-                    className="px-2 py-1 rounded text-xs bg-red-900/20 hover:bg-red-900/30 text-red-400 flex-shrink-0"
+                    className="flex-shrink-0"
+                    aria-label="Delete subtest"
                   >
                     ×
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="link"
+              size="xs"
               onClick={() => addSubcategory(category.id)}
-              className="text-xs text-sky-400 hover:text-sky-300 ml-2"
+              className="ml-2 px-0 text-psych"
             >
               + Add Subtest
-            </button>
-          </div>
+            </Button>
+          </motion.div>
         ))}
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="link"
+        size="xs"
         onClick={addCategory}
-        className="text-xs text-slate-400 hover:text-slate-300"
+        className="px-0 text-muted-foreground hover:text-foreground"
       >
         + Add Category
-      </button>
+      </Button>
 
       {error && (
-        <div className="text-red-400 text-sm bg-red-900/20 border border-red-800 rounded-lg p-3">
+        <div className="text-destructive text-sm bg-destructive/10 border border-destructive/30 rounded-lg p-3">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="text-emerald-400 text-sm bg-emerald-900/20 border border-emerald-800 rounded-lg p-3">
+        <div className="text-[color:var(--chart-2)] text-sm bg-[color:var(--chart-2)]/10 border border-[color:var(--chart-2)]/30 rounded-lg p-3">
           Saved successfully!
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className="w-full px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-medium text-sm disabled:opacity-50"
+        size="lg"
+        className="w-full"
       >
         {loading ? 'Saving...' : 'Save Categories'}
-      </button>
+      </Button>
     </form>
   );
 }

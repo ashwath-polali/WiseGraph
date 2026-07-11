@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/Button";
 
 interface Props {
@@ -70,11 +71,19 @@ export function SyncCategoriesButton({ evaluationId }: Props) {
         </svg>
         {syncing ? "Syncing..." : "Sync Categories"}
       </Button>
-      {message && (
-        <div className="absolute top-full mt-2 left-0 whitespace-nowrap bg-slate-800 text-slate-200 text-xs px-3 py-2 rounded-lg shadow-lg border border-slate-700">
-          {message}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute top-full mt-2 left-0 whitespace-nowrap rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md"
+          >
+            {message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

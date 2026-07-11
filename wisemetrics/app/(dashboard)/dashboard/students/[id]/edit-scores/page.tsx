@@ -48,14 +48,14 @@ export default async function EditStudentScoresPage(props: Props) {
         <div>
           <Link
             href={`/dashboard/students/${encodeURIComponent(id)}`}
-            className="text-xs text-sky-400 hover:text-sky-300"
+            className="text-xs text-primary transition-colors hover:text-primary/80"
           >
             ← Back to student view
           </Link>
-          <h1 className="mt-2 text-xl font-semibold text-slate-50">
+          <h1 className="mt-2 text-xl font-semibold text-foreground">
             Edit scores for {studentRow.name}
           </h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted-foreground">
             {cls.name} · Grade {cls.gradeLevel} · {cls.subject}
           </p>
         </div>

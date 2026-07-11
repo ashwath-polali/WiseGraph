@@ -2,6 +2,7 @@
 
 import { useState, createContext, useContext, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "motion/react";
 import type { ClassScoreSummary } from "@/types/scores";
 import dynamic from "next/dynamic";
 import { ComparisonToggle } from "@/components/ComparisonToggle";
@@ -57,28 +58,35 @@ export function PsychEvaluationProvider({
 export function ViewModeToggle() {
   const { viewMode, setViewMode } = useViewMode();
 
+  const MODES: { id: ViewMode; label: string }[] = [
+    { id: "polar", label: "Polar" },
+    { id: "bell", label: "Bell Curve" },
+  ];
+
   return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => setViewMode("polar")}
-        className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-          viewMode === "polar"
-            ? "bg-sky-500 text-white shadow-lg shadow-sky-500/50"
-            : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300"
-        }`}
-      >
-        Polar
-      </button>
-      <button
-        onClick={() => setViewMode("bell")}
-        className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-          viewMode === "bell"
-            ? "bg-sky-500 text-white shadow-lg shadow-sky-500/50"
-            : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300"
-        }`}
-      >
-        Bell Curve
-      </button>
+    <div className="inline-flex rounded-lg bg-muted p-0.5">
+      {MODES.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          onClick={() => setViewMode(m.id)}
+          className={
+            "relative rounded-md px-3 py-1 text-xs font-medium transition-colors duration-150 " +
+            (viewMode === m.id
+              ? "text-psych-foreground"
+              : "text-muted-foreground hover:text-foreground")
+          }
+        >
+          {viewMode === m.id && (
+            <motion.span
+              layoutId="psych-view-mode-pill"
+              className="absolute inset-0 rounded-md bg-psych shadow-sm"
+              transition={{ type: "spring", stiffness: 500, damping: 35 }}
+            />
+          )}
+          <span className="relative z-10">{m.label}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -150,7 +158,7 @@ export function ChartDisplay({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.95)",
+        backgroundColor: "color-mix(in oklch, var(--foreground) 82%, transparent)",
         backdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
@@ -173,19 +181,19 @@ export function ChartDisplay({
           right: "1.5rem",
           padding: "0.75rem",
           borderRadius: "0.75rem",
-          backgroundColor: "rgba(30, 41, 59, 0.9)",
-          color: "rgb(203, 213, 225)",
-          border: "1px solid " + "rgb(71, 85, 105)",
+          backgroundColor: "var(--card)",
+          color: "var(--card-foreground)",
+          border: "1px solid var(--border)",
           cursor: "pointer",
           zIndex: 1000000,
           transition: "all 0.2s",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "rgb(51, 65, 85)";
+          e.currentTarget.style.backgroundColor = "var(--muted)";
           e.currentTarget.style.transform = "scale(1.1)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "rgba(30, 41, 59, 0.9)";
+          e.currentTarget.style.backgroundColor = "var(--card)";
           e.currentTarget.style.transform = "scale(1)";
         }}
       >
@@ -206,9 +214,9 @@ export function ChartDisplay({
           width: "98vw",
           height: "96vh",
           borderRadius: "1rem",
-          border: "2px solid rgb(71, 85, 105)",
-          backgroundColor: "rgb(2, 6, 23)",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+          border: "2px solid var(--border)",
+          backgroundColor: "var(--card)",
+          boxShadow: "0 25px 50px -12px color-mix(in oklch, var(--foreground) 30%, transparent)",
           overflow: "hidden",
           display: "flex",
           alignItems: "center",

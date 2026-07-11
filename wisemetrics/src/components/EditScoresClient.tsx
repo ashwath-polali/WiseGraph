@@ -2,6 +2,7 @@
 
 import { useState, useMemo, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
 import type {
   StudentScoreSummary,
   CategoryScore,
@@ -129,7 +130,7 @@ export function EditScoresClient({ student }: Props) {
       {/* Overall score */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Overall standard score
           </label>
           <Input
@@ -138,17 +139,19 @@ export function EditScoresClient({ student }: Props) {
             max={150}
             value={overallInput}
             onChange={(e) => setOverallInput(e.target.value)}
+            className="font-mono"
+            data-numeric
           />
         </div>
       </div>
 
       {/* Category selector */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-slate-200">
+        <h3 className="text-sm font-semibold text-foreground">
           Category and subskill scores
         </h3>
         <select
-          className="rounded-md bg-slate-900 border border-slate-700 px-2 py-1 text-xs text-slate-50"
+          className="rounded-md bg-card border border-input px-2 py-1 text-xs text-foreground transition-[border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25"
           value={selectedCategoryId ?? ""}
           onChange={(e) => setSelectedCategoryId(e.target.value || null)}
         >
@@ -162,13 +165,13 @@ export function EditScoresClient({ student }: Props) {
 
       {/* Selected category editor */}
       {!selectedCategory ? (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           No categories available for this student.
         </p>
       ) : (
-        <div className="space-y-3 text-xs text-slate-300">
+        <div className="space-y-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
-            <span className="w-32 text-slate-400">Category score</span>
+            <span className="w-32 text-muted-foreground">Category score</span>
             <Input
               type="number"
               min={60}
@@ -177,23 +180,36 @@ export function EditScoresClient({ student }: Props) {
               onChange={(e) =>
                 updateCategoryScore(selectedCategory.id, e.target.value)
               }
+              className="font-mono"
+              data-numeric
             />
           </div>
 
           <div className="space-y-2">
-            <p className="text-[11px] text-slate-400">Subskills</p>
+            <p className="text-[11px] font-medium text-muted-foreground">
+              Subskills
+            </p>
             {(selectedCategory.subcategories ?? []).length === 0 ? (
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-muted-foreground">
                 No subskills recorded for this category yet.
               </p>
             ) : (
               <div className="space-y-2">
-                {selectedCategory.subcategories!.map((sub) => (
-                  <div
+                {selectedCategory.subcategories!.map((sub, i) => (
+                  <motion.div
                     key={sub.id}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 rounded-md px-1 py-0.5 transition-colors duration-150 hover:bg-accent/40"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.2,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay: i * 0.03,
+                    }}
                   >
-                    <span className="w-32 truncate">{sub.name}</span>
+                    <span className="w-32 truncate text-foreground">
+                      {sub.name}
+                    </span>
                     <Input
                       type="number"
                       min={60}
@@ -206,8 +222,10 @@ export function EditScoresClient({ student }: Props) {
                           e.target.value
                         )
                       }
+                      className="font-mono"
+                      data-numeric
                     />
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

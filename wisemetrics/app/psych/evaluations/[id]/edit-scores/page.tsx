@@ -14,7 +14,7 @@ export default async function EditPsychScoresPage(props: Props) {
   if (!evaluation) notFound();
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       <div className="max-w-[1800px] mx-auto px-6 py-6">
         {/* EditScoresPsychClient render everything */}
         <EditScoresPsychClient evaluation={evaluation} />

@@ -72,20 +72,20 @@ function ResetPasswordInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md space-y-4 p-6">
-        <h1 className="text-xl font-semibold text-slate-50">
+        <h1 className="text-xl font-semibold text-foreground">
           Reset your password
         </h1>
 
         {!isReady && !error && (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Checking your reset link…
           </p>
         )}
 
         {error && (
-          <p className="text-sm text-red-400">
+          <p className="text-sm text-destructive">
             {error}
           </p>
         )}
@@ -93,7 +93,7 @@ function ResetPasswordInner() {
         {isReady && !error && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-200">
+              <label className="block text-sm font-medium text-foreground">
                 New password
               </label>
               <Input
@@ -105,7 +105,7 @@ function ResetPasswordInner() {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-200">
+              <label className="block text-sm font-medium text-foreground">
                 Confirm password
               </label>
               <Input
@@ -117,7 +117,7 @@ function ResetPasswordInner() {
             </div>
 
             {isSubmitting && (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Updating your password…
               </p>
             )}

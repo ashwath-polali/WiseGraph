@@ -36,15 +36,15 @@ export default async function ConfigureEvaluationPage(props: Props) {
     <div className="max-w-4xl mx-auto px-6 py-8">
       <Link
         href={`/psych/evaluations/${params.id}`}
-        className="text-slate-400 hover:text-slate-300 text-sm mb-4 inline-block"
+        className="text-muted-foreground hover:text-psych text-sm mb-4 inline-block transition-colors"
       >
         ← Back to Evaluation
       </Link>
-      
-      <h1 className="text-3xl font-bold text-slate-50 mb-2">
+
+      <h1 className="text-3xl font-display font-bold text-foreground mb-2">
         Configure Assessment
       </h1>
-      <p className="text-slate-400 mb-8">
+      <p className="text-muted-foreground mb-8">
         {classData.name}
       </p>
       

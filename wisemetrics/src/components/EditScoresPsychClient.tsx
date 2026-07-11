@@ -3,8 +3,10 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { ClassScoreSummary } from "@/types/scores";
+import { motion } from "motion/react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 interface Props {
   evaluation: ClassScoreSummary;
@@ -128,10 +130,10 @@ export function EditScoresPsychClient({ evaluation }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       <form onSubmit={handleSave} className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-slate-800/60 bg-slate-950/95 backdrop-blur-sm px-6 py-4">
+        <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur-sm px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -145,10 +147,10 @@ export function EditScoresPsychClient({ evaluation }: Props) {
                 </svg>
                 Back
               </Button>
-              <div className="h-6 w-px bg-slate-700" />
+              <div className="h-6 w-px bg-border" />
               <div>
-                <h1 className="text-xl font-bold text-slate-100">Edit Scores</h1>
-                <p className="text-sm text-slate-500">{student?.name}</p>
+                <h1 className="font-display text-xl font-bold text-foreground">Edit Scores</h1>
+                <p className="text-sm text-muted-foreground">{student?.name}</p>
               </div>
             </div>
 
@@ -182,8 +184,8 @@ export function EditScoresPsychClient({ evaluation }: Props) {
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Overall Score */}
-          <div className="p-6 rounded-xl border border-slate-800/60 bg-slate-900/40">
-            <label className="block text-sm font-semibold text-slate-300 mb-3">
+          <Card className="p-6">
+            <label className="block text-sm font-semibold text-foreground mb-3">
               Overall Standard Score
             </label>
             <Input
@@ -195,100 +197,107 @@ export function EditScoresPsychClient({ evaluation }: Props) {
               onFocus={(e) => e.target.select()}
               onClick={(e) => e.currentTarget.select()}
               placeholder="100"
-              className="max-w-xs"
+              className="max-w-xs font-mono"
+              data-numeric
             />
-          </div>
+          </Card>
 
           {/* Categories */}
-          {evaluation.categories.map((cat) => {
+          {evaluation.categories.map((cat, index) => {
             const isExpanded = expandedCategories.has(cat.id);
             const subcategories = cat.subcategories || [];
             const hasSubcategories = subcategories.length > 0;
 
             return (
-              <div
+              <motion.div
                 key={cat.id}
-                className="rounded-xl border border-slate-800/60 bg-slate-900/40 overflow-hidden"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1], delay: index * 0.03 }}
               >
-                {/* Category Header - Clickable */}
-                <button
-                  type="button"
-                  onClick={() => hasSubcategories && toggleCategory(cat.id)}
-                  className="w-full p-6 flex items-center justify-between hover:bg-slate-800/20 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-bold text-slate-100">{cat.name}</h3>
-                    {hasSubcategories && (
-                      <span className="text-xs text-slate-500">
-                        ({subcategories.length} subcategories)
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <label className="text-sm text-slate-400">Score:</label>
-                    <Input
-                      type="number"
-                      min={60}
-                      max={150}
-                      value={scores[`cat_${cat.id}`] || ""}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        updateScore(`cat_${cat.id}`, e.target.value);
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.currentTarget.select();
-                      }}
-                      onFocus={(e) => e.target.select()}
-                      placeholder="100"
-                      className="w-24"
-                    />
-                    {hasSubcategories && (
-                      <svg
-                        className={`w-5 h-5 text-slate-400 transition-transform ${
-                          isExpanded ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </button>
-
-                {/* Subcategories - Only show when expanded */}
-                {isExpanded && hasSubcategories && (
-                  <div className="border-t border-slate-800/40 bg-slate-950/40 p-6">
-                    <div className="grid grid-cols-3 gap-4">
-                      {subcategories.map((sub) => (
-                        <div key={sub.id} className="flex items-center gap-3">
-                          <label className="text-sm text-slate-300 flex-1">
-                            {sub.name}
-                          </label>
-                          <Input
-                            type="number"
-                            min={60}
-                            max={150}
-                            value={scores[`sub_${sub.id}`] || ""}
-                            onChange={(e) => updateScore(`sub_${sub.id}`, e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            onClick={(e) => e.currentTarget.select()}
-                            placeholder="100"
-                            className="w-20"
-                          />
-                        </div>
-                      ))}
+                <Card className="overflow-hidden">
+                  {/* Category Header - Clickable */}
+                  <button
+                    type="button"
+                    onClick={() => hasSubcategories && toggleCategory(cat.id)}
+                    className="w-full p-6 flex items-center justify-between hover:bg-accent/40 transition-colors duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-lg font-bold text-foreground">{cat.name}</h3>
+                      {hasSubcategories && (
+                        <span className="text-xs text-muted-foreground">
+                          ({subcategories.length} subcategories)
+                        </span>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
+                    <div className="flex items-center gap-3">
+                      <label className="text-sm text-muted-foreground">Score:</label>
+                      <Input
+                        type="number"
+                        min={60}
+                        max={150}
+                        value={scores[`cat_${cat.id}`] || ""}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          updateScore(`cat_${cat.id}`, e.target.value);
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.currentTarget.select();
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        placeholder="100"
+                        className="w-24 font-mono"
+                        data-numeric
+                      />
+                      {hasSubcategories && (
+                        <svg
+                          className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${
+                            isExpanded ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Subcategories - Only show when expanded */}
+                  {isExpanded && hasSubcategories && (
+                    <div className="border-t border-border bg-muted/40 p-6">
+                      <div className="grid grid-cols-3 gap-4">
+                        {subcategories.map((sub) => (
+                          <div key={sub.id} className="flex items-center gap-3">
+                            <label className="text-sm text-foreground flex-1">
+                              {sub.name}
+                            </label>
+                            <Input
+                              type="number"
+                              min={60}
+                              max={150}
+                              value={scores[`sub_${sub.id}`] || ""}
+                              onChange={(e) => updateScore(`sub_${sub.id}`, e.target.value)}
+                              onFocus={(e) => e.target.select()}
+                              onClick={(e) => e.currentTarget.select()}
+                              placeholder="100"
+                              className="w-20 font-mono"
+                              data-numeric
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
             );
           })}
         </div>

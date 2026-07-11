@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'motion/react';
 import type { ClassScoreSummary, StudentScoreSummary } from '@/types/scores';
 import { Card } from '@/components/ui/Card';
 import { useViewMode } from '@/components/PsychEvaluationClient';
@@ -101,32 +102,35 @@ export function PsychStudentViewClient({
   const getDeltaColor = (current: number, snapshot: number | null): string => {
     if (snapshot === null) return "";
     const delta = current - snapshot;
-    if (delta > 0) return "text-emerald-400";
-    if (delta < 0) return "text-red-400";
-    return "text-slate-400";
+    if (delta > 0) return "text-[color:var(--chart-2)]";
+    if (delta < 0) return "text-destructive";
+    return "text-muted-foreground";
   };
 
   return (
     <div className="space-y-3">
       {/* Categories List */}
       <div className="space-y-1">
-        {evaluation.categories.map((category) => {
+        {evaluation.categories.map((category, index) => {
           const categoryScore =
             student.categories?.find((c) => c.id === category.id)?.score ?? 100;
           const isSelected = selectedCategoryId === category.id;
-          
+
           const snapshotScore = getSnapshotCategoryScore(category.id);
           const delta = formatDelta(categoryScore, snapshotScore);
           const deltaColor = getDeltaColor(categoryScore, snapshotScore);
 
           return (
-            <button
+            <motion.button
               key={category.id}
               onClick={() => setSelectedCategoryId(category.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1], delay: index * 0.03 }}
+              className={`w-full text-left px-3 py-2 rounded-lg transition-colors duration-150 ${
                 isSelected
-                  ? 'bg-sky-600 text-white'
-                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-50'
+                  ? 'bg-psych text-psych-foreground'
+                  : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -135,42 +139,42 @@ export function PsychStudentViewClient({
                     {category.name}
                   </p>
                 </div>
-                
+
                 {/* Score Display */}
                 {snapshotScore !== null ? (
-                  <div className="flex items-center gap-1.5 text-xs font-semibold flex-shrink-0 ml-2">
-                    <span className={isSelected ? 'text-white' : 'text-slate-200'}>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold flex-shrink-0 ml-2 font-mono" data-numeric>
+                    <span className={isSelected ? 'text-psych-foreground' : 'text-foreground'}>
                       {categoryScore}
                     </span>
-                    <span className={isSelected ? 'text-sky-200' : 'text-slate-500'}>
+                    <span className={isSelected ? 'text-psych-foreground/70' : 'text-muted-foreground'}>
                       {snapshotScore}
                     </span>
-                    <span className={deltaColor}>
+                    <span className={isSelected ? 'text-psych-foreground/90' : deltaColor}>
                       {delta}
                     </span>
                   </div>
                 ) : (
-                  <div className={`text-xs font-semibold flex-shrink-0 ml-2 ${
-                    isSelected ? 'text-sky-100' : 'text-slate-500'
-                  }`}>
+                  <div className={`text-xs font-semibold flex-shrink-0 ml-2 font-mono ${
+                    isSelected ? 'text-psych-foreground/90' : 'text-muted-foreground'
+                  }`} data-numeric>
                     {categoryScore}
                   </div>
                 )}
               </div>
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
       {/* Selected Category Details */}
       {selectedCategory && (
-        <div className="mt-6 pt-4 border-t border-slate-700">
-          <p className="text-xs font-semibold text-slate-400 mb-2 px-2">
+        <div className="mt-6 pt-4 border-t border-border">
+          <p className="text-xs font-semibold text-muted-foreground mb-2 px-2 tracking-wide">
             SUBTESTS
           </p>
           <div className="space-y-1">
             {selectedCategory.subcategories?.length ? (
-              selectedCategory.subcategories.map((sub) => {
+              selectedCategory.subcategories.map((sub, index) => {
                 const subScore =
                   student.categories
                     ?.find((c) => c.id === selectedCategory.id)
@@ -181,22 +185,25 @@ export function PsychStudentViewClient({
                 const deltaColor = getDeltaColor(subScore, snapshotScore);
 
                 return (
-                  <div
+                  <motion.div
                     key={sub.id}
-                    className="px-3 py-2 rounded-lg bg-slate-800/30 hover:bg-slate-800/50 transition-colors"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1], delay: index * 0.03 }}
+                    className="px-3 py-2 rounded-lg bg-muted/50 hover:bg-accent/40 transition-colors duration-150"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-50 truncate">
+                      <p className="text-xs text-foreground truncate">
                         {sub.name}
                       </p>
-                      
+
                       {/* Score Display */}
                       {snapshotScore !== null ? (
-                        <div className="flex items-center gap-1.5 text-xs font-semibold flex-shrink-0 ml-2">
-                          <span className="text-sky-400">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold flex-shrink-0 ml-2 font-mono" data-numeric>
+                          <span className="text-[color:var(--chart-4)]">
                             {subScore}
                           </span>
-                          <span className="text-slate-500">
+                          <span className="text-muted-foreground">
                             {snapshotScore}
                           </span>
                           <span className={deltaColor}>
@@ -204,16 +211,16 @@ export function PsychStudentViewClient({
                           </span>
                         </div>
                       ) : (
-                        <span className="text-xs font-semibold text-sky-400 flex-shrink-0 ml-2">
+                        <span className="text-xs font-semibold text-[color:var(--chart-4)] flex-shrink-0 ml-2 font-mono" data-numeric>
                           {subScore}
                         </span>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })
             ) : (
-              <p className="text-xs text-slate-500 px-2 py-2">
+              <p className="text-xs text-muted-foreground px-2 py-2">
                 No subtests
               </p>
             )}

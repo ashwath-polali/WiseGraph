@@ -42,8 +42,8 @@ export default async function UniversalCategoriesPage() {
     <div className="max-w-7xl mx-auto px-6 py-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-50 mb-1">Categories</h1>
-          <p className="text-sm text-slate-400">Manage assessment frameworks</p>
+          <h1 className="text-2xl font-display font-bold text-foreground mb-1">Categories</h1>
+          <p className="text-sm text-muted-foreground">Manage assessment frameworks</p>
         </div>
         <Link href="/psych/dashboard">
           <Button variant="secondary" className="text-sm py-1.5">← Dashboard</Button>
