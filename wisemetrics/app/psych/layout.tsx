@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { LogoutButton } from '@/components/LogoutButton';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default async function PsychLayout({
   children,
@@ -28,7 +29,16 @@ export default async function PsychLayout({
         <div className="flex h-14 items-center justify-between px-4">
           {/* Brand → click to go back to dashboard */}
           <Link href="/psych/dashboard" className="flex items-center gap-2.5">
-            <span className="text-[15px] font-semibold tracking-tight text-psych">WiseMetrics</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="12" cy="12" r="11" className="stroke-border" strokeWidth="1" />
+              <path d="M12 12 L12 2.5 A9.5 9.5 0 0 1 20.2 7.3 Z" className="fill-psych" />
+              <path d="M12 12 L20.2 7.3 A9.5 9.5 0 0 1 18.7 18.7 Z" className="fill-psych/45" />
+              <path d="M12 12 L18.7 18.7 A9.5 9.5 0 0 1 5.3 18.7 Z" className="fill-primary/50" />
+            </svg>
+            <span className="text-[15px] font-semibold tracking-tight">
+              WiseGraph
+              <span className="ml-1.5 text-[11px] font-medium text-psych">Psych</span>
+            </span>
           </Link>
 
           <div className="flex items-center gap-1.5">
@@ -40,6 +50,8 @@ export default async function PsychLayout({
             >
               Dashboard
             </Link>
+
+            <ThemeToggle />
 
             {/* Settings button with a clean gear icon */}
             <Link

@@ -3,22 +3,24 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LandingRadialHero } from "@/components/landing/LandingRadialHero";
 import { useEffect, useRef } from "react";
 
 const ENTER = [0.22, 1, 0.36, 1] as const;
 
 const FEATURES = [
   {
-    title: "See the whole class",
-    body: "Spot outliers and trends across every student at once, instead of paging through a stack of individual reports.",
+    title: "See the whole class at once",
+    body: "One dial for the whole roster. The kid who's quietly falling behind and the one who's flying stop hiding in a stack of individual reports.",
   },
   {
-    title: "Drill into subskills",
-    body: "Move from an overall score down to the specific strength or gap driving it — in a click, not a spreadsheet.",
+    title: "Follow a score to its roots",
+    body: "An overall number never tells you why. Tap a category and keep going — decoding, fluency, comprehension — until you're looking at the thing to actually work on.",
   },
   {
-    title: "Made for the room",
-    body: "Clean, exportable charts that hold up on a projector in PLCs, family conferences, and goal-setting meetings.",
+    title: "Charts that survive a projector",
+    body: "Export a clean image and put it on the wall. It reads from the back of the room, in a PLC, or across the table from a parent who's never seen a standard score.",
   },
 ];
 
@@ -28,7 +30,7 @@ export default function HomePage() {
       {/* ambient warm ground behind the hero */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(58%_100%_at_50%_-12%,color-mix(in_oklch,var(--primary)_9%,transparent),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[620px] bg-[radial-gradient(70%_100%_at_70%_-10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent)]"
       />
 
       <div className="relative mx-auto flex max-w-6xl flex-col px-5 pb-24 pt-6 sm:pt-8">
@@ -52,79 +54,117 @@ export default function HomePage() {
             <Link href="/signup">
               <Button size="sm">Get started</Button>
             </Link>
+            <div className="ml-1">
+              <ThemeToggle />
+            </div>
           </nav>
         </header>
 
-        {/* Hero */}
-        <section className="mt-20 flex flex-col items-center text-center sm:mt-28">
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: ENTER }}
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-psych" />
-            Built for school psychologists &amp; teachers
-          </motion.p>
+        {/* Hero — asymmetric split: copy left, live radial right */}
+        <section className="mt-14 grid items-center gap-10 sm:mt-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-6">
+          <div className="flex flex-col items-start text-left">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: ENTER }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-psych" />
+              Made with a school psychologist, for the people who read the scores
+            </motion.p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: ENTER, delay: 0.05 }}
-            className="font-display text-[2.5rem] font-medium leading-[1.04] tracking-tight text-balance sm:text-6xl md:text-[4.25rem]"
-          >
-            A student&apos;s whole story,
-            <br className="hidden sm:block" /> in one honest picture.
-          </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: ENTER, delay: 0.05 }}
+              className="font-display text-[2.6rem] font-medium leading-[1.02] tracking-tight text-balance sm:text-6xl md:text-[4.1rem]"
+            >
+              A student&apos;s whole story, in one honest picture.
+            </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: ENTER, delay: 0.12 }}
-            className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-muted-foreground sm:text-base"
-          >
-            WiseGraph turns standardized assessment scores into clear radial and
-            bell-curve visuals — so growth, gaps, and strengths read at a glance
-            in classrooms, IEP meetings, and parent conferences.
-          </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: ENTER, delay: 0.12 }}
+              className="mt-5 max-w-lg text-pretty text-[15px] leading-relaxed text-muted-foreground sm:text-base"
+            >
+              Standardized scores come back as a wall of numbers. WiseGraph turns
+              them into radial and bell-curve pictures you can actually read — in
+              class, in an IEP meeting, or across the table from a parent.
+            </motion.p>
 
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: ENTER, delay: 0.18 }}
+              className="mt-8 flex items-center gap-2"
+            >
+              <motion.div
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 22 }}
+              >
+                <Link href="/signup">
+                  <Button size="lg">Get started — it&apos;s free</Button>
+                </Link>
+              </motion.div>
+              <Link href="/login">
+                <Button variant="ghost" size="lg">
+                  Log in
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Live product visual */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: ENTER, delay: 0.18 }}
-            className="mt-8 flex items-center gap-3"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: ENTER, delay: 0.15 }}
+            className="flex justify-center lg:justify-end"
           >
-            <Link href="/signup">
-              <Button size="lg">Get started</Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="lg">
-                Log in
-              </Button>
-            </Link>
+            <LandingRadialHero />
           </motion.div>
         </section>
 
-        {/* Hero visualization */}
-        <motion.section
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: ENTER, delay: 0.25 }}
-          className="mt-16 w-full"
-        >
-          <InteractiveGraphBand />
-        </motion.section>
+        {/* Second act — the interactive trend band */}
+        <section className="mt-24">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5, ease: ENTER }}
+            className="mb-6 flex flex-col gap-1"
+          >
+            <h2 className="font-display text-2xl font-medium tracking-tight sm:text-3xl">
+              Watch a class move over a year.
+            </h2>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Every line is a cohort. Run your cursor across the band — the story
+              is in where they climb, where they stall, and how far apart they
+              drift.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: ENTER }}
+          >
+            <InteractiveGraphBand />
+          </motion.div>
+        </section>
 
         {/* Value props — editorial numbered row */}
-        <section className="mt-20 border-t border-border pt-10">
-          <div className="grid gap-x-10 gap-y-8 sm:grid-cols-3">
+        <section className="mt-24 border-t border-border pt-12">
+          <div className="grid gap-x-12 gap-y-10 sm:grid-cols-3">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.4, ease: ENTER, delay: i * 0.06 }}
+                transition={{ duration: 0.45, ease: ENTER, delay: i * 0.08 }}
               >
                 <span className="font-mono text-xs text-muted-foreground" data-numeric>
                   0{i + 1}
@@ -132,13 +172,39 @@ export default function HomePage() {
                 <h3 className="mt-2 font-display text-lg font-medium text-foreground">
                   {f.title}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {f.body}
                 </p>
               </motion.div>
             ))}
           </div>
         </section>
+
+        {/* Closing CTA */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: ENTER }}
+          className="mt-24 overflow-hidden rounded-3xl border border-border bg-card px-8 py-14 text-center shadow-[0_1px_2px_oklch(0.245_0.015_75/0.05),0_32px_64px_-32px_oklch(0.245_0.015_75/0.2)]"
+        >
+          <h2 className="mx-auto max-w-xl font-display text-3xl font-medium tracking-tight text-balance sm:text-4xl">
+            Stop squinting at spreadsheets.
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+            Set up your first class in a couple of minutes. Nothing to install.
+          </p>
+          <motion.div
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            className="mt-7 inline-block"
+          >
+            <Link href="/signup">
+              <Button size="lg">Get started</Button>
+            </Link>
+          </motion.div>
+        </motion.section>
       </div>
     </main>
   );
