@@ -26,6 +26,24 @@ interface Props {
   subskills: SubcategoryScore[];
 }
 
+function readToken(name: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || fallback;
+}
+
+// Apply alpha to a resolved oklch token without mixing with `transparent`
+// (which premultiplies toward black and mudds the fill).
+function withAlpha(color: string, a: number): string {
+  const t = color.trim();
+  if (t.startsWith("oklch(") && t.endsWith(")") && !t.includes("/")) {
+    return `${t.slice(0, -1)} / ${a})`;
+  }
+  return `color-mix(in srgb, ${t} ${Math.round(a * 100)}%, transparent)`;
+}
+
 export function SubcategoryDiamondChart({ subskills }: Props) {
   const labels = useMemo(
     () => subskills.map((s) => s.name),
@@ -37,6 +55,17 @@ export function SubcategoryDiamondChart({ subskills }: Props) {
     [subskills]
   );
 
+  // Student series = terracotta (--chart-4), matching the hero radar above.
+  const tokens = useMemo(
+    () => ({
+      student: readToken("--chart-4", "oklch(0.505 0.145 28)"),
+      grid: readToken("--border", "oklch(0.905 0.007 85)"),
+      label: readToken("--muted-foreground", "oklch(0.505 0.014 75)"),
+      foreground: readToken("--foreground", "oklch(0.245 0.015 75)"),
+    }),
+    []
+  );
+
   const data = useMemo(
     () => ({
       labels,
@@ -44,15 +73,15 @@ export function SubcategoryDiamondChart({ subskills }: Props) {
         {
           label: "Subskills",
           data: scores,
-          backgroundColor: "rgba(56, 189, 248, 0.18)",
-          borderColor: "rgb(56, 189, 248)",
+          backgroundColor: withAlpha(tokens.student, 0.15),
+          borderColor: tokens.student,
           borderWidth: 2,
           pointRadius: 3,
-          pointBackgroundColor: "rgb(56, 189, 248)",
+          pointBackgroundColor: tokens.student,
         },
       ],
     }),
-    [labels, scores]
+    [labels, scores, tokens]
   );
 
   const options: ChartOptions<"radar"> = {
@@ -64,13 +93,13 @@ export function SubcategoryDiamondChart({ subskills }: Props) {
         max: 150,
         ticks: {
           stepSize: 15,
-          color: "#64748b",
+          color: tokens.label,
           backdropColor: "transparent",
         },
-        grid: { color: "rgba(148,163,184,0.3)" },
-        angleLines: { color: "rgba(51,65,85,0.9)" },
+        grid: { color: tokens.grid },
+        angleLines: { color: tokens.grid },
         pointLabels: {
-          color: "#e2e8f0",
+          color: tokens.foreground,
           font: { size: 10 },
         },
       },

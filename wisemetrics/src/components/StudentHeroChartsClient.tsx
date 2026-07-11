@@ -50,6 +50,16 @@ function readToken(name: string, fallback: string): string {
   return value || fallback;
 }
 
+// Apply alpha to a resolved token WITHOUT mixing with `transparent` — mixing a
+// color with transparent in oklch premultiplies toward black and mudds the fill.
+function withAlpha(color: string, a: number): string {
+  const t = color.trim();
+  if (t.startsWith("oklch(") && t.endsWith(")") && !t.includes("/")) {
+    return `${t.slice(0, -1)} / ${a})`;
+  }
+  return `color-mix(in srgb, ${t} ${Math.round(a * 100)}%, transparent)`;
+}
+
 export function StudentHeroChartsClient({
   student,
   cls,
@@ -105,7 +115,7 @@ export function StudentHeroChartsClient({
         {
           label: student.name,
           data: studentScores,
-          backgroundColor: "color-mix(in oklch, var(--chart-4) 18%, transparent)",
+          backgroundColor: withAlpha(tokens.student, 0.15),
           borderColor: tokens.student,
           borderWidth: 2,
           pointRadius: 3,

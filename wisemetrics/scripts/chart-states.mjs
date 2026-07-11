@@ -49,12 +49,12 @@ await step("radial default", async () => {
 });
 
 await step("radial hover", async () => {
-  await page.locator('path[fill="var(--chart-1)"]').first().hover();
+  await page.locator('path[fill="url(#wg-0)"]').first().hover();
   await snap("51-radial-hover");
 });
 
 await step("radial drill", async () => {
-  await page.locator('path[fill="var(--chart-1)"]').first().click();
+  await page.locator('path[fill="url(#wg-0)"]').first().click();
   await snap("52-radial-drill");
   await page.getByRole("button", { name: /All categories/i }).click();
 });
@@ -70,7 +70,7 @@ await step("radial compare", async () => {
   await page.getByRole("button", { name: "Compare", exact: true }).click();
   await page.locator("select").selectOption({ index: 3 });
   await page.waitForTimeout(400);
-  await page.locator('path[fill="var(--chart-2)"]').first().hover();
+  await page.locator('path[fill="url(#wg-0)"]').first().hover();
   await snap("55-radial-compare-hover");
 });
 

@@ -72,6 +72,12 @@ export function RadialCanvas({
   const drillIdx = categories.findIndex((c) => c.id === drillCategoryId);
   const drillCat = drillIdx >= 0 ? categories[drillIdx] : null;
 
+  const classAvg = categories.length
+    ? Math.round(
+        categories.reduce((sum, c) => sum + c.avgScore, 0) / categories.length,
+      )
+    : 0;
+
   return (
     <svg
       ref={svgRef}
@@ -81,12 +87,51 @@ export function RadialCanvas({
         if (!isDrill) setHoveredId(null);
       }}
     >
-      <g transform={`translate(${CENTER} ${CENTER})`}>
-        <RingGrid />
+      <defs>
+        {/* one center-out gradient per wedge — dense at the hub, fading to the rim */}
+        {categories.map((_, idx) => {
+          const c = wedgeColor(idx);
+          return (
+            <radialGradient
+              key={idx}
+              id={`wg-${idx}`}
+              gradientUnits="userSpaceOnUse"
+              cx={0}
+              cy={0}
+              r={OUTER}
+            >
+              <stop offset="0%" stopColor={c} stopOpacity={0.42} />
+              <stop offset="58%" stopColor={c} stopOpacity={0.19} />
+              <stop offset="100%" stopColor={c} stopOpacity={0.05} />
+            </radialGradient>
+          );
+        })}
+        {/* warm ambient ground so the canvas isn't a stark void */}
+        <radialGradient
+          id="radial-ground"
+          gradientUnits="userSpaceOnUse"
+          cx={0}
+          cy={0}
+          r={OUTER}
+        >
+          <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.05} />
+          <stop offset="72%" stopColor="var(--primary)" stopOpacity={0.014} />
+          <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+        </radialGradient>
+        <filter id="wedge-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation={5} />
+        </filter>
+      </defs>
 
-        {/* origin */}
-        <circle r={7} fill="var(--primary)" opacity={0.08} />
-        <circle r={2.5} fill="var(--primary)" />
+      <g transform={`translate(${CENTER} ${CENTER})`}>
+        <motion.circle
+          r={OUTER}
+          fill="url(#radial-ground)"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
+        <RingGrid />
 
         <AnimatePresence mode="wait" initial={false}>
           {isDrill && drillCat ? (
@@ -149,8 +194,47 @@ export function RadialCanvas({
             </motion.g>
           )}
         </AnimatePresence>
+
+        {!isDrill && <CenterMedallion value={classAvg} />}
       </g>
     </svg>
+  );
+}
+
+function CenterMedallion({ value }: { value: number }) {
+  const score = useCountUp(value, 0.9);
+  return (
+    <motion.g
+      initial={{ opacity: 0, scale: 0.6 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.5, duration: 0.4, ease: ENTER_EASE }}
+      style={{ pointerEvents: "none" }}
+    >
+      <circle r={30} fill="var(--card)" stroke="var(--border)" strokeWidth={1} />
+      <circle r={30} fill="none" stroke="var(--primary)" strokeWidth={1} opacity={0.14} />
+      <text
+        textAnchor="middle"
+        y={-3}
+        dominantBaseline="central"
+        className="font-mono"
+        fontSize={17}
+        fontWeight={600}
+        fill="var(--foreground)"
+      >
+        {score}
+      </text>
+      <text
+        textAnchor="middle"
+        y={13}
+        dominantBaseline="central"
+        fontSize={6.5}
+        fontWeight={600}
+        fill="var(--muted-foreground)"
+        letterSpacing="0.12em"
+      >
+        CLASS AVG
+      </text>
+    </motion.g>
   );
 }
 
@@ -257,15 +341,24 @@ function Wedge({
       onMouseEnter={() => onHover(cat.id)}
       onClick={() => onDrill(cat.id)}
     >
+      {/* soft colored bloom, only on hover */}
       <motion.path
         d={d}
         fill={color}
+        filter="url(#wedge-glow)"
+        style={{ pointerEvents: "none" }}
+        animate={{ opacity: isHovered ? 0.24 : 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+      />
+      <motion.path
+        d={d}
+        fill={`url(#wg-${idx})`}
         stroke={color}
         strokeLinejoin="round"
         animate={{
-          fillOpacity: isHovered ? 0.3 : 0.16,
-          strokeWidth: isHovered ? 1.6 : 1.1,
-          strokeOpacity: isHovered ? 1 : 0.75,
+          fillOpacity: isHovered ? 1 : 0.82,
+          strokeWidth: isHovered ? 1.8 : 1.1,
+          strokeOpacity: isHovered ? 1 : 0.7,
         }}
         transition={{ duration: 0.15, ease: "easeOut" }}
       />
@@ -647,8 +740,8 @@ function DrillWedge({
     <g>
       <motion.path
         d={d}
-        fill={color}
-        fillOpacity={0.2}
+        fill={`url(#wg-${idx})`}
+        fillOpacity={0.95}
         stroke={color}
         strokeWidth={1.6}
         strokeLinejoin="round"
