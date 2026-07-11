@@ -129,7 +129,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Grade (9–12)
+              Grade (9-12)
             </label>
             <Input
               value={newGrade}
@@ -139,7 +139,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Overall score (60–150)
+              Overall score (60-150)
             </label>
             <Input
               type="number"

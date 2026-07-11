@@ -39,7 +39,7 @@ function Chip({
 }
 
 function formatDelta(d: number | null): string {
-  if (d == null || Number.isNaN(d)) return "–";
+  if (d == null || Number.isNaN(d)) return "-";
   const rounded = Math.round(d);
   if (rounded === 0) return "0";
   return rounded > 0 ? `+${rounded}` : `${rounded}`;
@@ -208,7 +208,7 @@ export function AverageDetailPanel({
           )}
 
           <p className="pt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Category and subskill scores sit on the same 60–150 standard
+            Category and subskill scores sit on the same 60-150 standard
             scale, so one student can be compared with the class at every
             level.
           </p>
@@ -348,7 +348,7 @@ export function BellDotsDetailPanel({
 
           <p className="text-[10px] leading-relaxed text-muted-foreground">
             This dot shows where the category score sits within the class bell
-            curve, on the 60–150 standard scale.
+            curve, on the 60-150 standard scale.
           </p>
         </div>
       </div>
@@ -415,7 +415,7 @@ export function BellDotsDetailPanel({
         )}
 
         <p className="text-[10px] leading-relaxed text-muted-foreground">
-          This dot shows how the subskill score fits inside the same 60–150
+          This dot shows how the subskill score fits inside the same 60-150
           distribution as the rest of the class.
         </p>
       </div>

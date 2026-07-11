@@ -27,7 +27,7 @@ export function ClassOverviewClient({ cls }: { cls: ClassScoreSummary }) {
           <p className="mt-0.5 text-xs text-muted-foreground">
             {chartMode === "radial"
               ? "Category averages, drawn out from the center."
-              : "Where the class sits on the 60–150 curve."}
+              : "Where the class sits on the 60-150 curve."}
           </p>
         </div>
         <div className="inline-flex rounded-lg bg-muted p-0.5">

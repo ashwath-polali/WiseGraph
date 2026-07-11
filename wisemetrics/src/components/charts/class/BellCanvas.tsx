@@ -129,7 +129,7 @@ export function BellCanvas({
           opacity={0.8}
           letterSpacing="0.08em"
         >
-          AVERAGE RANGE 85–115
+          AVERAGE RANGE 85-115
         </text>
       </motion.g>
 

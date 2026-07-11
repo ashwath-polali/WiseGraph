@@ -67,13 +67,13 @@ export function CreateFirstClassButton() {
   return (
     <div className="flex flex-wrap items-end gap-2">
       <Input
-        placeholder="Class name (e.g., Period 1 – Algebra II)"
+        placeholder="Class name (e.g., Period 1: Algebra II)"
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="min-w-[220px]"
       />
       <Input
-        placeholder="Grade (9–12)"
+        placeholder="Grade (9-12)"
         value={gradeLevel}
         onChange={(e) => setGradeLevel(e.target.value)}
         className="w-24"

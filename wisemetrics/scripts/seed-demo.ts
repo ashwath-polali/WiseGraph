@@ -57,8 +57,8 @@ async function main() {
   await prisma.class.deleteMany({ where: { teacherId: teacher.id } });
 
   for (const [ci, clsSpec] of [
-    { name: "Period 3 — English 9", grade: "9", subject: "English", term: "Fall 2026" },
-    { name: "Period 5 — English 9", grade: "9", subject: "English", term: "Fall 2026" },
+    { name: "Period 3: English 9", grade: "9", subject: "English", term: "Fall 2026" },
+    { name: "Period 5: English 9", grade: "9", subject: "English", term: "Fall 2026" },
   ].entries()) {
     const cls = await prisma.class.create({
       data: {

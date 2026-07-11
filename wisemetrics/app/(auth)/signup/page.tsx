@@ -175,7 +175,7 @@ export default function SignupPage() {
               <ul className="mt-5 space-y-2.5 border-t border-border pt-5 text-sm text-muted-foreground">
                 {[
                   'One evaluation per student',
-                  'Subtest scores on the 60–150 scale',
+                  'Subtest scores on the 60-150 scale',
                   'Polar and bell-curve views',
                   'Charts exported for IEP reports',
                 ].map((feature) => (

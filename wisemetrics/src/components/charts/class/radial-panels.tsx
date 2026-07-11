@@ -261,7 +261,7 @@ export function DotsDetailPanel({
 
           <div className="rounded-md bg-muted/60 p-2 text-[10px] leading-relaxed text-muted-foreground">
             Distance from the center is the score: this dot sits at{" "}
-            {student.name.split(" ")[0]}&apos;s scaled score on the 60–150
+            {student.name.split(" ")[0]}&apos;s scaled score on the 60-150
             standard scale.
           </div>
         </div>
@@ -324,7 +324,7 @@ export function DotsDetailPanel({
 
         <div className="rounded-md bg-muted/60 p-2 text-[10px] leading-relaxed text-muted-foreground">
           The dot sits at the radial distance for this subskill&apos;s score,
-          inside its category wedge, on the same 60–150 scale.
+          inside its category wedge, on the same 60-150 scale.
         </div>
       </div>
     </div>

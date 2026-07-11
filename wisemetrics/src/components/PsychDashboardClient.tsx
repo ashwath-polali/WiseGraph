@@ -103,7 +103,7 @@ export function PsychDashboardClient({ evaluations: initialEvaluations }: Props)
 
                     <div className="text-right">
                       <p className="text-muted-foreground">Overall</p>
-                      <p className="font-semibold text-foreground font-mono" data-numeric>{student?.overallScore || '—'}</p>
+                      <p className="font-semibold text-foreground font-mono" data-numeric>{student?.overallScore || '-'}</p>
                     </div>
 
                     <div className="text-right">

@@ -107,7 +107,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
       return;
     }
 
-    if (!confirm('Last check — this cannot be reversed.')) {
+    if (!confirm('Last check. This cannot be reversed.')) {
       return;
     }
 
@@ -200,7 +200,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
                   <option value="">First class created</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} – {c.subject}
+                      {c.name} · {c.subject}
                     </option>
                   ))}
                 </select>
