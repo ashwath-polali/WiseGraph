@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   motion,
   useMotionValue,
+  useScroll,
   useSpring,
   useTransform,
 } from "motion/react";
@@ -158,10 +159,19 @@ function Hero() {
   const px = useMotionValue(0);
   const py = useMotionValue(0);
   const spring = { stiffness: 150, damping: 18, mass: 0.4 };
-  const rotY = useSpring(useTransform(px, [-0.5, 0.5], [-14, 14]), spring);
-  const rotX = useSpring(useTransform(py, [-0.5, 0.5], [10, -10]), spring);
-  const glowX = useSpring(useTransform(px, [-0.5, 0.5], [-24, 24]), spring);
-  const glowY = useSpring(useTransform(py, [-0.5, 0.5], [-24, 24]), spring);
+  const rotY = useSpring(useTransform(px, [-0.5, 0.5], [-7, 7]), spring);
+  const rotX = useSpring(useTransform(py, [-0.5, 0.5], [6, -6]), spring);
+  const glowX = useSpring(useTransform(px, [-0.5, 0.5], [-16, 16]), spring);
+  const glowY = useSpring(useTransform(py, [-0.5, 0.5], [-16, 16]), spring);
+
+  // scroll-linked: the hero visual recedes as you scroll past it
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const radialY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const radialOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.15]);
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, -36]);
 
   function onMove(e: React.MouseEvent) {
     const el = ref.current;
@@ -182,7 +192,7 @@ function Hero() {
       onMouseLeave={onLeave}
       className="mt-14 grid items-center gap-10 sm:mt-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-6"
     >
-      <div className="flex flex-col items-start text-left">
+      <motion.div style={{ y: copyY }} className="flex flex-col items-start text-left">
         <motion.p
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -241,26 +251,30 @@ function Hero() {
             </Button>
           </Link>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Live product visual — tilts toward the cursor */}
+      {/* Live product visual: tilts toward the cursor, recedes on scroll */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: ENTER, delay: 0.2 }}
-        className="flex justify-center [perspective:1200px] lg:justify-end"
+        style={{ y: radialY, opacity: radialOpacity }}
+        className="flex justify-center lg:justify-end"
       >
         <motion.div
-          style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}
-          className="relative"
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: ENTER, delay: 0.2 }}
+          className="[perspective:1200px]"
         >
-          {/* cursor-tracking glow parallaxed a touch deeper */}
           <motion.div
-            aria-hidden
-            style={{ x: glowX, y: glowY }}
-            className="pointer-events-none absolute inset-6 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,color-mix(in_oklch,var(--psych)_18%,transparent),transparent_70%)] blur-2xl"
-          />
-          <LandingRadialHero />
+            style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}
+            className="relative"
+          >
+            <motion.div
+              aria-hidden
+              style={{ x: glowX, y: glowY }}
+              className="pointer-events-none absolute inset-6 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,color-mix(in_oklch,var(--psych)_18%,transparent),transparent_70%)] blur-2xl"
+            />
+            <LandingRadialHero />
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>
@@ -273,34 +287,24 @@ function Aurora() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <motion.div
-        className="absolute -left-40 -top-40 h-[620px] w-[620px] rounded-full blur-3xl"
+        className="absolute -left-40 -top-52 h-[640px] w-[640px] rounded-full blur-[100px]"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--primary) 40%, transparent), transparent 70%)",
+            "radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--primary) 16%, transparent), transparent 70%)",
         }}
-        initial={{ x: 0, y: 0, scale: 1 }}
-        animate={{ x: [0, 80, -30, 0], y: [0, 50, 100, 0], scale: [1, 1.18, 1.05, 1] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        initial={{ x: 0, y: 0 }}
+        animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
+        transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute right-[-10rem] top-[-5rem] h-[580px] w-[580px] rounded-full blur-3xl"
+        className="absolute right-[-12rem] top-[-8rem] h-[600px] w-[600px] rounded-full blur-[100px]"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--psych) 38%, transparent), transparent 70%)",
+            "radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--psych) 13%, transparent), transparent 70%)",
         }}
-        initial={{ x: 0, y: 0, scale: 1 }}
-        animate={{ x: [0, -60, 30, 0], y: [0, 70, 20, 0], scale: [1, 1.12, 1.22, 1] }}
-        transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute left-[32%] top-[6%] h-[480px] w-[480px] rounded-full blur-3xl"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, color-mix(in oklch, var(--chart-3) 30%, transparent), transparent 70%)",
-        }}
-        initial={{ x: 0, y: 0, scale: 1 }}
-        animate={{ x: [0, 50, -40, 0], y: [0, -40, 40, 0], scale: [1, 1.22, 1, 1] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+        initial={{ x: 0, y: 0 }}
+        animate={{ x: [0, -34, 0], y: [0, 40, 0] }}
+        transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
   );

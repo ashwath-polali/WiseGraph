@@ -118,7 +118,7 @@ export function DetailPanel({
         )}
       </div>
 
-      <div className="flex-1 space-y-0.5 overflow-y-auto pr-0.5 text-[11px]">
+      <div className="flex-1 space-y-0.5 overflow-y-auto pr-0.5 text-[11px]" data-lenis-prevent>
         {combinedSubIds.length === 0 ? (
           <p className="mt-4 text-center text-muted-foreground">
             No subskills set up for this category yet.

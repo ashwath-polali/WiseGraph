@@ -118,7 +118,7 @@ export function AverageDetailPanel({
           subskills.
         </p>
       ) : (
-        <div className="flex-1 space-y-2.5 overflow-y-auto pr-0.5 text-[11px]">
+        <div className="flex-1 space-y-2.5 overflow-y-auto pr-0.5 text-[11px]" data-lenis-prevent>
           <div>
             <SectionLabel>Category</SectionLabel>
             <div className="mt-0.5 font-medium text-foreground">

@@ -173,7 +173,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </Link>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto" data-lenis-prevent>
               {cls.students.length === 0 ? (
                 <div className="flex h-full items-center justify-center px-4 py-10 text-sm text-muted-foreground">
                   No students yet. Add your first from Manage.

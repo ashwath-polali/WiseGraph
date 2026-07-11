@@ -12,6 +12,7 @@ import type {
 import { Card } from "@/components/ui/Card";
 import { StudentHeroChartsClient } from "@/components/StudentHeroChartsClient";
 import { CategoryDrillDownClient } from "@/components/CategoryDrillDownClient";
+import { Reveal } from "@/components/Reveal";
 
 type RouteParams = {
   id: string;
@@ -173,19 +174,22 @@ export default async function StudentDetailPage(props: Props) {
           />
         </Card>
 
-        <Card className="p-6 space-y-4">
-          <h2 className="text-sm font-medium text-foreground">
-            Category drill-down
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Pick a category to see the subskills underneath it.
-          </p>
-          <CategoryDrillDownClient student={student} />
-        </Card>
+        <Reveal>
+          <Card className="p-6 space-y-4">
+            <h2 className="text-sm font-medium text-foreground">
+              Category drill-down
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Pick a category to see the subskills underneath it.
+            </p>
+            <CategoryDrillDownClient student={student} />
+          </Card>
+        </Reveal>
       </div>
 
       {/* Right: snapshot + detailed category panel */}
       <div className="space-y-4">
+        <Reveal>
         <Card className="p-4 space-y-2">
           <h2 className="text-sm font-medium text-foreground">Snapshot</h2>
           <p className="text-xs text-muted-foreground">
@@ -204,8 +208,10 @@ export default async function StudentDetailPage(props: Props) {
             </div>
           </div>
         </Card>
+        </Reveal>
 
         {/* Detailed category + subskill comparison */}
+        <Reveal delay={0.06}>
         <Card className="p-4 space-y-3">
           <h2 className="text-sm font-medium text-foreground">
             Categories & subskills
@@ -296,6 +302,7 @@ export default async function StudentDetailPage(props: Props) {
             )}
           </div>
         </Card>
+        </Reveal>
       </div>
     </main>
   );
