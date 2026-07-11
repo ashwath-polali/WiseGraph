@@ -28,13 +28,13 @@ export default function NewEvaluationPage() {
     setError('');
     
     if (!studentName.trim()) {
-      setError('Student name is required');
+      setError('Add the student\'s name to continue.');
       setLoading(false);
       return;
     }
-    
+
     if (!gradeLevel.trim()) {
-      setError('Grade level is required');
+      setError('Add a grade level to continue.');
       setLoading(false);
       return;
     }
@@ -49,11 +49,11 @@ export default function NewEvaluationPage() {
         // Load template from DATABASE instead of localStorage
         const templateRes = await fetch('/api/universal-template');
         if (!templateRes.ok) {
-          throw new Error('No universal categories defined. Please configure them first.');
+          throw new Error('You haven\'t set up your universal categories yet. Add them first, then come back.');
         }
         const templateData = await templateRes.json();
         if (!templateData.categories || templateData.categories.length === 0) {
-          throw new Error('No universal categories defined. Please configure them first.');
+          throw new Error('You haven\'t set up your universal categories yet. Add them first, then come back.');
         }
         
         template = {
@@ -83,7 +83,7 @@ export default function NewEvaluationPage() {
       
       if (!classRes.ok) {
         const errData = await classRes.json();
-        throw new Error(errData.error || 'Failed to create evaluation');
+        throw new Error(errData.error || 'We couldn\'t create that evaluation. Try again.');
       }
       
       const classDataRaw = await classRes.json();
@@ -134,7 +134,7 @@ export default function NewEvaluationPage() {
       router.push(`/psych/evaluations/${classData.id}`);
       
     } catch (err: any) {
-      setError(err.message || 'Failed to create evaluation');
+      setError(err.message || 'We couldn\'t create that evaluation. Try again.');
       if (createdClassId) {
         try {
           await fetch('/api/classes', {
@@ -154,13 +154,13 @@ export default function NewEvaluationPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-6">
       <Card className="p-8">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">New Evaluation</h1>
-        <p className="text-sm text-muted-foreground mb-6">Create a psychoeducational assessment</p>
+        <h1 className="font-display text-2xl font-bold text-foreground mb-1">New evaluation</h1>
+        <p className="text-sm text-muted-foreground mb-6">Set up a student and their assessment categories.</p>
 
         <form onSubmit={handleCreate} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Student Name *
+              Student name *
             </label>
             <Input
               value={studentName}
@@ -172,7 +172,7 @@ export default function NewEvaluationPage() {
           
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Grade Level *
+              Grade level *
             </label>
             <Input
               value={gradeLevel}
@@ -184,7 +184,7 @@ export default function NewEvaluationPage() {
           
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
-              Assessment Categories
+              Assessment categories
             </label>
 
             <div className="space-y-3">
@@ -201,10 +201,10 @@ export default function NewEvaluationPage() {
                     />
                     <div className="flex-1">
                       <p className="font-semibold text-foreground group-hover:text-psych transition-colors">
-                        Your Categories
+                        Your categories
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Use your configured universal framework. Quick and consistent.
+                        Use your universal set, so every evaluation lines up the same way.
                       </p>
                     </div>
                     <svg className="w-5 h-5 text-psych/0 group-hover:text-psych transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
@@ -227,10 +227,10 @@ export default function NewEvaluationPage() {
                     />
                     <div className="flex-1">
                       <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                        Custom Profile
+                        Custom profile
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Build a unique assessment. Add categories after creation.
+                        Build categories just for this student. You'll add them after this step.
                       </p>
                     </div>
                     <svg className="w-5 h-5 text-primary/0 group-hover:text-primary transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
@@ -245,7 +245,7 @@ export default function NewEvaluationPage() {
           {useUniversal && (
             <div className="p-3 bg-psych/10 border border-psych/30 rounded-lg">
               <p className="text-sm text-psych">
-                Using your universal framework.{' '}
+                This uses your universal categories.{' '}
                 <Link href="/psych/universal-categories" className="underline hover:opacity-80 font-semibold">
                   Edit categories
                 </Link>
@@ -256,7 +256,7 @@ export default function NewEvaluationPage() {
           {!useUniversal && (
             <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
               <p className="text-sm text-primary">
-                You'll configure categories after creation via the Configure button.
+                Once this is created, you'll add categories from the Configure button.
               </p>
             </div>
           )}
@@ -268,7 +268,7 @@ export default function NewEvaluationPage() {
           )}
           
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Creating...' : 'Create Evaluation'}
+            {loading ? 'Creating…' : 'Create evaluation'}
           </Button>
         </form>
       </Card>

@@ -35,7 +35,7 @@ export default async function SettingsPage() {
           <aside className="w-full border-b border-border pb-4 md:w-56 md:border-b-0 md:border-r md:pb-0 md:pr-4">
             <h1 className="text-lg font-semibold text-foreground">Settings</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              Customize your WiseMetrics account and classroom defaults.
+              Your account details and the defaults for your classes.
             </p>
 
             <nav className="mt-4 space-y-1 text-xs text-muted-foreground">

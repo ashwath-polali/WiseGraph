@@ -58,7 +58,7 @@ export function DetailPanel({
   if (!category) {
     return (
       <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/20 px-4 text-center text-xs text-muted-foreground">
-        Hover a wedge to see its subskills — click one to zoom in.
+        Hover a wedge to see its subskills. Click one to zoom in.
       </div>
     );
   }

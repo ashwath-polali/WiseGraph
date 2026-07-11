@@ -41,7 +41,7 @@ export default function LoginPage() {
         router.push('/psych/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid login credentials');
+      setError(err.message || 'That email and password don\'t match. Check them and try again.');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ export default function LoginPage() {
 
   async function handleForgotPassword() {
     if (!email) {
-      setError('Please enter your email address');
+      setError('Enter your email first and we\'ll send a reset link.');
       return;
     }
 
@@ -60,7 +60,7 @@ export default function LoginPage() {
       });
 
       if (error) throw error;
-      alert('Password reset email sent! Check your inbox.');
+      alert('Reset link sent. Check your inbox.');
     } catch (err: any) {
       setError(err.message);
     }
@@ -98,7 +98,7 @@ export default function LoginPage() {
           Welcome back.
         </h1>
         <p className="mt-2 text-[15px] text-muted-foreground">
-          Sign in to your WiseGraph account.
+          Sign in to pick up where you left off.
         </p>
 
         <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-[0_1px_2px_oklch(0.245_0.015_75/0.05),0_16px_40px_-20px_oklch(0.245_0.015_75/0.18)]">
@@ -164,7 +164,7 @@ export default function LoginPage() {
               </div>
               <Input
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

@@ -23,7 +23,7 @@ function ResetPasswordInner() {
     const type = searchParams.get("type");
 
     if (!tokenHash || type !== "recovery") {
-      setError("Invalid or expired reset link.");
+      setError("This reset link isn't valid or has expired. Request a new one from the login page.");
       return;
     }
 
@@ -34,7 +34,7 @@ function ResetPasswordInner() {
       });
 
       if (error || !data.session) {
-        setError(error?.message ?? "Could not validate reset link.");
+        setError(error?.message ?? "We couldn't verify this reset link. Request a new one from the login page.");
         return;
       }
 
@@ -47,11 +47,11 @@ function ResetPasswordInner() {
     setError(null);
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("Use at least 8 characters for your new password.");
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError("These two passwords don't match. Type them again.");
       return;
     }
 

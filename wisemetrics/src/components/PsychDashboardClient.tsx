@@ -32,7 +32,7 @@ export function PsychDashboardClient({ evaluations: initialEvaluations }: Props)
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function handleDelete(id: string, studentName: string) {
-    if (!confirm(`Are you sure you want to delete the evaluation for ${studentName}? This cannot be undone.`)) {
+    if (!confirm(`Delete ${studentName}'s evaluation? Its scores and snapshots go with it, and this can't be undone.`)) {
       return;
     }
 
@@ -51,7 +51,7 @@ export function PsychDashboardClient({ evaluations: initialEvaluations }: Props)
       router.refresh();
     } catch (err) {
       console.error('Delete error:', err);
-      alert('Failed to delete evaluation. Please try again.');
+      alert("We couldn't delete that evaluation. Try again.");
     } finally {
       setDeletingId(null);
     }
@@ -81,7 +81,7 @@ export function PsychDashboardClient({ evaluations: initialEvaluations }: Props)
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-medium text-foreground truncate transition-colors group-hover:text-psych">
-                        {student?.name || 'Unnamed Student'}
+                        {student?.name || 'Unnamed student'}
                       </h3>
                       {isRecent && (
                         <span className="text-[10px] bg-psych/15 text-psych px-1.5 py-0.5 rounded flex-shrink-0">
@@ -124,11 +124,11 @@ export function PsychDashboardClient({ evaluations: initialEvaluations }: Props)
                     size="icon-sm"
                     onClick={(e) => {
                       e.preventDefault();
-                      handleDelete(evaluation.id, student?.name || 'this evaluation');
+                      handleDelete(evaluation.id, student?.name || 'this student');
                     }}
                     disabled={deletingId === evaluation.id}
                     className="flex-shrink-0"
-                    title="Delete evaluation"
+                    title="Delete this evaluation"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

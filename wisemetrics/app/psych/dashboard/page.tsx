@@ -51,7 +51,7 @@ export default async function PsychDashboardPage() {
           {teacher?.name ? `Welcome back, ${teacher.name.split(' ')[0]}` : 'Dashboard'}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {teacher?.school || 'Psychoeducational Assessment Management'}
+          {teacher?.school || 'Your evaluations, ready for the next conference.'}
         </p>
       </div>
       
@@ -60,7 +60,7 @@ export default async function PsychDashboardPage() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground mb-0.5">Total Evaluations</p>
+              <p className="text-xs text-muted-foreground mb-0.5">All evaluations</p>
               <p className="font-mono data-numeric text-2xl font-bold text-foreground">{evaluationCount}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-psych/10 flex items-center justify-center">
@@ -74,7 +74,7 @@ export default async function PsychDashboardPage() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground mb-0.5">Recent (7 days)</p>
+              <p className="text-xs text-muted-foreground mb-0.5">Added this week</p>
               <p className="font-mono data-numeric text-2xl font-bold text-foreground">{recentCount}</p>
             </div>
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -88,10 +88,10 @@ export default async function PsychDashboardPage() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground mb-0.5">Actions</p>
+              <p className="text-xs text-muted-foreground mb-0.5">Get going</p>
               <div className="flex gap-2 mt-1">
                 <Link href="/psych/new-evaluation">
-                  <Button className="text-sm py-1.5 h-auto">+ New Evaluation</Button>
+                  <Button className="text-sm py-1.5 h-auto">+ New evaluation</Button>
                 </Link>
                 <Link href="/psych/universal-categories">
                   <Button variant="secondary" className="text-sm py-1.5 h-auto">⚙ Categories</Button>
@@ -110,7 +110,7 @@ export default async function PsychDashboardPage() {
       {/* Evaluations List */}
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-lg font-semibold text-foreground">
-          Recent Evaluations
+          Recent evaluations
         </h2>
       </div>
 
@@ -122,13 +122,13 @@ export default async function PsychDashboardPage() {
             </svg>
           </div>
           <h3 className="font-display text-base font-semibold text-foreground mb-1">
-            No Evaluations Yet
+            No evaluations yet
           </h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Get started by creating your first psychoeducational evaluation
+            Start a new evaluation and its scores will show up here.
           </p>
           <Link href="/psych/new-evaluation">
-            <Button className="text-sm">Create Your First Evaluation</Button>
+            <Button className="text-sm">Start your first evaluation</Button>
           </Link>
         </Card>
       ) : (

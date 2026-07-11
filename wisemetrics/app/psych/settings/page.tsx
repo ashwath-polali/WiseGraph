@@ -31,7 +31,7 @@ export default async function PsychSettingsPage() {
           <aside className="w-full border-b border-border pb-4 md:w-56 md:border-b-0 md:border-r md:pb-0 md:pr-4">
             <h1 className="font-display text-lg font-semibold text-foreground">Settings</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              Customize your WiseMetrics account.
+              Manage your account.
             </p>
 
             <nav className="mt-4 space-y-1 text-xs text-muted-foreground">

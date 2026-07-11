@@ -50,7 +50,7 @@ export default async function PsychEvaluationPage(props: Props) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Evaluations
+            Back to evaluations
           </Link>
           
           <div className="flex items-start justify-between">
@@ -107,17 +107,17 @@ export default async function PsychEvaluationPage(props: Props) {
                 </svg>
               </div>
               <h2 className="text-2xl font-display font-bold text-foreground mb-3">
-                No Categories Yet
+                No categories yet
               </h2>
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                Set up assessment categories and subcategories to start tracking scores and visualizing this student's performance profile.
+                Add categories and subtests, then enter this student's scores to see their profile.
               </p>
               <Link href={`/psych/evaluations/${params.id}/configure`}>
                 <Button className="inline-flex items-center gap-2 px-6 py-3">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Configure Categories
+                  Configure categories
                 </Button>
               </Link>
             </div>
@@ -131,7 +131,7 @@ export default async function PsychEvaluationPage(props: Props) {
                   <div className="p-5 border-b border-border">
                     <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-psych" />
-                      Assessment Areas
+                      Assessment areas
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
                       {evaluation.categories.length} {evaluation.categories.length === 1 ? 'category' : 'categories'}
@@ -161,10 +161,10 @@ export default async function PsychEvaluationPage(props: Props) {
                           <svg className="w-5 h-5 text-psych" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                           </svg>
-                          Performance Profile
+                          Performance profile
                         </h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Standard score visualization across all assessment areas
+                          Standard scores across every assessment area, on one chart.
                         </p>
                       </div>
                       {/* ONLY VIEW MODE TOGGLE */}
@@ -187,7 +187,7 @@ export default async function PsychEvaluationPage(props: Props) {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                          Edit Scores
+                          Edit scores
                         </Button>
                       </Link>
                     )}
@@ -200,7 +200,7 @@ export default async function PsychEvaluationPage(props: Props) {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                           </svg>
-                          Configure Categories
+                          Configure categories
                         </Button>
                       </Link>
                     )}
@@ -222,7 +222,7 @@ export default async function PsychEvaluationPage(props: Props) {
                             {category.name}
                           </h4>
                           <p className="text-xs text-muted-foreground">
-                            {category.subcategories?.length || 0} subcategories
+                            {category.subcategories?.length || 0} subtests
                           </p>
                         </div>
                         <div className="text-right">
@@ -230,7 +230,7 @@ export default async function PsychEvaluationPage(props: Props) {
                             {Math.round(category.score)}
                           </div>
                           <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Standard Score
+                            Standard score
                           </div>
                         </div>
                       </div>

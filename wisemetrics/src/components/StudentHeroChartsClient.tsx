@@ -161,10 +161,11 @@ export function StudentHeroChartsClient({
       <header className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-foreground">
-            Performance vs class
+            {student.name} vs the class
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Comparison of {student.name}&apos;s scores against class averages.
+            Each spoke is a category. The filled shape is {student.name}; the
+            faint one is the class average.
           </p>
         </div>
 

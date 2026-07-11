@@ -28,20 +28,20 @@ export function SyncCategoriesButton({ evaluationId }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.error || "Failed to sync");
+        setMessage(data.error || "We couldn't sync. Please try again.");
         return;
       }
 
       if (data.added.categories === 0 && data.added.subcategories === 0) {
-        setMessage("Already up to date!");
+        setMessage("Already up to date.");
       } else {
         setMessage(
-          `Added ${data.added.categories} categories and ${data.added.subcategories} subcategories`
+          `Added ${data.added.categories} categories and ${data.added.subcategories} subskills.`
         );
         router.refresh();
       }
     } catch (error) {
-      setMessage("Error syncing categories");
+      setMessage("We couldn't sync. Please try again.");
     } finally {
       setSyncing(false);
       setTimeout(() => setMessage(null), 3000);
@@ -69,7 +69,7 @@ export function SyncCategoriesButton({ evaluationId }: Props) {
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
           />
         </svg>
-        {syncing ? "Syncing..." : "Sync Categories"}
+        {syncing ? "Syncing…" : "Sync categories"}
       </Button>
       <AnimatePresence>
         {message && (

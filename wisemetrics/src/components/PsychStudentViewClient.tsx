@@ -221,7 +221,7 @@ export function PsychStudentViewClient({
               })
             ) : (
               <p className="text-xs text-muted-foreground px-2 py-2">
-                No subtests
+                No subtests in this category yet.
               </p>
             )}
           </div>

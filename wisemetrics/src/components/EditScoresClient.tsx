@@ -166,7 +166,7 @@ export function EditScoresClient({ student }: Props) {
       {/* Selected category editor */}
       {!selectedCategory ? (
         <p className="text-xs text-muted-foreground">
-          No categories available for this student.
+          No categories set up for this student yet. Add some under Configure assessment.
         </p>
       ) : (
         <div className="space-y-3 text-xs text-muted-foreground">
@@ -191,7 +191,7 @@ export function EditScoresClient({ student }: Props) {
             </p>
             {(selectedCategory.subcategories ?? []).length === 0 ? (
               <p className="text-[11px] text-muted-foreground">
-                No subskills recorded for this category yet.
+                No subskills in this category yet.
               </p>
             ) : (
               <div className="space-y-2">
@@ -235,7 +235,7 @@ export function EditScoresClient({ student }: Props) {
 
       <div className="flex justify-end">
         <Button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save all"}
+          {saving ? "Saving…" : "Save all"}
         </Button>
       </div>
     </form>

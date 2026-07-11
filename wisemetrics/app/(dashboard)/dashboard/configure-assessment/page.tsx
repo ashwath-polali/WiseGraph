@@ -42,7 +42,7 @@ export default async function ConfigureAssessmentPage({
         <Card className="space-y-4 p-6">
           <h1 className="text-xl font-semibold text-foreground">Configure assessment</h1>
           <p className="text-sm text-muted-foreground">
-            Before you can configure categories and subskills, create a class.
+            Create a class first, then you can set up its categories and subskills.
           </p>
           <CreateFirstClassButton />
           <Link href="/dashboard" className="text-xs text-primary transition-colors hover:text-primary/80">
@@ -88,7 +88,7 @@ export default async function ConfigureAssessmentPage({
         <Card className="p-6">
           <h1 className="text-xl font-semibold text-foreground">Configure assessment</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Selected class could not be loaded.
+            We couldn&apos;t load that class. Head back to the dashboard and try again.
           </p>
           <Link href="/dashboard" className="text-xs text-primary transition-colors hover:text-primary/80">
             Back to dashboard

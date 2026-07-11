@@ -88,7 +88,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
   async function handleDelete(id: string, name: string) {
     if (
       !window.confirm(
-        `Delete ${name}? This will remove all of their scores in this class.`
+        `Delete ${name}? This removes all of their scores in this class.`
       )
     ) {
       return;
@@ -272,8 +272,7 @@ export function ManageStudentsClient({ classId, initialStudents }: Props) {
                     colSpan={4}
                     className="px-5 py-6 text-center text-xs text-muted-foreground"
                   >
-                    No students yet. Use the form above to add your high school
-                    roster.
+                    No students yet. Add your first from the form above.
                   </td>
                 </tr>
               )}

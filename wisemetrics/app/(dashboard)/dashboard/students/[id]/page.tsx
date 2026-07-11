@@ -178,8 +178,7 @@ export default async function StudentDetailPage(props: Props) {
             Category drill-down
           </h2>
           <p className="text-xs text-muted-foreground">
-            Explore subskills for each category to see decoding, fluency, and
-            comprehension patterns.
+            Pick a category to see the subskills underneath it.
           </p>
           <CategoryDrillDownClient student={student} />
         </Card>
@@ -190,8 +189,7 @@ export default async function StudentDetailPage(props: Props) {
         <Card className="p-4 space-y-2">
           <h2 className="text-sm font-medium text-foreground">Snapshot</h2>
           <p className="text-xs text-muted-foreground">
-            Quick view of {student.name}&apos;s overall performance relative to
-            class expectations.
+            How {student.name} is doing next to the class, at a glance.
           </p>
           <div className="mt-2 space-y-1 text-xs text-muted-foreground">
             <div className="flex justify-between">
@@ -213,8 +211,8 @@ export default async function StudentDetailPage(props: Props) {
             Categories & subskills
           </h2>
           <p className="text-xs text-muted-foreground">
-            Compare this student&apos;s scores to class averages for each
-            category and subskill.
+            {student.name}&apos;s scores next to the class average, category by
+            category.
           </p>
 
           <div className="space-y-2 text-xs text-muted-foreground">
@@ -293,7 +291,7 @@ export default async function StudentDetailPage(props: Props) {
 
             {categoryComparisons.length === 0 && (
               <p className="text-[11px] text-muted-foreground">
-                No category scores available yet for this student.
+                No category scores for this student yet.
               </p>
             )}
           </div>

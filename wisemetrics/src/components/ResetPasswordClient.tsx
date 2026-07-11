@@ -33,7 +33,7 @@ export function ResetPasswordClient({ initialEmail }: { initialEmail: string }) 
         return;
       }
 
-      setMessage("Reset link sent. Check your email.");
+      setMessage("Reset link sent. Check your inbox.");
     } finally {
       setSending(false);
     }

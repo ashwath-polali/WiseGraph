@@ -77,7 +77,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
   }
 
   async function handleSwitchMode() {
-    if (!confirm(`Switch to ${accountType === 'psychologist' ? 'Teacher' : 'Psychologist'} mode? You'll be redirected.`)) {
+    if (!confirm(`Switch to ${accountType === 'psychologist' ? 'Teacher' : 'Psychologist'} mode? We'll take you to that portal.`)) {
       return;
     }
 
@@ -96,18 +96,18 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
       router.push(redirectUrl);
     } catch (err) {
       console.error('Error switching mode:', err);
-      alert('Failed to switch mode. Please try again.');
+      alert("We couldn't switch modes. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDeleteAccount() {
-    if (!confirm('Are you absolutely sure? This will permanently delete your account and all associated data. This cannot be undone.')) {
+    if (!confirm('Delete your account? This permanently removes your classes, students, and scores. There is no undo.')) {
       return;
     }
 
-    if (!confirm('This action cannot be reversed.')) {
+    if (!confirm('Last check — this cannot be reversed.')) {
       return;
     }
 
@@ -123,7 +123,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
       router.push('/login');
     } catch (err) {
       console.error('Error deleting account:', err);
-      alert('Failed to delete account. Please try again.');
+      alert("We couldn't delete your account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -238,7 +238,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
           )}
           {status === 'error' && (
             <p className="text-xs text-destructive">
-              Could not save settings. Please try again.
+              We couldn&apos;t save your settings. Please try again.
             </p>
           )}
         </div>
@@ -278,7 +278,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
                   onClick={handleSwitchMode}
                   disabled={loading}
                 >
-                  {loading ? 'Switching...' : 'Switch'}
+                  {loading ? 'Switching…' : 'Switch'}
                 </Button>
               </div>
 
@@ -296,7 +296,7 @@ export function SettingsClient({ teacher, classes, accountType, teacherId }: Pro
                   onClick={handleDeleteAccount}
                   disabled={loading}
                 >
-                  {loading ? 'Deleting...' : 'Delete'}
+                  {loading ? 'Deleting…' : 'Delete'}
                 </Button>
               </div>
             </div>

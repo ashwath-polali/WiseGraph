@@ -46,7 +46,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
     try {
       const validCategories = categories.filter((c) => c.name.trim());
       if (validCategories.length === 0) {
-        setError('Add at least one category');
+        setError('Add at least one category before saving.');
         setLoading(false);
         return;
       }
@@ -63,7 +63,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError('Failed to save');
+      setError("We couldn't save your categories. Try again.");
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
 
   function deleteCategory(id: string) {
     if (categories.length === 1) {
-      setError('Must have at least one category');
+      setError('Keep at least one category.');
       return;
     }
     setCategories(categories.filter((c) => c.id !== id));
@@ -215,7 +215,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
               onClick={() => addSubcategory(category.id)}
               className="ml-2 px-0 text-psych"
             >
-              + Add Subtest
+              + Add subtest
             </Button>
           </motion.div>
         ))}
@@ -228,7 +228,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
         onClick={addCategory}
         className="px-0 text-muted-foreground hover:text-foreground"
       >
-        + Add Category
+        + Add category
       </Button>
 
       {error && (
@@ -239,7 +239,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
 
       {success && (
         <div className="text-[color:var(--chart-2)] text-sm bg-[color:var(--chart-2)]/10 border border-[color:var(--chart-2)]/30 rounded-lg p-3">
-          Saved successfully!
+          Categories saved. New evaluations will use them.
         </div>
       )}
 
@@ -249,7 +249,7 @@ export function UniversalTemplateClient({ teacherId }: Props) {
         size="lg"
         className="w-full"
       >
-        {loading ? 'Saving...' : 'Save Categories'}
+        {loading ? 'Saving…' : 'Save categories'}
       </Button>
     </form>
   );

@@ -40,7 +40,7 @@ export default function SignupPage() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('No user returned');
+      if (!authData.user) throw new Error('We couldn\'t create your account. Try again in a moment.');
 
       // 2. Create Teacher record with ORIGINAL email (can have duplicates)
       const res = await fetch('/api/teacher', {
@@ -55,7 +55,7 @@ export default function SignupPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to create account');
+        throw new Error(errorData.error || 'We couldn\'t finish setting up your account. Try again in a moment.');
       }
 
       // 3. Route based on account type
@@ -108,7 +108,7 @@ export default function SignupPage() {
             Who's this account for?
           </h1>
           <p className="mt-2 max-w-md text-[15px] text-muted-foreground">
-            WiseGraph shapes itself around how you work with students.
+            Pick the one that matches how you work with students. It sets up the right portal.
           </p>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2">
@@ -243,7 +243,7 @@ export default function SignupPage() {
           Create your account.
         </h1>
         <p className="mt-2 text-[15px] text-muted-foreground">
-          {accountType === 'teacher' ? 'Teacher' : 'School psychologist'} on WiseGraph.
+          Setting up a {accountType === 'teacher' ? 'teacher' : 'school psychologist'} account.
         </p>
 
         <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-[0_1px_2px_oklch(0.245_0.015_75/0.05),0_16px_40px_-20px_oklch(0.245_0.015_75/0.18)]">
@@ -254,7 +254,7 @@ export default function SignupPage() {
               </label>
               <Input
                 type="text"
-                placeholder="Enter your full name"
+                placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -273,7 +273,7 @@ export default function SignupPage() {
                 required
               />
               <p className="mt-1.5 text-xs text-muted-foreground">
-                The same email can hold both account types.
+                One email works for both a teacher and a psychologist account.
               </p>
             </div>
 

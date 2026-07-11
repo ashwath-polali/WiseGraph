@@ -38,11 +38,11 @@ export default async function ConfigureEvaluationPage(props: Props) {
         href={`/psych/evaluations/${params.id}`}
         className="text-muted-foreground hover:text-psych text-sm mb-4 inline-block transition-colors"
       >
-        ← Back to Evaluation
+        ← Back to evaluation
       </Link>
 
       <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-        Configure Assessment
+        Configure assessment
       </h1>
       <p className="text-muted-foreground mb-8">
         {classData.name}

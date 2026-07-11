@@ -30,7 +30,7 @@ export default async function ManageStudentsPage({
         <Card className="p-6">
           <h1 className="text-xl font-semibold text-foreground">Manage students</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            No classes yet. Create a class first.
+            You don&apos;t have a class yet. Create one first, then come back to add students.
           </p>
           <Link
             href="/dashboard"
@@ -64,7 +64,7 @@ export default async function ManageStudentsPage({
         <Card className="p-6">
           <h1 className="text-xl font-semibold text-foreground">Manage students</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Selected class could not be loaded.
+            We couldn&apos;t load that class. Head back to the dashboard and try again.
           </p>
           <Link
             href="/dashboard"

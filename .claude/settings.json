@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "mcp__cortex__get_briefing",
-      "mcp__playwright__browser_navigate"
+      "mcp__playwright__browser_navigate",
+      "Skill(humanizer)",
+      "Skill(humanizer:*)"
     ]
   }
 }

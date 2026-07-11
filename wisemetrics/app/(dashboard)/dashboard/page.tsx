@@ -13,6 +13,7 @@ import { ClassSelectorClient } from "@/components/ClassSelectorClient";
 import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
 import { DeleteClassButton } from "@/components/DeleteClassButton";
 import { ClassOverviewClient } from "@/components/ClassOverviewClient";
+import { RosterList } from "@/components/RosterList";
 
 type DashboardPageProps = {
   searchParams: Promise<{ classId?: string }>;
@@ -45,11 +46,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <Card className="w-full max-w-xl space-y-6 p-8">
           <div>
             <h1 className="font-display text-2xl font-medium text-foreground">
-              Welcome to WiseGraph.
+              Let&apos;s set up your first class.
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Create your first class to start tracking performance by category
-              and subskill.
+              Add a class, drop in your roster, and you can start scoring
+              students by category and subskill.
             </p>
           </div>
           <CreateFirstClassButton />
@@ -90,8 +91,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <Card className="w-full max-w-md space-y-3 p-6">
           <h1 className="font-display text-xl font-medium text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            Selected class could not be loaded. Try choosing a different class
-            or refreshing the page.
+            We couldn&apos;t load that class. Pick another one, or refresh the
+            page.
           </p>
           <Link href="/dashboard" className="text-sm font-medium text-primary hover:text-primary/80">
             Reload dashboard
@@ -158,7 +159,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   </span>
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Open a student for detailed charts and subskills.
+                  Open a student to see their charts and subskill breakdown.
                 </p>
               </div>
               <Link
@@ -175,52 +176,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <div className="flex-1 overflow-y-auto">
               {cls.students.length === 0 ? (
                 <div className="flex h-full items-center justify-center px-4 py-10 text-sm text-muted-foreground">
-                  No students yet. Use “Manage” to add your roster.
+                  No students yet. Add your first from Manage.
                 </div>
               ) : (
-                <ul className="divide-y divide-border/70">
-                  {cls.students.map((student) => (
-                    <li key={student.id} className="group">
-                      <div className="flex items-center justify-between gap-2 px-5 py-2.5 transition-colors duration-150 hover:bg-accent/40">
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          <Link
-                            href={`/dashboard/students/${student.id}?classId=${encodeURIComponent(
-                              cls.id,
-                            )}`}
-                            className="min-w-0"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-[13px] font-medium text-foreground">
-                                {student.name}
-                              </p>
-                              <p className="text-[11px] text-muted-foreground">
-                                Grade {student.gradeLevel}
-                              </p>
-                            </div>
-                          </Link>
-                          <Link
-                            href={`/dashboard/students/${student.id}/edit-scores`}
-                            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity duration-150 group-hover:opacity-100 hover:bg-muted hover:text-foreground focus-visible:opacity-100"
-                            aria-label={`Edit scores for ${student.name}`}
-                          >
-                            <svg viewBox="0 0 16 16" className="h-3 w-3" aria-hidden="true">
-                              <path
-                                d="M11.8 2.2a1 1 0 0 1 1.4 1.4l-7.2 7.2L4 11.5l.7-2.1 7.1-7.2zM3 6.5v6h6l2-2H5a1 1 0 0 1-1-1V6.5z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </Link>
-                        </div>
-                        <span
-                          className="shrink-0 rounded-md border border-border bg-muted/60 px-2 py-0.5 font-mono text-xs font-medium text-foreground"
-                          data-numeric
-                        >
-                          {student.overallScore}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <RosterList students={cls.students} classId={cls.id} />
               )}
             </div>
           </Card>

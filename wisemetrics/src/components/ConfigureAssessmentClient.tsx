@@ -108,7 +108,7 @@ export function ConfigureAssessmentClient({
 
   async function handleDeleteCategory(id: string, name: string) {
     const ok = window.confirm(
-      `Are you sure you want to delete the category "${name}"? This will also remove all of its subskills and scores.`
+      `Delete the "${name}" category? This also removes its subskills and every score under it.`
     );
     if (!ok) return;
 
@@ -126,7 +126,7 @@ export function ConfigureAssessmentClient({
 
   async function handleDeleteSubcategory(id: string, name: string) {
     const ok = window.confirm(
-      `Delete subskill "${name}"? This will remove its scores for all students.`
+      `Delete the "${name}" subskill? This removes its scores for every student.`
     );
     if (!ok) return;
 
@@ -311,7 +311,7 @@ export function ConfigureAssessmentClient({
 
         {categories.length === 0 && (
           <p className="text-xs text-muted-foreground">
-            No categories yet. Add at least one to configure assessments.
+            No categories yet. Add your first one above to start scoring.
           </p>
         )}
       </div>

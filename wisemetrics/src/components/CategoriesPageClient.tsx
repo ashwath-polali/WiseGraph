@@ -41,7 +41,7 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              Universal Categories
+              Universal categories
             </div>
           </button>
 
@@ -57,7 +57,7 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              Custom Profiles
+              Custom profiles
             </div>
             {customEvaluations.length > 0 && (
               <span className={`text-xs block mt-1 ${
@@ -75,8 +75,8 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
         {activeTab === 'universal' ? (
           <div>
             <div className="mb-6">
-              <h1 className="font-display text-2xl font-bold text-foreground mb-1">Universal Categories</h1>
-              <p className="text-sm text-muted-foreground">Edit the default assessment framework</p>
+              <h1 className="font-display text-2xl font-bold text-foreground mb-1">Universal categories</h1>
+              <p className="text-sm text-muted-foreground">The default set of categories every new evaluation starts from.</p>
             </div>
             <Card className="p-6">
               <UniversalTemplateClient teacherId={teacherId} />
@@ -85,8 +85,8 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
         ) : (
           <div>
             <div className="mb-6">
-              <h1 className="font-display text-2xl font-bold text-foreground mb-1">Custom Profiles</h1>
-              <p className="text-sm text-muted-foreground">Manage unique assessment frameworks for each student</p>
+              <h1 className="font-display text-2xl font-bold text-foreground mb-1">Custom profiles</h1>
+              <p className="text-sm text-muted-foreground">Categories built for one student, separate from your universal set.</p>
             </div>
 
             {customEvaluations.length === 0 ? (
@@ -97,13 +97,13 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
                   </svg>
                 </div>
                 <h3 className="text-base font-semibold text-foreground mb-1">
-                  No Custom Profiles Yet
+                  No custom profiles yet
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Create a new evaluation with "Custom Profile" to get started
+                  Start a new evaluation and pick "Custom profile" to build categories for one student.
                 </p>
                 <Link href="/psych/new-evaluation">
-                  <Button className="text-sm">Create Evaluation</Button>
+                  <Button className="text-sm">New evaluation</Button>
                 </Link>
               </Card>
             ) : (
@@ -123,7 +123,7 @@ export function CategoriesPageClient({ teacherId, customEvaluations }: Props) {
                         <div className="group flex items-center gap-3 p-3 rounded-lg hover:bg-accent/40 transition-colors duration-150 border border-transparent hover:border-[color:var(--chart-3)]/50">
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-medium text-foreground truncate group-hover:text-[color:var(--chart-3)] transition-colors">
-                              {evaluation.student?.name || 'Unnamed'}
+                              {evaluation.student?.name || 'Unnamed student'}
                             </h3>
                             <p className="text-xs text-muted-foreground">
                               Grade {evaluation.gradeLevel}
