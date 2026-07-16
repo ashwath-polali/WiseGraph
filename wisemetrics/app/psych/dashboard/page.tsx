@@ -44,45 +44,51 @@ export default async function PsychDashboardPage() {
   ).length;
   
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6">
-      {/* Header: title + primary actions */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto max-w-7xl px-6 py-10">
+      {/* Masthead */}
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h1 className="font-display text-2xl font-medium text-foreground mb-1">
-            {teacher?.name ? `Welcome back, ${teacher.name.split(' ')[0]}` : 'Dashboard'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {teacher?.school || 'Your evaluations, ready for the next conference.'}
+          <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
+            {teacher?.school || 'Psychoeducational evaluations'}
           </p>
+          <h1 className="mt-2 font-display text-5xl font-semibold tracking-[-0.02em] text-foreground">
+            {teacher?.name
+              ? `Welcome back, ${teacher.name.split(' ')[0].replace(/\.$/, '')}.`
+              : 'Your evaluations.'}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">Every profile, ready for the next conference.</p>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/psych/universal-categories">
-            <Button variant="outline" size="sm">Categories</Button>
+            <Button variant="outline">Categories</Button>
           </Link>
           <Link href="/psych/new-evaluation">
-            <Button size="sm">New evaluation</Button>
+            <Button className="inline-flex items-center gap-1.5">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              New evaluation
+            </Button>
           </Link>
         </div>
       </div>
 
-      {/* One condensed stat strip, not a row of cards */}
-      <div className="mb-6 inline-flex items-center gap-5 rounded-xl border border-border bg-card px-5 py-3">
+      {/* Stat strip */}
+      <div className="mb-6 inline-flex items-center gap-6 rounded-2xl border border-border bg-card px-6 py-4 shadow-sm">
         <div className="flex items-baseline gap-2">
-          <span className="font-mono data-numeric text-xl font-semibold text-foreground">{evaluationCount}</span>
+          <span className="font-mono text-3xl font-semibold text-foreground" data-numeric>{evaluationCount}</span>
           <span className="text-sm text-muted-foreground">evaluations</span>
         </div>
-        <div className="h-8 w-px bg-border" />
+        <div className="h-9 w-px bg-border" />
         <div className="flex items-baseline gap-2">
-          <span className="font-mono data-numeric text-xl font-semibold text-foreground">{recentCount}</span>
+          <span className="font-mono text-3xl font-semibold text-foreground" data-numeric>{recentCount}</span>
           <span className="text-sm text-muted-foreground">added this week</span>
         </div>
       </div>
 
-      {/* Evaluations List */}
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Recent evaluations
-        </h2>
+      {/* Evaluations */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-xl font-semibold text-foreground">Recent evaluations</h2>
       </div>
 
       {evaluations.length === 0 ? (

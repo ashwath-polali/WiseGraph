@@ -2,10 +2,12 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/ui/Card';
+import { motion } from 'motion/react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
+
+const GRADES = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 export default function NewEvaluationPage() {
   const router = useRouter();
@@ -151,127 +153,123 @@ export default function NewEvaluationPage() {
     }
   }
   
+  const OPTIONS = [
+    {
+      universal: true,
+      title: 'Your categories',
+      desc: 'Use your universal set, so every evaluation lines up the same way.',
+    },
+    {
+      universal: false,
+      title: 'Custom profile',
+      desc: "Build categories just for this student. You'll add them right after.",
+    },
+  ];
+
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6">
-      <Card className="p-8">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">New evaluation</h1>
-        <p className="text-sm text-muted-foreground mb-6">Set up a student and their assessment categories.</p>
+    <div className="mx-auto max-w-2xl px-6 py-14">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <Link
+          href="/psych/dashboard"
+          className="group mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-psych"
+        >
+          <svg className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Dashboard
+        </Link>
 
-        <form onSubmit={handleCreate} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Student name *
-            </label>
-            <Input
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              placeholder="e.g., John Doe"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Grade level *
-            </label>
-            <Input
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-              placeholder="e.g., 9"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-3">
-              Assessment categories
-            </label>
+        <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">New evaluation</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-[-0.02em] text-foreground">Set up a profile.</h1>
+        <p className="mt-2 text-sm text-muted-foreground">A student, a grade, and the areas you&apos;ll score.</p>
 
-            <div className="space-y-3">
-              {/* Your Categories */}
-              <label className="group block cursor-pointer">
-                <div className="relative p-4 rounded-lg border-2 border-border hover:border-psych transition-colors bg-muted/40 hover:bg-muted/70">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="type"
-                      checked={useUniversal}
-                      onChange={() => setUseUniversal(true)}
-                      className="w-4 h-4 mt-1 flex-shrink-0 accent-psych"
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground group-hover:text-psych transition-colors">
-                        Your categories
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Use your universal set, so every evaluation lines up the same way.
-                      </p>
+        <form onSubmit={handleCreate} className="mt-9 space-y-7">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground">Student name</label>
+            <Input value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="e.g., Jordan Vega" autoFocus required />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground">Grade level</label>
+            <div className="flex flex-wrap gap-1.5">
+              {GRADES.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setGradeLevel(g)}
+                  className={`h-9 min-w-9 rounded-lg border px-2.5 text-sm font-medium transition-colors ${
+                    gradeLevel === g
+                      ? 'border-psych bg-psych text-psych-foreground'
+                      : 'border-border bg-card text-muted-foreground hover:border-psych/40 hover:text-foreground'
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-3 block text-sm font-medium text-foreground">Assessment categories</label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {OPTIONS.map((opt) => {
+                const selected = useUniversal === opt.universal;
+                return (
+                  <button
+                    key={opt.title}
+                    type="button"
+                    onClick={() => setUseUniversal(opt.universal)}
+                    className={`relative rounded-xl border p-4 text-left transition-all ${
+                      selected ? 'border-psych bg-psych/5 shadow-sm' : 'border-border bg-card hover:border-psych/40'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className={`font-semibold ${selected ? 'text-psych' : 'text-foreground'}`}>{opt.title}</p>
+                      <span
+                        className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
+                          selected ? 'border-psych bg-psych text-psych-foreground' : 'border-border'
+                        }`}
+                      >
+                        {selected && (
+                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </span>
                     </div>
-                    <svg className="w-5 h-5 text-psych/0 group-hover:text-psych transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                    </svg>
-                  </div>
-                </div>
-              </label>
-
-              {/* Custom Profile */}
-              <label className="group block cursor-pointer">
-                <div className="relative p-4 rounded-lg border-2 border-border hover:border-primary transition-colors bg-muted/40 hover:bg-muted/70">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="radio"
-                      name="type"
-                      checked={!useUniversal}
-                      onChange={() => setUseUniversal(false)}
-                      className="w-4 h-4 mt-1 flex-shrink-0 accent-primary"
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                        Custom profile
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Build categories just for this student. You'll add them after this step.
-                      </p>
-                    </div>
-                    <svg className="w-5 h-5 text-primary/0 group-hover:text-primary transition-colors flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                    </svg>
-                  </div>
-                </div>
-              </label>
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{opt.desc}</p>
+                  </button>
+                );
+              })}
             </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              {useUniversal ? (
+                <>
+                  Uses your universal categories.{' '}
+                  <Link href="/psych/universal-categories" className="font-medium text-psych underline-offset-2 hover:underline">
+                    Edit them
+                  </Link>
+                  .
+                </>
+              ) : (
+                "You'll add categories from the Configure button once it's created."
+              )}
+            </p>
           </div>
-
-          {useUniversal && (
-            <div className="p-3 bg-psych/10 border border-psych/30 rounded-lg">
-              <p className="text-sm text-psych">
-                This uses your universal categories.{' '}
-                <Link href="/psych/universal-categories" className="underline hover:opacity-80 font-semibold">
-                  Edit categories
-                </Link>
-              </p>
-            </div>
-          )}
-
-          {!useUniversal && (
-            <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <p className="text-sm text-primary">
-                Once this is created, you'll add categories from the Configure button.
-              </p>
-            </div>
-          )}
 
           {error && (
-            <div className="text-destructive text-sm bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-              {error}
-            </div>
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
-          
+
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? 'Creating…' : 'Create evaluation'}
           </Button>
         </form>
-      </Card>
+      </motion.div>
     </div>
   );
 }
