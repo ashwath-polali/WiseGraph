@@ -1170,15 +1170,17 @@ function getCategoryColor(index: number): { fill: string; stroke: string } {
   // Category wedges cycle the categorical chart tokens (indigo, moss, ochre,
   // slate-blue, violet) with terracotta --chart-4 reserved for the student
   // series. Tokens resolve per-theme and survive PNG/PDF export.
+  // srgb mix (not oklch) so the tint stays clean and light — mixing with
+  // transparent in oklch premultiplies toward black and reads muddy/heavy.
   const colors = [
-    { fill: 'color-mix(in oklch, var(--chart-1) 20%, transparent)', stroke: 'var(--chart-1)' },
-    { fill: 'color-mix(in oklch, var(--chart-2) 20%, transparent)', stroke: 'var(--chart-2)' },
-    { fill: 'color-mix(in oklch, var(--chart-3) 20%, transparent)', stroke: 'var(--chart-3)' },
-    { fill: 'color-mix(in oklch, var(--chart-5) 20%, transparent)', stroke: 'var(--chart-5)' },
-    { fill: 'color-mix(in oklch, var(--chart-6) 20%, transparent)', stroke: 'var(--chart-6)' },
-    { fill: 'color-mix(in oklch, var(--chart-1) 20%, transparent)', stroke: 'var(--chart-1)' },
-    { fill: 'color-mix(in oklch, var(--chart-2) 20%, transparent)', stroke: 'var(--chart-2)' },
-    { fill: 'color-mix(in oklch, var(--chart-3) 20%, transparent)', stroke: 'var(--chart-3)' },
+    { fill: 'color-mix(in srgb, var(--chart-1) 13%, transparent)', stroke: 'var(--chart-1)' },
+    { fill: 'color-mix(in srgb, var(--chart-2) 13%, transparent)', stroke: 'var(--chart-2)' },
+    { fill: 'color-mix(in srgb, var(--chart-3) 13%, transparent)', stroke: 'var(--chart-3)' },
+    { fill: 'color-mix(in srgb, var(--chart-5) 13%, transparent)', stroke: 'var(--chart-5)' },
+    { fill: 'color-mix(in srgb, var(--chart-6) 13%, transparent)', stroke: 'var(--chart-6)' },
+    { fill: 'color-mix(in srgb, var(--chart-1) 13%, transparent)', stroke: 'var(--chart-1)' },
+    { fill: 'color-mix(in srgb, var(--chart-2) 13%, transparent)', stroke: 'var(--chart-2)' },
+    { fill: 'color-mix(in srgb, var(--chart-3) 13%, transparent)', stroke: 'var(--chart-3)' },
   ];
   return colors[index % colors.length];
 }
