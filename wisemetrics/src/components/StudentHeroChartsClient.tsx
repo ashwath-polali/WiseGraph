@@ -3,13 +3,9 @@
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ClassScoreSummary, StudentScoreSummary } from "@/types/scores";
-import { clampScore } from "@/lib/chartScaling";
-import { StudentBellCurveChart } from "@/components/charts/StudentBellCurveChart";
 import { StudentConcentricPieChart } from "@/components/charts/StudentConcentricPieChart";
-import {
-  StudentPolarPremium,
-  type PremiumCategory,
-} from "@/components/charts/student/StudentPolarPremium";
+import { StudentPolarInstrument } from "@/components/charts/student/StudentPolarInstrument";
+import { StudentBellInstrument } from "@/components/charts/student/StudentBellInstrument";
 import { ExportButtons } from "@/components/ExportButtons";
 
 type ViewMode = "polar" | "bell" | "concentric";
@@ -26,39 +22,24 @@ interface Props {
   defaultView?: ViewMode;
 }
 
-export function StudentHeroChartsClient({
-  student,
-  cls,
-  defaultView = "polar",
-}: Props) {
+export function StudentHeroChartsClient({ student, cls, defaultView = "polar" }: Props) {
   const [view, setView] = useState<ViewMode>(defaultView);
   const chartRef = useRef<HTMLDivElement | null>(null);
 
-  const premiumCategories: PremiumCategory[] = useMemo(
-    () =>
-      student.categories.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        score: clampScore(cat.score),
-        subtests: (cat.subcategories ?? []).map((s) => ({
-          id: s.id,
-          name: s.name,
-          score: clampScore(s.score),
-        })),
-      })),
-    [student.categories],
+  // the instruments read an evaluation-shaped object (students[0] + categories);
+  // give them this one student's profile.
+  const evaluation: ClassScoreSummary = useMemo(
+    () => ({ ...cls, categories: student.categories, students: [student] }),
+    [cls, student],
   );
 
   return (
     <div className="space-y-4">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">
-            {student.name}&apos;s profile
-          </h2>
+          <h2 className="text-sm font-semibold text-foreground">{student.name}&apos;s profile</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            The outer ring is the overall score. Each wedge is a category at its
-            score, with its subtests traced inside.
+            The outer ring is the overall score. Each wedge is a category at its score, with its subtests traced inside.
           </p>
         </div>
 
@@ -70,9 +51,7 @@ export function StudentHeroChartsClient({
               onClick={() => setView(m.id)}
               className={
                 "relative rounded-md px-3 py-1 text-[11px] font-medium transition-colors duration-150 " +
-                (view === m.id
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground")
+                (view === m.id ? "text-foreground" : "text-muted-foreground hover:text-foreground")
               }
             >
               {view === m.id && (
@@ -88,7 +67,7 @@ export function StudentHeroChartsClient({
         </div>
       </header>
 
-      <div ref={chartRef} className="student-hero-chart h-[420px] rounded-lg">
+      <div ref={chartRef} className="student-hero-chart h-[460px] rounded-lg">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={view}
@@ -99,9 +78,7 @@ export function StudentHeroChartsClient({
             transition={{ duration: 0.15, ease: "easeOut" }}
           >
             {view === "bell" ? (
-              <div className="h-full">
-                <StudentBellCurveChart student={student} cls={cls} />
-              </div>
+              <StudentBellInstrument evaluation={evaluation} hideControls />
             ) : view === "concentric" ? (
               <div className="flex h-full items-center justify-center">
                 <div className="h-full w-full max-w-xl">
@@ -110,11 +87,8 @@ export function StudentHeroChartsClient({
               </div>
             ) : (
               <div className="flex h-full items-center justify-center">
-                <div className="h-full w-full max-w-md">
-                  <StudentPolarPremium
-                    categories={premiumCategories}
-                    overallScore={clampScore(student.overallScore)}
-                  />
+                <div className="aspect-square h-full max-w-full">
+                  <StudentPolarInstrument evaluation={evaluation} hideControls />
                 </div>
               </div>
             )}
@@ -122,11 +96,7 @@ export function StudentHeroChartsClient({
         </AnimatePresence>
       </div>
 
-      <ExportButtons
-        studentName={student.name}
-        view={view}
-        targetRef={chartRef}
-      />
+      <ExportButtons studentName={student.name} view={view} targetRef={chartRef} />
     </div>
   );
 }
