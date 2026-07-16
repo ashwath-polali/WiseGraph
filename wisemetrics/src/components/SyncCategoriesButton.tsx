@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/Button";
 
 interface Props {
   evaluationId: string;
+  /** icon-only, for tight control bars */
+  compact?: boolean;
 }
 
-export function SyncCategoriesButton({ evaluationId }: Props) {
+export function SyncCategoriesButton({ evaluationId, compact = false }: Props) {
   const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -48,29 +50,41 @@ export function SyncCategoriesButton({ evaluationId }: Props) {
     }
   }
 
+  const icon = (
+    <svg
+      className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+      />
+    </svg>
+  );
+
   return (
     <div className="relative">
-      <Button
-        onClick={handleSync}
-        disabled={syncing}
-        variant="secondary"
-        className="inline-flex items-center gap-2"
-      >
-        <svg
-          className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      {compact ? (
+        <button
+          type="button"
+          onClick={handleSync}
+          disabled={syncing}
+          title="Sync categories"
+          aria-label="Sync categories"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-        {syncing ? "Syncing…" : "Sync categories"}
-      </Button>
+          {icon}
+        </button>
+      ) : (
+        <Button onClick={handleSync} disabled={syncing} variant="secondary" className="inline-flex items-center gap-2">
+          {icon}
+          {syncing ? "Syncing…" : "Sync categories"}
+        </Button>
+      )}
       <AnimatePresence>
         {message && (
           <motion.div

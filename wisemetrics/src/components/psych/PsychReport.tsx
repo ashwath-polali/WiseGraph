@@ -176,7 +176,7 @@ function ReportBody({ evaluation, student, overallScore, isUniversal, evaluation
             </svg>
             Evaluations
           </Link>
-          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-card/70 p-1.5 backdrop-blur-md">
+          <div className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border bg-card/70 p-1.5 backdrop-blur-md">
             <ViewModeToggle />
             <div className="h-5 w-px bg-border" />
             <button
@@ -187,6 +187,20 @@ function ReportBody({ evaluation, student, overallScore, isUniversal, evaluation
               Compare
             </button>
             <ExportChartButtons studentName={student?.name || evaluation.name} />
+            <div className="h-5 w-px bg-border" />
+            {student && (
+              <Link
+                href={`/psych/evaluations/${evaluationId}/edit-scores`}
+                title="Edit scores"
+                aria-label="Edit scores"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </Link>
+            )}
+            {isUniversal && <SyncCategoriesButton evaluationId={evaluationId} compact />}
           </div>
         </div>
 
