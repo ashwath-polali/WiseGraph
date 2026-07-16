@@ -1,5 +1,5 @@
 // Sign up a psychologist test account, save its session, and screenshot the
-// psych flow so fable-5 can iterate on the actual psych surface.
+// psych flow for local development and visual QA.
 //   node scripts/psych-setup.mjs
 import { chromium } from "playwright";
 import { existsSync, mkdirSync } from "fs";

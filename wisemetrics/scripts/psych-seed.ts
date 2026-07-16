@@ -1,6 +1,6 @@
-// Seed a realistic psych EVALUATION (a class owned by the psych test account,
-// one student, Wiseman-style categories + subtests + a comparison snapshot) so
-// fable-5 can see and iterate on the real psych "Performance profile" chart.
+// Seed a realistic psychoeducational evaluation (a class owned by the psych test
+// account: one student, standard categories + subtests + a comparison snapshot)
+// for local development and demos.
 //   npx tsx scripts/psych-seed.ts
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";

@@ -1,3 +1,7 @@
-# fable-5 / AI working context — local reference only, never committed
+# Local editor config and working notes — not part of the app
 /wisegraph-history/
 /.dev-server.log
+.claude/
+CLAUDE.md
+.mcp.json
+.screenshots/
