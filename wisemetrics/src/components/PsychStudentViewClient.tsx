@@ -27,10 +27,7 @@ export function PsychStudentViewClient({
   isUniversal,
   evaluationId,
 }: Props) {
-  const { comparisonSnapshotId } = useViewMode();
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    evaluation.categories[0]?.id || null
-  );
+  const { comparisonSnapshotId, selectedCategoryId, setSelectedCategoryId } = useViewMode();
   const [snapshotScores, setSnapshotScores] = useState<SnapshotScore[] | null>(null);
 
   // Extract category IDs for stable dependency array

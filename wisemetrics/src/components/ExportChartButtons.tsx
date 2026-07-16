@@ -34,6 +34,11 @@ export function ExportChartButtons({ studentName }: Props) {
         "text-anchor",
         "dominant-baseline",
         "color",
+        // gradient stops carry the wedge wash color as CSS var tokens; without
+        // inlining the resolved color, var(--chart-n) is unresolvable in the
+        // standalone exported SVG and the fills render transparent.
+        "stop-color",
+        "stop-opacity",
       ];
 
       stylesToCopy.forEach((prop) => {
@@ -47,9 +52,52 @@ export function ExportChartButtons({ studentName }: Props) {
     return svgClone;
   }
 
-  function normalizeExportSvg(svgClone: SVGElement) {
-    // Explicit overall background (matches canvas)
-    svgClone.style.backgroundColor = "#020617";
+  // Resolve any CSS color (oklch/lab tokens included) to concrete sRGB by
+  // painting one pixel and reading it back — the SVG-as-Image render path can't
+  // be trusted with wide-gamut color across browsers, and we never want a
+  // blank/black export.
+  function toSrgb(color: string, fallback: string): string {
+    try {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 1;
+      const ctx = cv.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return fallback;
+      ctx.fillStyle = fallback;
+      ctx.fillStyle = color; // invalid input silently keeps the fallback
+      ctx.fillRect(0, 0, 1, 1);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      return `rgb(${r}, ${g}, ${b})`;
+    } catch {
+      return fallback;
+    }
+  }
+
+  // The export canvas background follows the live theme: white paper in light,
+  // the warm near-black card in dark. Reads the --card token so it can never
+  // regress to a hardcoded dark slate the way the old export did.
+  function resolveExportBg(): string {
+    const raw = getComputedStyle(document.documentElement)
+      .getPropertyValue("--card")
+      .trim();
+    return toSrgb(raw || "#ffffff", "#ffffff");
+  }
+
+  // Export at the chart's own coordinate space (viewBox), not its on-screen
+  // pixel size — the chart can render at ~82vh, and a 2× capture of that would
+  // be a needlessly huge, oddly-scaled image. viewBox gives a stable, print-
+  // friendly resolution regardless of how large the chart is shown.
+  function exportSize(svg: SVGSVGElement): { width: number; height: number } {
+    const vb = svg.viewBox?.baseVal;
+    if (vb && vb.width > 0 && vb.height > 0) {
+      return { width: vb.width, height: vb.height };
+    }
+    const bbox = svg.getBoundingClientRect();
+    return { width: bbox.width, height: bbox.height };
+  }
+
+  function normalizeExportSvg(svgClone: SVGElement, bg: string) {
+    // Explicit overall background (matches canvas), theme-aware
+    svgClone.style.backgroundColor = bg;
     // Ensure the SVG itself does not inject a global fill
     svgClone.setAttribute("fill", "none");
   }
@@ -69,12 +117,11 @@ export function ExportChartButtons({ studentName }: Props) {
         return;
       }
 
+      const bg = resolveExportBg();
       const svgClone = inlineStyles(svg);
-      normalizeExportSvg(svgClone);
+      normalizeExportSvg(svgClone, bg);
 
-      const bbox = svg.getBoundingClientRect();
-      const width = bbox.width;
-      const height = bbox.height;
+      const { width, height } = exportSize(svg);
 
       svgClone.setAttribute("width", width.toString());
       svgClone.setAttribute("height", height.toString());
@@ -95,7 +142,7 @@ export function ExportChartButtons({ studentName }: Props) {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        ctx.fillStyle = "#020617";
+        ctx.fillStyle = bg;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.scale(2, 2);
@@ -146,12 +193,11 @@ export function ExportChartButtons({ studentName }: Props) {
         return;
       }
 
+      const bg = resolveExportBg();
       const svgClone = inlineStyles(svg);
-      normalizeExportSvg(svgClone);
+      normalizeExportSvg(svgClone, bg);
 
-      const bbox = svg.getBoundingClientRect();
-      const width = bbox.width;
-      const height = bbox.height;
+      const { width, height } = exportSize(svg);
 
       svgClone.setAttribute("width", width.toString());
       svgClone.setAttribute("height", height.toString());
@@ -172,7 +218,7 @@ export function ExportChartButtons({ studentName }: Props) {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        ctx.fillStyle = "#020617";
+        ctx.fillStyle = bg;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.scale(2, 2);

@@ -8,7 +8,10 @@ import dynamic from "next/dynamic";
 import { ComparisonToggle } from "@/components/ComparisonToggle";
 
 const PolarStudentChart = dynamic(
-  () => import("@/components/charts/PolarStudentChart").then(mod => ({ default: mod.PolarStudentChart })),
+  () =>
+    import("@/components/charts/student/StudentPolarInstrument").then(mod => ({
+      default: mod.StudentPolarInstrument,
+    })),
   { ssr: false }
 );
 
@@ -24,6 +27,8 @@ type ViewModeContextType = {
   setViewMode: (mode: ViewMode) => void;
   comparisonSnapshotId: string | null;
   setComparisonSnapshotId: (id: string | null) => void;
+  selectedCategoryId: string | null;
+  setSelectedCategoryId: (id: string | null) => void;
 };
 
 const ViewModeContext = createContext<ViewModeContextType | null>(null);
@@ -45,8 +50,18 @@ export function PsychEvaluationProvider({
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>("polar");
   const [comparisonSnapshotId, setComparisonSnapshotId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    evaluation.categories[0]?.id ?? null,
+  );
 
-  const contextValue = { viewMode, setViewMode, comparisonSnapshotId, setComparisonSnapshotId };
+  const contextValue = {
+    viewMode,
+    setViewMode,
+    comparisonSnapshotId,
+    setComparisonSnapshotId,
+    selectedCategoryId,
+    setSelectedCategoryId,
+  };
 
   return (
     <ViewModeContext.Provider value={contextValue}>
@@ -264,8 +279,8 @@ export function ChartDisplay({
 
   return (
     <>
-      {/* Main Chart - more vertical space in regular view */}
-      <div className="h-[700px]">
+      {/* Main Chart - fills the hero box the page provides */}
+      <div className="h-full w-full">
         {viewMode === "polar" ? (
           <PolarStudentChart
             evaluation={evaluation}
