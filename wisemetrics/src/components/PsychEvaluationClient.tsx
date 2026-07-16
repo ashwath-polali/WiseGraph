@@ -16,7 +16,10 @@ const PolarStudentChart = dynamic(
 );
 
 const EnhancedBellCurveChart = dynamic(
-  () => import("@/components/charts/EnhancedBellCurveChart").then(mod => ({ default: mod.EnhancedBellCurveChart })),
+  () =>
+    import("@/components/charts/student/StudentBellInstrument").then(mod => ({
+      default: mod.StudentBellInstrument,
+    })),
   { ssr: false }
 );
 
@@ -268,8 +271,9 @@ export function ChartDisplay({
               />
             ) : (
               <EnhancedBellCurveChart
-                cls={evaluation}
-                viewMode="bell"
+                evaluation={evaluation}
+                showFullNames={showFullNames}
+                onToggleNames={() => setShowFullNames(!showFullNames)}
                 comparisonSnapshotId={comparisonSnapshotId}
               />
             )}
@@ -294,10 +298,12 @@ export function ChartDisplay({
           />
         ) : (
           <EnhancedBellCurveChart
-            cls={evaluation}
-            viewMode="bell"
+            evaluation={evaluation}
+            showFullNames={showFullNames}
+            onToggleNames={() => setShowFullNames(!showFullNames)}
             onExpand={() => setIsExpanded(true)}
             comparisonSnapshotId={comparisonSnapshotId}
+            focusIndex={focusIndex}
           />
         )}
       </div>
