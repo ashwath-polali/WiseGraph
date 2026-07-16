@@ -128,6 +128,10 @@ type Props = {
   onToggleNames?: () => void;
   onExpand?: () => void;
   comparisonSnapshotId?: string | null;
+  /** externally drive the highlighted domain (scroll-driven tour). null = none. */
+  focusIndex?: number | null;
+  /** hide the chart's own control buttons (when the page supplies its own). */
+  hideControls?: boolean;
 };
 
 export function StudentPolarInstrument({
@@ -137,6 +141,8 @@ export function StudentPolarInstrument({
   onToggleNames,
   onExpand,
   comparisonSnapshotId,
+  focusIndex,
+  hideControls = false,
 }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
@@ -183,6 +189,13 @@ export function StudentPolarInstrument({
     setDrill(null);
     setSelected(null);
   }, [evaluation]);
+
+  // scroll-driven tour highlights a domain from outside (only when not drilled)
+  useEffect(() => {
+    if (focusIndex === undefined) return;
+    if (drill) return;
+    setHover(focusIndex);
+  }, [focusIndex, drill]);
 
   // Escape closes the detail panel (and exits drill if open)
   useEffect(() => {
@@ -721,8 +734,8 @@ export function StudentPolarInstrument({
         </svg>
         </div>
 
-        {/* hover readout (full view only) */}
-        {!drill && hover !== null && cats[hover] && (
+        {/* hover readout (full view, manual hover only — suppressed during a scroll tour) */}
+        {!drill && focusIndex == null && hover !== null && cats[hover] && (
           <div className="pointer-events-none absolute left-1/2 top-2 -translate-x-1/2 rounded-xl border border-border bg-popover/95 px-4 py-2.5 text-center shadow-lg backdrop-blur-sm">
             <div className="text-sm font-semibold text-foreground">{cats[hover].name}</div>
             <div className="mt-0.5 font-mono text-xs text-muted-foreground" data-numeric>
@@ -736,7 +749,7 @@ export function StudentPolarInstrument({
           <button
             type="button"
             onClick={exitDrill}
-            className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:text-foreground"
+            className="absolute left-3 top-16 z-20 inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:text-foreground"
           >
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -750,7 +763,7 @@ export function StudentPolarInstrument({
       </div>
 
       {/* controls */}
-      {(onToggleNames || onExpand) && (
+      {!hideControls && (onToggleNames || onExpand) && (
         <div className="mt-3 flex items-center justify-center gap-2">
           {onToggleNames && (
             <button
@@ -788,7 +801,7 @@ function DetailPanel({ item, onClose }: { item: SelectedItem; onClose: () => voi
       role="dialog"
       aria-modal="false"
       aria-label={`${item.name} details`}
-      className="absolute right-3 top-3 z-10 w-60 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur-md"
+      className="absolute right-3 top-16 z-10 w-60 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur-md"
     >
       <div className="flex items-start justify-between">
         <span

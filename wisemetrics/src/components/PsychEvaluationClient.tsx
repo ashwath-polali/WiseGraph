@@ -119,8 +119,10 @@ export function ComparisonToggleWrapper({ evaluationId }: { evaluationId: string
 
 export function ChartDisplay({
   evaluation,
+  focusIndex,
 }: {
   evaluation: ClassScoreSummary;
+  focusIndex?: number | null;
 }) {
   const { viewMode, comparisonSnapshotId } = useViewMode();
   const [showFullNames, setShowFullNames] = useState(false);
@@ -288,6 +290,7 @@ export function ChartDisplay({
             onToggleNames={() => setShowFullNames(!showFullNames)}
             onExpand={() => setIsExpanded(true)}
             comparisonSnapshotId={comparisonSnapshotId}
+            focusIndex={focusIndex}
           />
         ) : (
           <EnhancedBellCurveChart
