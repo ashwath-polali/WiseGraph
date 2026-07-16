@@ -98,6 +98,13 @@ export function StudentBellInstrument({
     evaluation.students[0]?.overallScore ??
     Math.round(cats.reduce((a, c) => a + c.score, 0) / Math.max(cats.length, 1));
 
+  // rank by score so labels near the crowded peak can stagger vertically
+  const catRank = useMemo(() => {
+    const m = new Map<string, number>();
+    [...cats].sort((a, b) => a.score - b.score).forEach((c, idx) => m.set(c.id, idx));
+    return m;
+  }, [cats]);
+
   useEffect(() => {
     if (!comparisonSnapshotId) return setSnapshot(null);
     let live = true;
@@ -112,8 +119,13 @@ export function StudentBellInstrument({
 
   useEffect(() => {
     if (focusIndex === undefined) return;
-    setHover(focusIndex);
-  }, [focusIndex]);
+    setHover(focusIndex != null && focusIndex >= 0 && focusIndex < cats.length ? focusIndex : null);
+  }, [focusIndex, cats.length]);
+
+  // categories can be reconfigured under us — drop any stale selection
+  useEffect(() => {
+    setSelected(null);
+  }, [evaluation]);
 
   // Escape closes the detail panel
   useEffect(() => {
@@ -256,7 +268,7 @@ export function StudentBellInstrument({
 
           {/* --- cursor scrubber (fills the area to the left = percentile) --- */}
           {scrub != null && (
-            <g style={{ pointerEvents: "none" }}>
+            <g data-export="hide" style={{ pointerEvents: "none" }}>
               <clipPath id="bell-scrub-clip">
                 <rect x={PAD_L} y={PAD_T - 10} width={n2(mapX(scrub) - PAD_L)} height={BASE_Y - PAD_T + 10} />
               </clipPath>
@@ -286,13 +298,16 @@ export function StudentBellInstrument({
             const cy = curveY(cat.score);
             const color = colorOf(i);
             return (
-              <g key={cat.id} style={{ opacity: dim ? 0.28 : 1, transition: "opacity .25s" }}>
+              <g key={cat.id} data-export="show" style={{ opacity: dim ? 0.28 : 1, transition: "opacity .25s" }}>
                 {/* subtests first (under the category dot) */}
                 {cat.subs.map((s) => {
                   const sx = mapX(s.score);
                   const sy = curveY(s.score) + jitterForKey(s.id, 9);
                   return (
                     <g key={s.id} className="cursor-pointer" onClick={() => selSub(cat, s)}>
+                      <title>
+                        {s.name}: standard score {Math.round(s.score)}
+                      </title>
                       <circle className="bell-dot" cx={n2(sx)} cy={n2(sy)} r={on ? 5 : 4} fill={color} fillOpacity={0.55} stroke="var(--card)" strokeWidth={1.2} style={{ transition: "r .15s" }} />
                       {(on || showFullNames) && (
                         <text className="bell-mk-label" x={n2(sx)} y={n2(sy) - 9} textAnchor="middle" fontSize={9} fontWeight={600} fill="var(--muted-foreground)" stroke="var(--background)" strokeWidth={2.4} paintOrder="stroke">
@@ -305,10 +320,22 @@ export function StudentBellInstrument({
                 {/* category lollipop */}
                 <line className="bell-stem" x1={n2(cx)} y1={BASE_Y} x2={n2(cx)} y2={n2(cy)} stroke={color} strokeWidth={on ? 2.4 : 1.6} opacity={0.7} />
                 <g className="cursor-pointer" onClick={() => selCat(cat)}>
+                  <title>
+                    {cat.name}: standard score {Math.round(cat.score)}
+                  </title>
                   <circle className="bell-dot" cx={n2(cx)} cy={n2(cy)} r={on ? 8 : 6.5} fill={color} stroke="var(--card)" strokeWidth={2} style={{ transition: "r .15s" }} />
-                  <text className="bell-mk-label" x={n2(cx)} y={n2(cy) - 14} textAnchor="middle" fontSize={12} fontWeight={on ? 700 : 600} fill="var(--foreground)" stroke="var(--background)" strokeWidth={3} paintOrder="stroke">
-                    {cat.name}
-                  </text>
+                  {(() => {
+                    const lift = 14 + ((catRank.get(cat.id) ?? 0) % 2) * 18;
+                    const ly = cy - lift;
+                    return (
+                      <>
+                        {lift > 20 && <line x1={n2(cx)} y1={n2(cy) - 9} x2={n2(cx)} y2={n2(ly) + 5} stroke={color} strokeWidth={0.8} opacity={0.4} />}
+                        <text className="bell-mk-label" x={n2(cx)} y={n2(ly)} textAnchor="middle" fontSize={12} fontWeight={on ? 700 : 600} fill="var(--foreground)" stroke="var(--background)" strokeWidth={3} paintOrder="stroke">
+                          {cat.name}
+                        </text>
+                      </>
+                    );
+                  })()}
                 </g>
               </g>
             );
@@ -316,6 +343,7 @@ export function StudentBellInstrument({
 
           {/* --- overall marker --- */}
           <g className="bell-overall cursor-pointer" onClick={() => setSelected({ type: "overall", name: "Overall", score: overall })}>
+            <title>Overall: standard score {overall}</title>
             <line x1={n2(mapX(overall))} y1={n2(curveY(overall))} x2={n2(mapX(overall))} y2={PAD_T - 12} stroke="var(--foreground)" strokeWidth={1.4} strokeDasharray="4 4" opacity={0.6} />
             <circle cx={n2(mapX(overall))} cy={n2(curveY(overall))} r={5.5} fill="var(--foreground)" stroke="var(--card)" strokeWidth={2} />
             <g transform={`translate(${n2(mapX(overall))} ${PAD_T - 12})`}>

@@ -438,6 +438,7 @@ export function StudentPolarInstrument({
             return (
               <g
                 key={cat.id}
+                data-export="show"
                 className="cursor-pointer"
                 onMouseEnter={() => setHover(i)}
                 onClick={() => openDrill(i)}

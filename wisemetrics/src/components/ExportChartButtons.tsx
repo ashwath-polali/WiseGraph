@@ -100,6 +100,20 @@ export function ExportChartButtons({ studentName }: Props) {
     svgClone.style.backgroundColor = bg;
     // Ensure the SVG itself does not inject a global fill
     svgClone.setAttribute("fill", "none");
+
+    // The chart may be captured mid-interaction: a self-draw still running, a
+    // domain focused (others dimmed), or the cursor scrubber active. Normalize
+    // the clone so the export is always the finished, full-brightness chart.
+    svgClone
+      .querySelectorAll<SVGElement>(".bell-curve, .inst-arc, .inst-subline, .inst-overallglow")
+      .forEach((el) => {
+        el.style.setProperty("stroke-dasharray", "none");
+        el.style.setProperty("stroke-dashoffset", "0");
+      });
+    svgClone.querySelectorAll('[data-export="hide"]').forEach((el) => el.remove());
+    svgClone
+      .querySelectorAll<SVGElement>('[data-export="show"]')
+      .forEach((el) => el.style.setProperty("opacity", "1"));
   }
 
   async function exportToPNG() {
