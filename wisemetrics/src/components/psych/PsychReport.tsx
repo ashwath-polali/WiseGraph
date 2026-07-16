@@ -126,7 +126,7 @@ function ReportBody({ evaluation, student, overallScore, isUniversal, evaluation
         />
 
         {/* the chart — huge, the reactive centerpiece (shifted right so the tour text has room) */}
-        <div id="chart-container" className="absolute inset-0 flex items-center justify-center py-6 md:pl-[28%] md:pr-[2%]">
+        <div id="chart-container" className="absolute inset-0 flex items-center justify-center pb-6 pt-20 md:pl-[28%] md:pr-[2%]">
           <div className="h-full w-full max-w-[min(96vw,1180px)]">
             <ChartDisplay evaluation={evaluation} focusIndex={focusIndex} />
           </div>
