@@ -89,7 +89,7 @@ export function StudentMorphBridge() {
   const captionO = useTransform(scrollYProgress, [0.05, 0.2, 0.85, 1], [0, 1, 1, 0]);
 
   return (
-    <section ref={ref} className="relative h-[220vh]" aria-label="The same scores, on the curve">
+    <section ref={ref} className="relative h-[150vh]" aria-label="The same scores, on the curve">
       <div className="sticky top-14 flex h-[calc(100dvh-3.5rem)] flex-col items-center justify-center overflow-hidden">
         <div className="mb-2 border-y border-border/70 py-3 text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-muted-foreground">Plate II</p>

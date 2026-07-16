@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -8,8 +9,16 @@ import { ShaderBackground } from "@/components/landing/ShaderBackground";
 import { MagneticButton } from "@/components/landing/HeroStory";
 import { FigureOne } from "@/components/landing/FigureOne";
 import { FigureTwo } from "@/components/landing/FigureTwo";
-import { StudentMorphBridge } from "@/components/landing/StudentMorphBridge";
-import { ConstellationPanel } from "@/components/landing/ConstellationPanel";
+
+// scroll/motion-value-driven visuals (pathLength can't be measured on the server)
+const StudentMorphBridge = dynamic(
+  () => import("@/components/landing/StudentMorphBridge").then((m) => m.StudentMorphBridge),
+  { ssr: false },
+);
+const ConstellationPanel = dynamic(
+  () => import("@/components/landing/ConstellationPanel").then((m) => m.ConstellationPanel),
+  { ssr: false },
+);
 
 const ENTER = [0.22, 1, 0.36, 1] as const;
 
