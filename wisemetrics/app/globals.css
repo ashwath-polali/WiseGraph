@@ -185,6 +185,21 @@ html.lenis body {
   pointer-events: none;
 }
 
+/* Chart fluid reveal — irises open from the center on load */
+@keyframes chart-reveal {
+  from {
+    clip-path: circle(0% at 50% 50%);
+    opacity: 0;
+  }
+  to {
+    clip-path: circle(125% at 50% 50%);
+    opacity: 1;
+  }
+}
+.chart-reveal-in {
+  animation: chart-reveal 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Respect reduced-motion: kill non-essential animation globally */
 @media (prefers-reduced-motion: reduce) {
   *,

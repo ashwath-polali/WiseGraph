@@ -315,7 +315,7 @@ export function PolarStudentChart({
           <svg
             ref={svgRef}
             viewBox={`0 0 ${size} ${size}`}
-            className="h-full w-full"
+            className="h-full w-full chart-reveal-in"
             style={{ maxHeight: '600px', maxWidth: '600px' }}
           >
             <defs>
