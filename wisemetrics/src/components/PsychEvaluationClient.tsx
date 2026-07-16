@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useMemo, createContext, useContext, useEffect } from "react";
+import { useState, createContext, useContext, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import type { ClassScoreSummary } from "@/types/scores";
 import dynamic from "next/dynamic";
 import { ComparisonToggle } from "@/components/ComparisonToggle";
-import {
-  StudentPolarPremium,
-  type PremiumCategory,
-} from "@/components/charts/student/StudentPolarPremium";
+
+const PolarStudentChart = dynamic(
+  () => import("@/components/charts/PolarStudentChart").then(mod => ({ default: mod.PolarStudentChart })),
+  { ssr: false }
+);
 
 const EnhancedBellCurveChart = dynamic(
   () => import("@/components/charts/EnhancedBellCurveChart").then(mod => ({ default: mod.EnhancedBellCurveChart })),
@@ -110,29 +111,6 @@ export function ChartDisplay({
   const [showFullNames, setShowFullNames] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
-
-  const premiumCategories: PremiumCategory[] = useMemo(
-    () =>
-      evaluation.categories.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        score: cat.score,
-        subtests: (cat.subcategories ?? []).map((s) => ({
-          id: s.id,
-          name: s.name,
-          score: s.score,
-        })),
-      })),
-    [evaluation.categories],
-  );
-  const overallScore =
-    evaluation.students[0]?.overallScore ??
-    (evaluation.categories.length
-      ? Math.round(
-          evaluation.categories.reduce((a, c) => a + c.score, 0) /
-            evaluation.categories.length,
-        )
-      : 100);
 
   // Create portal container on mount
   useEffect(() => {
@@ -265,12 +243,11 @@ export function ChartDisplay({
             }}
           >
             {viewMode === "polar" ? (
-              <StudentPolarPremium
-                categories={premiumCategories}
-                overallScore={overallScore}
-                comparisonSnapshotId={comparisonSnapshotId}
+              <PolarStudentChart
+                evaluation={evaluation}
                 showFullNames={showFullNames}
                 onToggleNames={() => setShowFullNames(!showFullNames)}
+                comparisonSnapshotId={comparisonSnapshotId}
               />
             ) : (
               <EnhancedBellCurveChart
@@ -290,13 +267,12 @@ export function ChartDisplay({
       {/* Main Chart - more vertical space in regular view */}
       <div className="h-[700px]">
         {viewMode === "polar" ? (
-          <StudentPolarPremium
-            categories={premiumCategories}
-            overallScore={overallScore}
-            comparisonSnapshotId={comparisonSnapshotId}
+          <PolarStudentChart
+            evaluation={evaluation}
             showFullNames={showFullNames}
             onToggleNames={() => setShowFullNames(!showFullNames)}
             onExpand={() => setIsExpanded(true)}
+            comparisonSnapshotId={comparisonSnapshotId}
           />
         ) : (
           <EnhancedBellCurveChart
