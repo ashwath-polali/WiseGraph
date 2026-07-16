@@ -7,9 +7,9 @@ import { clampScore } from "@/lib/chartScaling";
 import { StudentBellCurveChart } from "@/components/charts/StudentBellCurveChart";
 import { StudentConcentricPieChart } from "@/components/charts/StudentConcentricPieChart";
 import {
-  StudentRadarCanvas,
-  type RadarCategory,
-} from "@/components/charts/student/StudentRadarCanvas";
+  StudentPolarPremium,
+  type PremiumCategory,
+} from "@/components/charts/student/StudentPolarPremium";
 import { ExportButtons } from "@/components/ExportButtons";
 
 type ViewMode = "polar" | "bell" | "concentric";
@@ -34,18 +34,19 @@ export function StudentHeroChartsClient({
   const [view, setView] = useState<ViewMode>(defaultView);
   const chartRef = useRef<HTMLDivElement | null>(null);
 
-  const radarCategories: RadarCategory[] = useMemo(
+  const premiumCategories: PremiumCategory[] = useMemo(
     () =>
-      cls.categories.map((cat) => {
-        const match = student.categories.find((c) => c.id === cat.id);
-        return {
-          id: cat.id,
-          name: cat.name,
-          classScore: clampScore(cat.score),
-          studentScore: clampScore(match?.score ?? student.overallScore),
-        };
-      }),
-    [cls.categories, student.categories, student.overallScore],
+      student.categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        score: clampScore(cat.score),
+        subtests: (cat.subcategories ?? []).map((s) => ({
+          id: s.id,
+          name: s.name,
+          score: clampScore(s.score),
+        })),
+      })),
+    [student.categories],
   );
 
   return (
@@ -53,11 +54,11 @@ export function StudentHeroChartsClient({
       <header className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-foreground">
-            {student.name} vs the class
+            {student.name}&apos;s profile
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Each spoke is a category. The filled shape is {student.name}; the
-            dashed one is the class average.
+            The outer ring is the overall score. Each wedge is a category at its
+            score, with its subtests traced inside.
           </p>
         </div>
 
@@ -110,9 +111,9 @@ export function StudentHeroChartsClient({
             ) : (
               <div className="flex h-full items-center justify-center">
                 <div className="h-full w-full max-w-md">
-                  <StudentRadarCanvas
-                    categories={radarCategories}
-                    studentName={student.name}
+                  <StudentPolarPremium
+                    categories={premiumCategories}
+                    overallScore={clampScore(student.overallScore)}
                   />
                 </div>
               </div>
