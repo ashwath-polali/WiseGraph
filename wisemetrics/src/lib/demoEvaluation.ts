@@ -125,3 +125,16 @@ export const DEMO_EVALUATION: ClassScoreSummary = {
 
 export const DEMO_FOCUS = focusStudent;
 export const DEMO_CLASS = [focusStudent, ...classmates];
+
+// a believable "before" snapshot (last year) — a few points under this year, so
+// the bell ghost + movement connectors show growth with zero network.
+type DemoSnapshot = { scores: { categoryId: string; subcategoryId: string | null; standardScore: number }[] };
+export const DEMO_SNAPSHOT: DemoSnapshot = {
+  scores: FOCUS.flatMap((c) => {
+    const catScore = avg(c.subs.map((s) => s.score));
+    return [
+      { categoryId: c.id, subcategoryId: null, standardScore: clamp(catScore - 8) },
+      ...c.subs.map((s) => ({ categoryId: c.id, subcategoryId: s.id, standardScore: clamp(s.score - 7) })),
+    ];
+  }),
+};

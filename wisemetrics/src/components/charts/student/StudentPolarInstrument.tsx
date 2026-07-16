@@ -17,28 +17,31 @@ gsap.registerPlugin(useGSAP, DrawSVGPlugin);
  * self-draw and cursor parallax layer on top in later passes.
  * ------------------------------------------------------------------ */
 
-const SIZE = 600;
-const C = SIZE / 2;
-const MAXR = 236;
-const INNER = 6;
+// Geometry constants are exported (Step 0) so the landing morph bridge +
+// constellation read ONE source of truth — never a lookalike or geometry.ts.
+export const SIZE = 600;
+export const C = SIZE / 2;
+export const MAXR = 236;
+export const INNER = 6;
 const RINGS = [60, 70, 85, 100, 115, 130, 150];
 
 // [chart-1, 2, 3, 5, 6] cycle — matches the established wedge order.
 const COLOR_TOKENS = ["--chart-1", "--chart-2", "--chart-3", "--chart-5", "--chart-6"];
-const colorOf = (i: number) => `var(${COLOR_TOKENS[i % COLOR_TOKENS.length]})`;
+export const colorOf = (i: number) => `var(${COLOR_TOKENS[i % COLOR_TOKENS.length]})`;
 
 const clamp = (s: number) => Math.max(60, Math.min(150, s));
-const scoreToRadius = (s: number) => INNER + ((clamp(s) - 60) / 90) * MAXR;
+export const scoreToRadius = (s: number) => INNER + ((clamp(s) - 60) / 90) * MAXR;
 const n2 = (v: number) => Math.round(v * 100) / 100;
 
 /** angle for a category slot — 12 o'clock start, clockwise. */
-function catAngles(idx: number, count: number) {
+export function catAngles(idx: number, count: number) {
   const per = (2 * Math.PI) / Math.max(count, 1);
   const start = idx * per - Math.PI / 2;
   const end = (idx + 1) * per - Math.PI / 2;
   return { start, end, mid: (start + end) / 2 };
 }
-const P = (r: number, a: number) => ({ x: C + r * Math.cos(a), y: C + r * Math.sin(a) });
+export const polarPointAt = (r: number, a: number) => ({ x: C + r * Math.cos(a), y: C + r * Math.sin(a) });
+const P = polarPointAt;
 
 /** closed pie slice (wash fill), from center to radius r across [start,end]. */
 function wedgeFill(r: number, start: number, end: number, pad = 0.02) {
@@ -113,7 +116,7 @@ function ordinal(n: number) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-type SnapshotData = {
+export type SnapshotData = {
   scores: {
     categoryId: string;
     subcategoryId: string | null;
@@ -132,6 +135,8 @@ type Props = {
   focusIndex?: number | null;
   /** hide the chart's own control buttons (when the page supplies its own). */
   hideControls?: boolean;
+  /** static "before" snapshot for the landing — renders the ghost with zero network. */
+  snapshotOverride?: SnapshotData;
 };
 
 export function StudentPolarInstrument({
@@ -143,6 +148,7 @@ export function StudentPolarInstrument({
   comparisonSnapshotId,
   focusIndex,
   hideControls = false,
+  snapshotOverride,
 }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);
@@ -169,8 +175,12 @@ export function StudentPolarInstrument({
     evaluation.students[0]?.overallScore ??
     Math.round(cats.reduce((a, c) => a + c.score, 0) / count);
 
-  // snapshot ("before") overlay
+  // snapshot ("before") overlay — a static override (landing) wins over the fetch
   useEffect(() => {
+    if (snapshotOverride !== undefined) {
+      setSnapshot(snapshotOverride);
+      return;
+    }
     if (!comparisonSnapshotId) {
       setSnapshot(null);
       return;
@@ -183,7 +193,7 @@ export function StudentPolarInstrument({
     return () => {
       live = false;
     };
-  }, [comparisonSnapshotId]);
+  }, [comparisonSnapshotId, snapshotOverride]);
 
   // categories can be reconfigured under us — never keep a drill/selection that
   // points at a category that no longer exists.

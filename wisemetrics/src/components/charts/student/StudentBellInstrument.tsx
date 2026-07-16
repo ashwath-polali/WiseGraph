@@ -19,14 +19,16 @@ gsap.registerPlugin(useGSAP, DrawSVGPlugin);
  * and the snapshot "before" ghost. Pure SVG, so it prints and exports.
  * ------------------------------------------------------------------ */
 
-const W = 1000;
-const H = 520;
-const PAD_L = 46;
+// Geometry constants exported (Step 0) so the landing morph bridge reads the
+// bell's real coordinate space, not a lookalike.
+export const W = 1000;
+export const H = 520;
+export const PAD_L = 46;
 const PAD_R = 46;
 const PAD_T = 40;
 const PAD_B = 52;
-const PLOT_W = W - PAD_L - PAD_R;
-const BASE_Y = H - PAD_B;
+export const PLOT_W = W - PAD_L - PAD_R;
+export const BASE_Y = H - PAD_B;
 const PLOT_H = H - PAD_T - PAD_B;
 const PEAK = normalPdf(100, 100, 15);
 const K = (PLOT_H * 0.94) / PEAK;
@@ -34,8 +36,8 @@ const TICKS = [60, 70, 85, 100, 115, 130, 150];
 const n2 = (v: number) => Math.round(v * 100) / 100;
 const clamp = (s: number) => Math.max(60, Math.min(150, s));
 
-const mapX = (s: number) => PAD_L + ((clamp(s) - 60) / 90) * PLOT_W;
-const curveY = (s: number) => BASE_Y - normalPdf(clamp(s), 100, 15) * K;
+export const mapX = (s: number) => PAD_L + ((clamp(s) - 60) / 90) * PLOT_W;
+export const curveY = (s: number) => BASE_Y - normalPdf(clamp(s), 100, 15) * K;
 
 const COLOR_TOKENS = ["--chart-1", "--chart-2", "--chart-3", "--chart-5", "--chart-6"];
 const colorOf = (i: number) => `var(${COLOR_TOKENS[i % COLOR_TOKENS.length]})`;
@@ -43,7 +45,7 @@ const colorOf = (i: number) => `var(${COLOR_TOKENS[i % COLOR_TOKENS.length]})`;
 type Sub = { id: string; name: string; score: number };
 type Cat = { id: string; name: string; score: number; subs: Sub[] };
 type Selected = { type: "overall" | "category" | "subcategory"; name: string; score: number; categoryName?: string; snapshotScore?: number };
-type SnapshotData = { scores: { categoryId: string; subcategoryId: string | null; standardScore: number }[] };
+export type SnapshotData = { scores: { categoryId: string; subcategoryId: string | null; standardScore: number }[] };
 
 type Props = {
   evaluation: ClassScoreSummary;
@@ -54,6 +56,8 @@ type Props = {
   comparisonSnapshotId?: string | null;
   focusIndex?: number | null;
   hideControls?: boolean;
+  /** static "before" snapshot for the landing — renders the ghost with zero network. */
+  snapshotOverride?: SnapshotData;
 };
 
 /** the smooth normal curve as an SVG path (open, for the stroke + draw-on). */
@@ -76,6 +80,7 @@ export function StudentBellInstrument({
   comparisonSnapshotId,
   focusIndex,
   hideControls = false,
+  snapshotOverride,
 }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const [selected, setSelected] = useState<Selected | null>(null);
@@ -107,6 +112,10 @@ export function StudentBellInstrument({
   }, [cats]);
 
   useEffect(() => {
+    if (snapshotOverride !== undefined) {
+      setSnapshot(snapshotOverride);
+      return;
+    }
     if (!comparisonSnapshotId) return setSnapshot(null);
     let live = true;
     fetch(`/api/snapshots/${comparisonSnapshotId}`)
@@ -116,7 +125,7 @@ export function StudentBellInstrument({
     return () => {
       live = false;
     };
-  }, [comparisonSnapshotId]);
+  }, [comparisonSnapshotId, snapshotOverride]);
 
   useEffect(() => {
     if (focusIndex === undefined) return;
