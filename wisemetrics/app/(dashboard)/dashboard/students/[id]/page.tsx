@@ -14,6 +14,41 @@ import { StudentHeroChartsClient } from "@/components/StudentHeroChartsClient";
 import { CategoryDrillDownClient } from "@/components/CategoryDrillDownClient";
 import { Reveal } from "@/components/Reveal";
 import { NumberTicker } from "@/components/ui/number-ticker";
+import { CategoryGaugeCard } from "@/components/student/CategoryGaugeCard";
+
+function scoreBand(s: number) {
+  if (s >= 116)
+    return {
+      label: s >= 131 ? "Well above average" : "Above average",
+      cls: "border-[color:var(--chart-2)]/30 bg-[color:var(--chart-2)]/10 text-[color:var(--chart-2)]",
+    };
+  if (s >= 85)
+    return {
+      label: "Average range",
+      cls: "border-primary/30 bg-primary/10 text-primary",
+    };
+  if (s >= 70)
+    return {
+      label: "Below average",
+      cls: "border-[color:var(--chart-3)]/40 bg-[color:var(--chart-3)]/10 text-[color:var(--chart-3)]",
+    };
+  return {
+    label: "Well below average",
+    cls: "border-destructive/30 bg-destructive/10 text-destructive",
+  };
+}
+
+function BandPill({ score }: { score: number }) {
+  const band = scoreBand(score);
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${band.cls}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {band.label}
+    </span>
+  );
+}
 
 type RouteParams = {
   id: string;
@@ -132,181 +167,105 @@ export default async function StudentDetailPage(props: Props) {
   );
 
   return (
-    <main className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
-      {/* Left: charts + drill-down */}
-      <div className="space-y-6">
-        <Card className="p-6 space-y-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">
+    <main className="space-y-8">
+      {/* Hero: identity + score + band + the chart */}
+      <section className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-[0_1px_2px_oklch(0.245_0.015_75/0.05),0_30px_60px_-30px_oklch(0.245_0.015_75/0.18)]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_90%_at_85%_-10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent)]"
+        />
+        <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-center lg:gap-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
+              <Link
+                href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
+                className="transition-colors hover:text-foreground"
+              >
+                ← Dashboard
+              </Link>
+              <span className="text-border">/</span>
+              <span>
                 {cls.name} · Grade {cls.gradeLevel} · {cls.subject}
-              </p>
-              <h1 className="mt-1 font-display text-2xl font-medium text-foreground">
-                {student.name}
-              </h1>
-              <div className="mt-2 flex items-center gap-3">
-                <Link
-                  href={editHref}
-                  className="rounded-md bg-muted px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                >
-                  Edit scores
-                </Link>
-                {/* Preserve the student's class when going back */}
-                <Link
-                  href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
-                  className="text-xs text-primary transition-colors hover:text-primary/80"
-                >
-                  Back to dashboard
-                </Link>
-              </div>
-            </div>
-            <div className="shrink-0 rounded-xl border border-border bg-muted/40 px-4 py-2.5 text-center">
-              <div className="font-mono text-[2rem] font-semibold leading-none text-foreground">
-                <NumberTicker value={student.overallScore} />
-              </div>
-              <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                Overall
-              </div>
-            </div>
-          </div>
-
-          <StudentHeroChartsClient
-            student={student}
-            cls={cls}
-            defaultView={defaultView}
-          />
-        </Card>
-
-        <Reveal>
-          <Card className="p-6 space-y-4">
-            <h2 className="text-sm font-medium text-foreground">
-              Category drill-down
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Pick a category to see the subskills underneath it.
-            </p>
-            <CategoryDrillDownClient student={student} />
-          </Card>
-        </Reveal>
-      </div>
-
-      {/* Right: snapshot + detailed category panel */}
-      <div className="space-y-4">
-        <Reveal>
-        <Card className="p-4 space-y-2">
-          <h2 className="text-sm font-medium text-foreground">Snapshot</h2>
-          <p className="text-xs text-muted-foreground">
-            How {student.name} is doing next to the class, at a glance.
-          </p>
-          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-            <div className="flex justify-between">
-              <span>Overall score</span>
-              <span className="font-semibold">
-                {student.overallScore}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Categories tracked</span>
-              <span>{student.categories.length}</span>
+
+            <h1 className="mt-4 font-display text-4xl font-medium leading-[1.03] tracking-tight text-foreground sm:text-5xl">
+              {student.name}
+            </h1>
+
+            <div className="mt-6 flex flex-wrap items-end gap-x-5 gap-y-3">
+              <div>
+                <div
+                  className="font-mono text-[3.25rem] font-semibold leading-none text-foreground"
+                  data-numeric
+                >
+                  <NumberTicker value={student.overallScore} />
+                </div>
+                <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                  Overall standard score
+                </div>
+              </div>
+              <BandPill score={student.overallScore} />
+            </div>
+
+            <div className="mt-7">
+              <Link
+                href={editHref}
+                className="inline-flex h-9 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Edit scores
+              </Link>
             </div>
           </div>
-        </Card>
-        </Reveal>
 
-        {/* Detailed category + subskill comparison */}
-        <Reveal delay={0.06}>
-        <Card className="p-4 space-y-3">
-          <h2 className="text-sm font-medium text-foreground">
-            Categories & subskills
+          <div className="min-w-0">
+            <StudentHeroChartsClient
+              student={student}
+              cls={cls}
+              defaultView={defaultView}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Category breakdown — premium gauges on the 60-150 scale */}
+      <section>
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-xl font-medium text-foreground">
+            Category breakdown
           </h2>
           <p className="text-xs text-muted-foreground">
-            {student.name}&apos;s scores next to the class average, category by
-            category.
+            Every score on the 60-150 scale · the shaded band is the 85-115
+            average
           </p>
-
-          <div className="space-y-2 text-xs text-muted-foreground">
-            {categoryComparisons.map((cat) => {
-              const catSign = cat.delta > 0 ? "+" : cat.delta < 0 ? "−" : "±";
-              const catDeltaAbs = Math.abs(cat.delta);
-
-              return (
-                <details
-                  key={cat.id}
-                  className="rounded-md bg-muted px-2 py-1.5"
-                >
-                  <summary className="flex cursor-pointer items-center justify-between gap-2 list-none">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-semibold text-foreground">
-                        {cat.name}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">
-                        Student {cat.studentScore} · Class {cat.classScore}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-mono ${
-                        cat.delta > 0
-                          ? "bg-[color:var(--chart-2)]/12 text-[color:var(--chart-2)]"
-                          : cat.delta < 0
-                          ? "bg-destructive/12 text-destructive"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {catSign}
-                      {catDeltaAbs}
-                    </span>
-                  </summary>
-
-                  {cat.subskills.length > 0 && (
-                    <div className="mt-2 space-y-1 border-t border-border pt-1.5">
-                      {cat.subskills.map((sub) => {
-                        const sign =
-                          sub.delta > 0 ? "+" : sub.delta < 0 ? "−" : "±";
-                        const deltaAbs = Math.abs(sub.delta);
-                        return (
-                          <div
-                            key={sub.id}
-                            className="flex items-center justify-between rounded-md bg-muted/60 px-2 py-1"
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-[11px] text-foreground">
-                                {sub.name}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground">
-                                Student {sub.studentScore} · Class{" "}
-                                {sub.classScore}
-                              </span>
-                            </div>
-                            <span
-                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-mono ${
-                                sub.delta > 0
-                                  ? "bg-[color:var(--chart-2)]/12 text-[color:var(--chart-2)]"
-                                  : sub.delta < 0
-                                  ? "bg-destructive/12 text-destructive"
-                                  : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {sign}
-                              {deltaAbs}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </details>
-              );
-            })}
-
-            {categoryComparisons.length === 0 && (
-              <p className="text-[11px] text-muted-foreground">
-                No category scores for this student yet.
-              </p>
-            )}
+        </div>
+        {categoryComparisons.length === 0 ? (
+          <Card className="p-6 text-sm text-muted-foreground">
+            No category scores for this student yet.
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {categoryComparisons.map((cat, i) => (
+              <CategoryGaugeCard key={cat.id} category={cat} index={i} />
+            ))}
           </div>
+        )}
+      </section>
+
+      {/* Drill-down */}
+      <Reveal>
+        <Card className="space-y-4 p-6">
+          <div>
+            <h2 className="font-display text-xl font-medium text-foreground">
+              Category drill-down
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pick a category to see the subtests underneath it.
+            </p>
+          </div>
+          <CategoryDrillDownClient student={student} />
         </Card>
-        </Reveal>
-      </div>
+      </Reveal>
     </main>
   );
 }
