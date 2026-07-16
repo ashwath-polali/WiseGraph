@@ -8,6 +8,7 @@ import { ShaderBackground } from "@/components/landing/ShaderBackground";
 import { MagneticButton } from "@/components/landing/HeroStory";
 import { FigureOne } from "@/components/landing/FigureOne";
 import { FigureTwo } from "@/components/landing/FigureTwo";
+import { StudentMorphBridge } from "@/components/landing/StudentMorphBridge";
 
 const ENTER = [0.22, 1, 0.36, 1] as const;
 
@@ -54,6 +55,9 @@ export default function HomePage() {
 
       {/* Chapter I + II — the cover + reading Figure 1 (pinned polar tour) */}
       <FigureOne />
+
+      {/* Chapter III — the turn: polar scores fly onto the bell curve */}
+      <StudentMorphBridge />
 
       {/* Chapter IV — reading Figure 2 (pinned bell tour + compare) */}
       <FigureTwo />
