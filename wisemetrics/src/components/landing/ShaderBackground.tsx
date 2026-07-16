@@ -39,9 +39,11 @@ export function ShaderBackground() {
 
   const dark = resolvedTheme === "dark";
   const colors = dark ? DARK : LIGHT;
-  const fallback = dark
-    ? "radial-gradient(70% 60% at 28% -5%, #231e33, transparent 62%), radial-gradient(60% 55% at 96% 12%, #1b2a23, transparent 60%), var(--background)"
-    : "radial-gradient(72% 62% at 24% -6%, #e7e2f4, transparent 62%), radial-gradient(60% 55% at 98% 10%, #e0ece5, transparent 60%), var(--background)";
+  // Token-based so the inline string is IDENTICAL on server and client (CSS
+  // resolves the colors per active theme) — otherwise resolvedTheme being
+  // undefined on the server vs "dark" on the client is a hydration mismatch.
+  const fallback =
+    "radial-gradient(72% 62% at 24% -6%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 62%), radial-gradient(60% 55% at 98% 10%, color-mix(in srgb, var(--psych) 14%, transparent), transparent 60%), var(--background)";
 
   return (
     <div
