@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ShaderBackground } from "@/components/landing/ShaderBackground";
 import { MagneticButton } from "@/components/landing/HeroStory";
 import { FigureOne } from "@/components/landing/FigureOne";
+import { FigureTwo } from "@/components/landing/FigureTwo";
 
 const ENTER = [0.22, 1, 0.36, 1] as const;
 
@@ -54,8 +55,11 @@ export default function HomePage() {
       {/* Chapter I + II — the cover + reading Figure 1 (pinned polar tour) */}
       <FigureOne />
 
-      {/* ===== interlude + colophon (Chapters III–V land here next) ===== */}
-      <div id="figure-two" className="mx-auto max-w-[1240px] px-5 pb-28 pt-24">
+      {/* Chapter IV — reading Figure 2 (pinned bell tour + compare) */}
+      <FigureTwo />
+
+      {/* ===== interlude + colophon (Chapters III + V land here next) ===== */}
+      <div className="mx-auto max-w-[1240px] px-5 pb-28 pt-24">
         <section className="border-t border-border pt-16">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-20">
             <motion.h2
