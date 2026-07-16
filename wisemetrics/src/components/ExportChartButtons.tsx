@@ -105,7 +105,7 @@ export function ExportChartButtons({ studentName }: Props) {
     // domain focused (others dimmed), or the cursor scrubber active. Normalize
     // the clone so the export is always the finished, full-brightness chart.
     svgClone
-      .querySelectorAll<SVGElement>(".bell-curve, .inst-arc, .inst-subline, .inst-overallglow")
+      .querySelectorAll<SVGElement>(".bell-curve, .inst-arc, .inst-subline, .inst-overallglow, .drill-arc, .drill-poly")
       .forEach((el) => {
         el.style.setProperty("stroke-dasharray", "none");
         el.style.setProperty("stroke-dashoffset", "0");

@@ -83,6 +83,7 @@ export function StudentBellInstrument({
   const [scrub, setScrub] = useState<number | null>(null); // cursor score, or null
   const [ready, setReady] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [subHover, setSubHover] = useState<string | null>(null);
 
   const cats: Cat[] = useMemo(
     () =>
@@ -175,6 +176,23 @@ export function StudentBellInstrument({
       tlRef.current?.kill();
     };
   }, []);
+
+  // when a domain focuses (scroll tour), bloom its subtests open
+  useGSAP(
+    () => {
+      if (hover == null || reduceMotion) return;
+      const q = gsap.utils.selector(root);
+      gsap.from(q(`[data-bellsub="${hover}"]`), {
+        scale: 0.4,
+        opacity: 0.3,
+        transformOrigin: "50% 50%",
+        duration: 0.4,
+        stagger: 0.06,
+        ease: "back.out(1.7)",
+      });
+    },
+    { dependencies: [hover], scope: root },
+  );
 
   const onMove = (e: React.MouseEvent) => {
     const svg = svgEl.current;
@@ -299,18 +317,56 @@ export function StudentBellInstrument({
             const color = colorOf(i);
             return (
               <g key={cat.id} data-export="show" style={{ opacity: dim ? 0.28 : 1, transition: "opacity .25s" }}>
-                {/* subtests first (under the category dot) */}
+                {/* subtests first (under the category dot) — they bloom open when the domain is focused */}
                 {cat.subs.map((s) => {
                   const sx = mapX(s.score);
                   const sy = curveY(s.score) + jitterForKey(s.id, 9);
+                  const hov = subHover === s.id;
+                  const active = on || hov;
+                  const cx = mapX(cat.score);
+                  const cy = curveY(cat.score);
                   return (
-                    <g key={s.id} className="cursor-pointer" onClick={() => selSub(cat, s)}>
+                    <g
+                      key={s.id}
+                      data-bellsub={i}
+                      className="bell-sub cursor-pointer"
+                      onClick={() => selSub(cat, s)}
+                      onMouseEnter={() => setSubHover(s.id)}
+                      onMouseLeave={() => setSubHover(null)}
+                    >
                       <title>
                         {s.name}: standard score {Math.round(s.score)}
                       </title>
-                      <circle className="bell-dot" cx={n2(sx)} cy={n2(sy)} r={on ? 5 : 4} fill={color} fillOpacity={0.55} stroke="var(--card)" strokeWidth={1.2} style={{ transition: "r .15s" }} />
-                      {(on || showFullNames) && (
-                        <text className="bell-mk-label" x={n2(sx)} y={n2(sy) - 9} textAnchor="middle" fontSize={9} fontWeight={600} fill="var(--muted-foreground)" stroke="var(--background)" strokeWidth={2.4} paintOrder="stroke">
+                      {/* fan connector from the category dot, drawn only when the domain is open */}
+                      {on && (
+                        <line x1={n2(cx)} y1={n2(cy)} x2={n2(sx)} y2={n2(sy)} stroke={color} strokeWidth={0.8} opacity={0.3} />
+                      )}
+                      {active && <circle cx={n2(sx)} cy={n2(sy)} r={11} fill={color} opacity={0.14} style={{ transition: "opacity .2s" }} />}
+                      <circle
+                        className="bell-dot"
+                        cx={n2(sx)}
+                        cy={n2(sy)}
+                        r={active ? 5.5 : 3.6}
+                        fill={color}
+                        fillOpacity={active ? 0.95 : 0.6}
+                        stroke="var(--card)"
+                        strokeWidth={1.2}
+                        style={{ transition: "r .2s, fill-opacity .2s" }}
+                      />
+                      {(active || showFullNames) && (
+                        <text
+                          className="bell-mk-label"
+                          x={n2(sx)}
+                          y={n2(sy) - (active ? 12 : 9)}
+                          textAnchor="middle"
+                          fontSize={active ? 10 : 8.5}
+                          fontWeight={active ? 700 : 500}
+                          fill={active ? "var(--foreground)" : "var(--muted-foreground)"}
+                          stroke="var(--background)"
+                          strokeWidth={2}
+                          paintOrder="stroke"
+                          style={{ transition: "font-size .15s" }}
+                        >
                           {showFullNames ? s.name : s.name.charAt(0).toUpperCase()}
                         </text>
                       )}

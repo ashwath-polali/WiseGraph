@@ -151,6 +151,8 @@ export function StudentPolarInstrument({
   const [drill, setDrill] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [scrollDrill, setScrollDrill] = useState(false); // drill was opened by the scroll tour, not a click
+  const [subHover, setSubHover] = useState<string | null>(null); // hovered subtest id in the drill view
 
   const cats: Cat[] = useMemo(
     () =>
@@ -190,12 +192,23 @@ export function StudentPolarInstrument({
     setSelected(null);
   }, [evaluation]);
 
-  // scroll-driven tour highlights a domain from outside (only when not drilled)
+  // the scroll tour OPENS each domain — it drills into the focused category so
+  // its subtests fan out, and returns to the full radial for the overview scenes.
   useEffect(() => {
     if (focusIndex === undefined) return;
-    if (drill) return;
-    setHover(focusIndex);
-  }, [focusIndex, drill]);
+    if (focusIndex == null || !cats[focusIndex]) {
+      setScrollDrill(false);
+      setDrill(null);
+      setSelected(null);
+      setHover(null);
+    } else {
+      setScrollDrill(true);
+      setDrill(cats[focusIndex].id);
+      setSelected(null); // the scene text carries the readout; no floating panel
+      setHover(focusIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusIndex]);
 
   // Escape closes the detail panel (and exits drill if open)
   useEffect(() => {
@@ -271,6 +284,25 @@ export function StudentPolarInstrument({
     { scope: root },
   );
 
+  // when a domain opens (drill changes), fan its subtests in fluidly
+  useGSAP(
+    () => {
+      if (!drill || reduceMotion) return;
+      const q = gsap.utils.selector(root);
+      gsap.fromTo(q(".drill-arc"), { drawSVG: 0 }, { drawSVG: "100%", duration: 0.55, ease: "power2.out" });
+      gsap.fromTo(q(".drill-poly"), { drawSVG: 0 }, { drawSVG: "100%", duration: 0.6, delay: 0.15, ease: "power2.out" });
+      gsap.from(q(".drill-sub"), {
+        opacity: 0,
+        scale: 0.3,
+        transformOrigin: "50% 50%",
+        duration: 0.45,
+        stagger: 0.07,
+        ease: "back.out(1.8)",
+      });
+    },
+    { dependencies: [drill], scope: root },
+  );
+
   const onMove = (e: React.MouseEvent) => {
     const el = root.current;
     if (!el) return;
@@ -307,6 +339,7 @@ export function StudentPolarInstrument({
   const drillCat = drillIdx >= 0 ? cats[drillIdx] : null;
   const openDrill = (i: number) => {
     const c = cats[i];
+    setScrollDrill(false);
     setDrill(c.id);
     setSelected({ type: "category", name: c.name, score: c.score, snapshotScore: snapCat(c.id) ?? undefined });
   };
@@ -323,6 +356,7 @@ export function StudentPolarInstrument({
   const exitDrill = () => {
     setDrill(null);
     setSelected(null);
+    setScrollDrill(false);
   };
 
   return (
@@ -355,8 +389,8 @@ export function StudentPolarInstrument({
                 <stop offset="100%" stopColor={colorOf(i)} stopOpacity={0.34} />
               </radialGradient>
             ))}
-            <radialGradient id="inst-hub" gradientUnits="userSpaceOnUse" cx={C} cy={C} r={64}>
-              <stop offset="0%" stopColor="var(--psych)" stopOpacity={0.28} />
+            <radialGradient id="inst-hub" gradientUnits="userSpaceOnUse" cx={C} cy={C} r={46}>
+              <stop offset="0%" stopColor="var(--psych)" stopOpacity={0.22} />
               <stop offset="100%" stopColor="var(--psych)" stopOpacity={0} />
             </radialGradient>
           </defs>
@@ -534,19 +568,19 @@ export function StudentPolarInstrument({
                   const lp = P(scoreToRadius(p.s.score) + 16, p.a);
                   return (
                     <g key={p.s.id}>
-                      <circle className="inst-dot" cx={n2(p.x)} cy={n2(p.y)} r={3.6} fill={colorOf(i)} stroke="var(--card)" strokeWidth={1.5} />
+                      <circle className="inst-dot" cx={n2(p.x)} cy={n2(p.y)} r={2.8} fill={colorOf(i)} fillOpacity={0.9} stroke="var(--card)" strokeWidth={1} />
                       <text
                         x={n2(lp.x)}
                         y={n2(lp.y)}
                         textAnchor="middle"
                         dominantBaseline="central"
-                        fontSize={showFullNames ? 8.5 : 10}
-                        fontWeight={600}
+                        fontSize={showFullNames ? 8 : 9.5}
+                        fontWeight={500}
                         fill="var(--muted-foreground)"
                         stroke="var(--background)"
-                        strokeWidth={2.6}
+                        strokeWidth={1.8}
                         paintOrder="stroke"
-                        opacity={ready && showLabels ? 1 : 0}
+                        opacity={ready && showLabels ? 0.85 : 0}
                         style={{ transition: "opacity .2s" }}
                       >
                         {showFullNames ? p.s.name : p.s.name.charAt(0).toUpperCase()}
@@ -615,7 +649,7 @@ export function StudentPolarInstrument({
               return (
                 <g style={{ opacity: drill ? 1 : 0, transition: "opacity .4s ease" }}>
                   <path d={wedgeFill(r, start, end)} fill={`url(#inst-wash-${i})`} />
-                  <path d={arcPath(r, start, end)} fill="none" stroke={color} strokeWidth={2.75} strokeLinecap="round" />
+                  <path className="drill-arc" d={arcPath(r, start, end)} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" />
                   {snapPts && (
                     <polyline
                       points={snapPts.map((p) => `${n2(p.x)},${n2(p.y)}`).join(" ")}
@@ -628,6 +662,7 @@ export function StudentPolarInstrument({
                     />
                   )}
                   <polyline
+                    className="drill-poly"
                     points={pts.map((p) => `${n2(p.x)},${n2(p.y)}`).join(" ")}
                     fill="none"
                     stroke={color}
@@ -636,33 +671,53 @@ export function StudentPolarInstrument({
                     strokeLinejoin="round"
                   />
                   {subPts.map((p) => {
-                    const lp = P(scoreToRadius(p.s.score) + 24, p.a);
+                    const lp = P(scoreToRadius(p.s.score) + 22, p.a);
                     const sel = selected?.type === "subcategory" && selected.name === p.s.name;
+                    const hov = subHover === p.s.id;
+                    const active = sel || hov;
                     return (
-                      <g key={p.s.id} data-drill-sub className="cursor-pointer" onClick={() => selectSub(drillCat, p.s)}>
+                      <g
+                        key={p.s.id}
+                        data-drill-sub
+                        className="drill-sub cursor-pointer"
+                        onClick={() => selectSub(drillCat, p.s)}
+                        onMouseEnter={() => setSubHover(p.s.id)}
+                        onMouseLeave={() => setSubHover(null)}
+                      >
                         <title>
                           {p.s.name}: standard score {Math.round(p.s.score)}
                         </title>
+                        {/* soft halo that blooms on hover */}
                         <circle
                           cx={n2(p.x)}
                           cy={n2(p.y)}
-                          r={sel ? 7.5 : 5.5}
+                          r={active ? 12 : 8}
                           fill={color}
+                          opacity={active ? 0.16 : 0}
+                          style={{ transition: "opacity .2s, r .2s" }}
+                        />
+                        <circle
+                          cx={n2(p.x)}
+                          cy={n2(p.y)}
+                          r={active ? 6 : 4.5}
+                          fill={color}
+                          fillOpacity={active ? 1 : 0.9}
                           stroke="var(--card)"
-                          strokeWidth={2}
-                          style={{ transition: "r .15s" }}
+                          strokeWidth={1.5}
+                          style={{ transition: "r .2s" }}
                         />
                         <text
                           x={n2(p.x)}
-                          y={n2(p.y) - 15}
+                          y={n2(p.y) - (active ? 15 : 13)}
                           textAnchor="middle"
                           className="font-mono"
-                          fontSize={12}
+                          fontSize={active ? 13 : 11.5}
                           fontWeight={700}
                           fill={color}
                           stroke="var(--background)"
-                          strokeWidth={3}
+                          strokeWidth={2.2}
                           paintOrder="stroke"
+                          style={{ transition: "font-size .2s" }}
                         >
                           {Math.round(p.s.score)}
                         </text>
@@ -671,49 +726,52 @@ export function StudentPolarInstrument({
                           y={n2(lp.y)}
                           textAnchor="middle"
                           dominantBaseline="central"
-                          fontSize={11}
-                          fontWeight={600}
-                          fill="var(--foreground)"
+                          fontSize={10.5}
+                          fontWeight={active ? 700 : 500}
+                          fill={active ? "var(--foreground)" : "var(--muted-foreground)"}
                           stroke="var(--background)"
-                          strokeWidth={3}
+                          strokeWidth={2}
                           paintOrder="stroke"
+                          style={{ transition: "fill .2s" }}
                         >
                           {p.s.name}
                         </text>
                       </g>
                     );
                   })}
-                  <text
-                    x={C}
-                    y={26}
-                    textAnchor="middle"
-                    className="font-display"
-                    fontSize={24}
-                    fontWeight={700}
-                    fill="var(--foreground)"
-                  >
-                    {drillCat.name}
-                  </text>
+                  {!scrollDrill && (
+                    <text
+                      x={C}
+                      y={26}
+                      textAnchor="middle"
+                      className="font-display"
+                      fontSize={24}
+                      fontWeight={700}
+                      fill="var(--foreground)"
+                    >
+                      {drillCat.name}
+                    </text>
+                  )}
                 </g>
               );
             })()}
 
           {/* --- center hub (breathing) --- */}
           <g className="inst-hub">
-            <circle cx={C} cy={C} r={54} fill="url(#inst-hub)" />
-            <circle cx={C} cy={C} r={40} fill="var(--card)" stroke="var(--border)" strokeWidth={1}>
+            <circle cx={C} cy={C} r={42} fill="url(#inst-hub)" />
+            <circle cx={C} cy={C} r={29} fill="var(--card)" stroke="var(--border)" strokeWidth={1}>
               {!reduceMotion && (
-                <animate attributeName="r" values="40;42;40" dur="3.6s" repeatCount="indefinite" />
+                <animate attributeName="r" values="29;30.2;29" dur="3.8s" repeatCount="indefinite" />
               )}
             </circle>
-            <circle cx={C} cy={C} r={40} fill="none" stroke="var(--psych)" strokeWidth={1.2} opacity={0.5} />
+            <circle cx={C} cy={C} r={29} fill="none" stroke="var(--psych)" strokeWidth={1} opacity={0.4} />
             <text
               x={C}
-              y={C - 5}
+              y={C - 3}
               textAnchor="middle"
               dominantBaseline="central"
               className="font-mono"
-              fontSize={30}
+              fontSize={22}
               fontWeight={600}
               fill="var(--foreground)"
             >
@@ -721,10 +779,10 @@ export function StudentPolarInstrument({
             </text>
             <text
               x={C}
-              y={C + 20}
+              y={C + 13}
               textAnchor="middle"
               dominantBaseline="central"
-              fontSize={9}
+              fontSize={7}
               fontWeight={600}
               fill="var(--muted-foreground)"
               letterSpacing="0.16em"
@@ -745,8 +803,8 @@ export function StudentPolarInstrument({
           </div>
         )}
 
-        {/* drill: back to all areas */}
-        {drill && (
+        {/* drill: back to all areas (only for a manual click-drill; the tour uses scroll) */}
+        {drill && !scrollDrill && (
           <button
             type="button"
             onClick={exitDrill}
