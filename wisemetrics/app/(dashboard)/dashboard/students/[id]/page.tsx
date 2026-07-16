@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/Card";
 import { StudentHeroChartsClient } from "@/components/StudentHeroChartsClient";
 import { CategoryDrillDownClient } from "@/components/CategoryDrillDownClient";
 import { Reveal } from "@/components/Reveal";
+import { NumberTicker } from "@/components/ui/number-ticker";
 
 type RouteParams = {
   id: string;
@@ -136,35 +137,37 @@ export default async function StudentDetailPage(props: Props) {
       <div className="space-y-6">
         <Card className="p-6 space-y-4">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">
                 {cls.name} · Grade {cls.gradeLevel} · {cls.subject}
               </p>
-              <div className="mt-1 flex items-center gap-2">
-                <h1 className="text-xl font-semibold text-foreground">
-                  {student.name}
-                </h1>
+              <h1 className="mt-1 font-display text-2xl font-medium text-foreground">
+                {student.name}
+              </h1>
+              <div className="mt-2 flex items-center gap-3">
                 <Link
                   href={editHref}
                   className="rounded-md bg-muted px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
                 >
                   Edit scores
                 </Link>
+                {/* Preserve the student's class when going back */}
+                <Link
+                  href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
+                  className="text-xs text-primary transition-colors hover:text-primary/80"
+                >
+                  Back to dashboard
+                </Link>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Overall standard score:{" "}
-                <span className="font-semibold text-foreground">
-                  {student.overallScore}
-                </span>
-              </p>
             </div>
-            {/* Preserve the student's class when going back */}
-            <Link
-              href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
-              className="text-xs text-primary transition-colors hover:text-primary/80"
-            >
-              Back to dashboard
-            </Link>
+            <div className="shrink-0 rounded-xl border border-border bg-muted/40 px-4 py-2.5 text-center">
+              <div className="font-mono text-[2rem] font-semibold leading-none text-foreground">
+                <NumberTicker value={student.overallScore} />
+              </div>
+              <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                Overall
+              </div>
+            </div>
           </div>
 
           <StudentHeroChartsClient
