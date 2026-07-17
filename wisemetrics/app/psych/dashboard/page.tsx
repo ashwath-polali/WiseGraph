@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import { PsychDashboardClient } from '@/components/PsychDashboardClient';
+import { OnboardingTour } from '@/components/OnboardingTour';
+import { PSYCH_TOUR } from '@/lib/onboardingSteps';
 
 export default async function PsychDashboardPage() {
   const teacherId = await getCurrentTeacherId();
@@ -59,10 +61,10 @@ export default async function PsychDashboardPage() {
           <p className="mt-2 text-sm text-muted-foreground">Every profile, ready for the next conference.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/psych/universal-categories">
+          <Link href="/psych/universal-categories" data-tour="psych-categories">
             <Button variant="outline">Categories</Button>
           </Link>
-          <Link href="/psych/new-evaluation">
+          <Link href="/psych/new-evaluation" data-tour="psych-new">
             <Button className="inline-flex items-center gap-1.5">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -91,6 +93,7 @@ export default async function PsychDashboardPage() {
         <h2 className="font-display text-xl font-semibold text-foreground">Recent evaluations</h2>
       </div>
 
+      <div data-tour="psych-evals">
       {evaluations.length === 0 ? (
         <Card className="p-8 text-center">
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
@@ -121,6 +124,9 @@ export default async function PsychDashboardPage() {
           }))}
         />
       )}
+      </div>
+
+      <OnboardingTour steps={PSYCH_TOUR} storageKey="wg_tour_psych_v1" />
     </div>
   );
 }

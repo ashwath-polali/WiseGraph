@@ -14,6 +14,8 @@ import { CreateFirstClassButton } from "@/components/CreateFirstClassButton";
 import { DeleteClassButton } from "@/components/DeleteClassButton";
 import { ClassOverviewClient } from "@/components/ClassOverviewClient";
 import { RosterList } from "@/components/RosterList";
+import { OnboardingTour } from "@/components/OnboardingTour";
+import { TEACHER_TOUR } from "@/lib/onboardingSteps";
 
 type DashboardPageProps = {
   searchParams: Promise<{ classId?: string }>;
@@ -53,8 +55,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               students by category and subskill.
             </p>
           </div>
-          <CreateFirstClassButton />
+          <span data-tour="teacher-new">
+            <CreateFirstClassButton />
+          </span>
         </Card>
+        <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" />
       </main>
     );
   }
@@ -121,6 +126,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               href={`/dashboard/configure-assessment?classId=${encodeURIComponent(
                 cls.id,
               )}`}
+              data-tour="teacher-configure"
             >
               <Button variant="outline" size="sm">
                 Configure assessment
@@ -139,17 +145,21 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               }))}
               currentClassId={cls.id}
             />
-            <CreateFirstClassButton />
+            <span data-tour="teacher-new">
+              <CreateFirstClassButton />
+            </span>
           </div>
         </div>
 
         {/* Top row: class overview + students sidebar */}
         <div className="grid grid-cols-1 gap-6 lg:h-[680px] lg:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
           {/* Left: big class card with chart + radial/bell toggle */}
-          <ClassOverviewClient cls={cls as ClassScoreSummary} />
+          <div data-tour="teacher-overview" className="min-w-0">
+            <ClassOverviewClient cls={cls as ClassScoreSummary} />
+          </div>
 
           {/* Right: students list WITH Manage button in panel */}
-          <Card className="flex h-full flex-col overflow-hidden p-0">
+          <Card data-tour="teacher-roster" className="flex h-full flex-col overflow-hidden p-0">
             <div className="flex items-center justify-between gap-2 border-b border-border px-5 py-4">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">
@@ -190,6 +200,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <DeleteClassButton classId={cls.id} />
         </div>
       </section>
+      <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" />
     </main>
   );
 }
