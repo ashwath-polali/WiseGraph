@@ -1,12 +1,21 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "motion/react";
 import type { ClassScoreSummary, StudentScoreSummary } from "@/types/scores";
 import { StudentConcentricPieChart } from "@/components/charts/StudentConcentricPieChart";
-import { StudentPolarInstrument } from "@/components/charts/student/StudentPolarInstrument";
-import { StudentBellInstrument } from "@/components/charts/student/StudentBellInstrument";
 import { ExportButtons } from "@/components/ExportButtons";
+
+// self-drawing instruments run client-only (GSAP/measured SVG), so avoid SSR
+const StudentPolarInstrument = dynamic(
+  () => import("@/components/charts/student/StudentPolarInstrument").then((m) => m.StudentPolarInstrument),
+  { ssr: false },
+);
+const StudentBellInstrument = dynamic(
+  () => import("@/components/charts/student/StudentBellInstrument").then((m) => m.StudentBellInstrument),
+  { ssr: false },
+);
 
 type ViewMode = "polar" | "bell" | "concentric";
 
