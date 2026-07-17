@@ -73,7 +73,7 @@ export function CreateFirstClassButton() {
         className="min-w-[220px]"
       />
       <Input
-        placeholder="Grade (9-12)"
+        placeholder="Grade level"
         value={gradeLevel}
         onChange={(e) => setGradeLevel(e.target.value)}
         className="w-24"

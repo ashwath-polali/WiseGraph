@@ -80,11 +80,16 @@ export default async function ManageStudentsPage({
   return (
     <main className="space-y-6">
       <Card className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Students · {cls.name}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Manage roster · Grade {cls.gradeLevel}
+            </p>
+            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground">{cls.name}</h1>
+          </div>
           <Link
             href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}
-            className="text-xs text-primary transition-colors hover:text-primary/80"
+            className="shrink-0 text-xs text-primary transition-colors hover:text-primary/80"
           >
             Back to dashboard
           </Link>

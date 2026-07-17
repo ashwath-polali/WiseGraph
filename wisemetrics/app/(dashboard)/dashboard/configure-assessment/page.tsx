@@ -103,12 +103,11 @@ export default async function ConfigureAssessmentPage({
       <Card className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">
-              Configure assessment · {cls.name}
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Grade {cls.gradeLevel} · {cls.subject}
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              Configure assessment · Grade {cls.gradeLevel}
             </p>
+            <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground">{cls.name}</h1>
+            <p className="mt-1 text-xs text-muted-foreground">{cls.subject}</p>
           </div>
           <Link href={`/dashboard?classId=${encodeURIComponent(cls.id)}`}>
             <span className="text-xs text-primary transition-colors hover:text-primary/80">Back to dashboard</span>
