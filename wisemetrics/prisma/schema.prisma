@@ -15,6 +15,7 @@ model Teacher {
   defaultClassId     String?
   defaultStudentView String?
   school             String?
+  onboardedAt        DateTime?
   classes            Class[]
   PsychStudent       PsychStudent[]
   ScoreSnapshots     ScoreSnapshot[]

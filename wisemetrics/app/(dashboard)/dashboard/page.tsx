@@ -40,6 +40,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const teacherId = await getCurrentTeacherId();
   if (!teacherId) return null;
 
+  const onboard = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { onboardedAt: true },
+  });
+  const showTour = !onboard?.onboardedAt;
+
   const classes = (await getTeacherClassesWithSummary()) as TeacherClass[];
 
   if (!classes.length) {
@@ -59,7 +65,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <CreateFirstClassButton />
           </span>
         </Card>
-        <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" />
+        <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" enabled={showTour} />
       </main>
     );
   }
@@ -200,7 +206,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <DeleteClassButton classId={cls.id} />
         </div>
       </section>
-      <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" />
+      <OnboardingTour steps={TEACHER_TOUR} storageKey="wg_tour_teacher_v1" enabled={showTour} />
     </main>
   );
 }

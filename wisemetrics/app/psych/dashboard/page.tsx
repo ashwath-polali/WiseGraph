@@ -14,7 +14,7 @@ export default async function PsychDashboardPage() {
   
   const teacher = await prisma.teacher.findUnique({
     where: { id: teacherId },
-    select: { name: true, school: true, accountType: true },
+    select: { name: true, school: true, accountType: true, onboardedAt: true },
   });
 
   if (teacher?.accountType !== 'psychologist') {
@@ -126,7 +126,7 @@ export default async function PsychDashboardPage() {
       )}
       </div>
 
-      <OnboardingTour steps={PSYCH_TOUR} storageKey="wg_tour_psych_v1" />
+      <OnboardingTour steps={PSYCH_TOUR} storageKey="wg_tour_psych_v1" enabled={!teacher?.onboardedAt} />
     </div>
   );
 }

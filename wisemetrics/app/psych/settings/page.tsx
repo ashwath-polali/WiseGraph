@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Card } from '@/components/ui/Card';
 import { SettingsClient } from '@/components/SettingsClient';
+import { ReplayTourButton } from '@/components/ReplayTourButton';
 
 export default async function PsychSettingsPage() {
   const teacherId = await getCurrentTeacherId();
@@ -65,6 +66,14 @@ export default async function PsychSettingsPage() {
               teacherId={teacher.id}
             />
           </div>
+        </Card>
+
+        <Card className="mt-6 flex flex-wrap items-center justify-between gap-4 p-6">
+          <div>
+            <h2 className="font-display text-base font-semibold text-foreground">Getting started</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">Walk through the quick tour of the app again any time.</p>
+          </div>
+          <ReplayTourButton storageKey="wg_tour_psych_v1" dashboardHref="/psych/dashboard" />
         </Card>
       </section>
     </main>

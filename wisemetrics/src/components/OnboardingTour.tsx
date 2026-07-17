@@ -16,7 +16,16 @@ export type TourStep = {
 const CARD_W = 340;
 const GAP = 16;
 
-export function OnboardingTour({ steps, storageKey }: { steps: TourStep[]; storageKey: string }) {
+export function OnboardingTour({
+  steps,
+  storageKey,
+  enabled = true,
+}: {
+  steps: TourStep[];
+  storageKey: string;
+  /** the account hasn't been onboarded yet (server-decided, once ever) */
+  enabled?: boolean;
+}) {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
@@ -25,11 +34,11 @@ export function OnboardingTour({ steps, storageKey }: { steps: TourStep[]; stora
   useEffect(() => {
     setMounted(true);
     try {
-      if (!localStorage.getItem(storageKey)) setOpen(true);
+      if (enabled && !localStorage.getItem(storageKey)) setOpen(true);
     } catch {
       /* private mode — just skip */
     }
-  }, [storageKey]);
+  }, [storageKey, enabled]);
 
   const step = steps[i];
 
@@ -65,6 +74,8 @@ export function OnboardingTour({ steps, storageKey }: { steps: TourStep[]; stora
     } catch {
       /* ignore */
     }
+    // persist per account so it never shows again, on any device
+    fetch("/api/onboarded", { method: "POST" }).catch(() => {});
     setOpen(false);
   }, [storageKey]);
 
