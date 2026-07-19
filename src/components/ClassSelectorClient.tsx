@@ -23,6 +23,13 @@ export function ClassSelectorClient({
   const [isPending, startTransition] = useTransition();
 
   function handleSelect(id: string) {
+    // remember the class we're switching to, so coming back to the dashboard
+    // from a student, an edit screen, or the nav lands here instead of resetting
+    fetch("/api/teacher", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ defaultClassId: id }),
+    }).catch(() => {});
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("classId", id);

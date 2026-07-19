@@ -265,7 +265,7 @@ export function TeacherStudentReport({ student, cls, comparisons, editHref }: Pr
           {/* floating top controls */}
           <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-6 py-5">
             <Link
-              href="/dashboard"
+              href={`/dashboard?classId=${cls.id}`}
               className="group pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1.5 text-sm text-muted-foreground backdrop-blur-md transition-colors hover:text-foreground"
             >
               <svg className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
