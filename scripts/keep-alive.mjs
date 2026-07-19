@@ -7,10 +7,10 @@
 // is a 7x margin under the pause window.
 //
 // Run it yourself any time to confirm the DB is reachable:
-//   cd wisemetrics && node scripts/keep-alive.mjs
+//   node scripts/keep-alive.mjs
 //
 // It reads DATABASE_URL from the environment (the GitHub Action supplies it as a
-// secret) and falls back to wisemetrics/.env for local runs.
+// secret) and falls back to .env for local runs.
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -19,7 +19,7 @@ import pg from "pg";
 
 function resolveDatabaseUrl() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  // local fallback: read wisemetrics/.env without pulling in a dotenv dependency
+  // local fallback: read .env without pulling in a dotenv dependency
   try {
     const envPath = join(dirname(fileURLToPath(import.meta.url)), "..", ".env");
     const line = readFileSync(envPath, "utf8")
@@ -50,7 +50,7 @@ async function pingOnce(url) {
 
 const url = resolveDatabaseUrl();
 if (!url) {
-  console.error("DATABASE_URL is not set (env or wisemetrics/.env). Nothing to ping.");
+  console.error("DATABASE_URL is not set (env or .env). Nothing to ping.");
   process.exit(1);
 }
 
